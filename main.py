@@ -38,7 +38,7 @@ routes = [
 app = Starlette(debug=True, routes=routes)
 
 if __name__ == "__main__":
-    uvicorn.run(app)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 # curl -XPOST --data '{"text": "My name is Julien"}' http://127.0.0.1:8000/models/foo | play -
