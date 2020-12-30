@@ -1,0 +1,5 @@
+git+https://github.com/julien-c/espnet.git@hf_model_hub
+torch
+starlette
+aiofiles
+uvicorn
