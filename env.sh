@@ -1,0 +1,1 @@
+export KUBECONFIG=kube/eks-kubeconfig.yml
