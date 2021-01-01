@@ -9,7 +9,6 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
 
-
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 
 
@@ -22,10 +21,7 @@ EXAMPLE_TTS_ZH_MODEL_ID = "julien-c/kan-bayashi_csmsc_tacotron2"
 MODELS: Dict[str, Any] = {}
 start_time = time.time()
 for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
-    model = Text2Speech.from_pretrained(
-        model_id,
-        device="cpu"
-    )
+    model = Text2Speech.from_pretrained(model_id, device="cpu")
     MODELS[model_id] = model
 
 print("models.loaded", time.time() - start_time)
@@ -49,9 +45,9 @@ async def post_inference(request: Request):
     speech = outputs[0]
     filename = "out-{}.wav".format(int(time.time() * 1e3))
     soundfile.write(filename, speech.numpy(), _model.fs, "PCM_16")
-    return FileResponse(filename, headers={
-        HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)
-    })
+    return FileResponse(
+        filename, headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)}
+    )
 
 
 routes = [
