@@ -14,16 +14,19 @@ RUN apt update && \
                       python3 \
                       python3-pip \
                       software-properties-common \
-                      wget
+                      wget \
+                      ffmpeg
 
 RUN python3 --version && pip3 --version
 
-WORKDIR /app
-COPY . /app
-
 RUN pip3 install torch starlette aiofiles uvicorn
 
+WORKDIR /app
+
+COPY requirements.txt /app
 RUN pip3 install -r requirements.txt
+
+COPY . /app
 
 EXPOSE 8000
 
