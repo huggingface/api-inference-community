@@ -19,8 +19,6 @@ RUN apt update && \
 
 RUN python3 --version && pip3 --version
 
-RUN pip3 install torch starlette aiofiles uvicorn
-
 WORKDIR /app
 
 COPY requirements.txt /app
