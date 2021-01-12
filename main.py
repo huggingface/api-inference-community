@@ -1,20 +1,20 @@
 import tempfile
 import time
-from typing import Any, Dict
+from mimetypes import guess_extension
+from typing import Any, Dict, Optional
 
 import soundfile
 import uvicorn
+from asteroid import separate
+from asteroid.models import BaseModel as AsteroidBaseModel
+from espnet2.bin.asr_inference import Speech2Text
+from espnet2.bin.tts_inference import Text2Speech
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
-
-from espnet2.bin.tts_inference import Text2Speech
-from asteroid.models import BaseModel as AsteroidBaseModel
-from asteroid import separate
-
 
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 
@@ -26,16 +26,22 @@ EXAMPLE_TTS_EN_MODEL_ID = (
 )
 EXAMPLE_TTS_ZH_MODEL_ID = "julien-c/kan-bayashi_csmsc_tacotron2"
 
+EXAMPLE_ASR_EN_MODEL_ID = "julien-c/mini_an4_asr_train_raw_bpe_valid"
+
 EXAMPLE_SEP_ENH_MODEL_ID = "mhu-coder/ConvTasNet_Libri1Mix_enhsingle"
 EXAMPLE_SEP_SEP_MODEL_ID = "julien-c/DPRNNTasNet-ks16_WHAM_sepclean"
 
 
 TTS_MODELS: Dict[str, AnyModel] = {}
+ASR_MODELS: Dict[str, AnyModel] = {}
 SEP_MODELS: Dict[str, AnyModel] = {}
 start_time = time.time()
 for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
     model = Text2Speech.from_pretrained(model_id, device="cpu")
     TTS_MODELS[model_id] = model
+for model_id in (EXAMPLE_ASR_EN_MODEL_ID,):
+    model = Speech2Text.from_pretrained(model_id, device="cpu")
+    ASR_MODELS[model_id] = model
 for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
     model = AsteroidBaseModel.from_pretrained(model_id)
     SEP_MODELS[model_id] = model
@@ -45,6 +51,11 @@ print("models.loaded", time.time() - start_time)
 
 def home(request: Request):
     return JSONResponse({"ok": True})
+
+
+def list_models(_):
+    all_models = {**TTS_MODELS, **ASR_MODELS, **SEP_MODELS}
+    return JSONResponse({k: v.__class__.__name__ for k, v in all_models.items()})
 
 
 async def post_inference_tts(request: Request, model: AnyModel):
@@ -64,6 +75,34 @@ async def post_inference_tts(request: Request, model: AnyModel):
     return FileResponse(
         filename, headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)}
     )
+
+
+async def post_inference_asr(request: Request, model: AnyModel):
+    start = time.time()
+
+    print(request.headers)
+    content_type = request.headers["content-type"]
+    print(content_type)
+    file_ext: Optional[str] = guess_extension(content_type, strict=False)
+    print(file_ext)
+
+    try:
+        body = await request.body()
+        with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
+            print(tmp, tmp.name)
+            tmp.write(body)
+            tmp.flush()
+            speech, rate = soundfile.read(tmp.name)
+    except Exception as exc:
+        return JSONResponse(
+            {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
+        )
+
+    outputs = model(speech)
+    text, *_ = outputs[0]
+    print(text)
+
+    return JSONResponse({"text": text})
 
 
 async def post_inference_sep(request: Request, model: AnyModel):
@@ -102,6 +141,10 @@ async def post_inference(request: Request) -> JSONResponse:
         model = TTS_MODELS.get(model_id)
         return await post_inference_tts(request, model)
 
+    if model_id in ASR_MODELS:
+        model = ASR_MODELS.get(model_id)
+        return await post_inference_asr(request, model)
+
     if model_id in SEP_MODELS:
         model = SEP_MODELS.get(model_id)
         return await post_inference_sep(request, model)
@@ -111,6 +154,7 @@ async def post_inference(request: Request) -> JSONResponse:
 
 routes = [
     Route("/", home),
+    Route("/models", list_models),
     Route("/models/{model_id:path}", post_inference, methods=["POST"]),
 ]
 
@@ -130,12 +174,18 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
+# Sample wav file
+# wget https://assets.amazon.science/c2/65/08e161cb4e96a7e007d6c3a4fef5/sample02-orig.wav
+
+
 # TTS example:
 # curl -XPOST --data '{"text": "My name is Julien"}' http://127.0.0.1:8000/models/julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train | play -
 # curl -XPOST --data '{"text": "请您说得慢些好吗"}' http://127.0.0.1:8000/models/julien-c/kan-bayashi_csmsc_tacotron2 | play -
 # or in production:
 # curl -XPOST --data '{"text": "My name is Julien"}' https://api-audio.huggingface.co/models/julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train | play -
 
-# Source-separation example:
-# wget https://assets.amazon.science/c2/65/08e161cb4e96a7e007d6c3a4fef5/sample02-orig.wav
+# ASR example:
+# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
+
+# SEP example:
 # curl -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
