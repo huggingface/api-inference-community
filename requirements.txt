@@ -1,5 +1,11 @@
-git+https://github.com/julien-c/espnet.git@hf_model_hub
-torch
 starlette
 aiofiles
 uvicorn
+
+# ESPnet
+git+https://github.com/julien-c/espnet.git@hf_model_hub
+torch
+
+# Asteroid
+git+https://github.com/asteroid-team/asteroid@master
+librosa
