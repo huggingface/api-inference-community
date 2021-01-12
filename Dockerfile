@@ -5,6 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update && \
     apt install -y -q bash \
                       build-essential \
+                      ffmpeg \
                       git \
                       curl \
                       ca-certificates \
@@ -14,14 +15,14 @@ RUN apt update && \
                       python3 \
                       python3-pip \
                       software-properties-common \
-                      wget \
-                      ffmpeg
+                      wget
 
 RUN python3 --version && pip3 --version
 
 WORKDIR /app
 
-COPY requirements.txt /app
+COPY requirements.txt /app/requirements.txt
+
 RUN pip3 install -r requirements.txt
 
 COPY . /app
