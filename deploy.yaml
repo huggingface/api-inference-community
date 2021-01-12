@@ -34,6 +34,6 @@ spec:
     spec:
       containers:
       - name: api-inference-audio
-        image: julienc/api-inference-audio:cors
+        image: julienc/api-inference-audio:asr
         ports:
         - containerPort: 8000
