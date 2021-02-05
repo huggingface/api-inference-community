@@ -4,20 +4,19 @@ from mimetypes import guess_extension
 from typing import Any, Dict, Optional, Tuple
 
 import soundfile
-import uvicorn
 import torch
-
+import uvicorn
 from asteroid import separate
 from asteroid.models import BaseModel as AsteroidBaseModel
 from espnet2.bin.asr_inference import Speech2Text
 from espnet2.bin.tts_inference import Text2Speech
-from transformers import Wav2Vec2ForMaskedLM, Wav2Vec2Tokenizer
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
+from transformers import Wav2Vec2ForMaskedLM, Wav2Vec2Tokenizer
 
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 
@@ -35,7 +34,12 @@ EXAMPLE_ASR_EN_MODEL_ID = "julien-c/mini_an4_asr_train_raw_bpe_valid"
 EXAMPLE_SEP_ENH_MODEL_ID = "mhu-coder/ConvTasNet_Libri1Mix_enhsingle"
 EXAMPLE_SEP_SEP_MODEL_ID = "julien-c/DPRNNTasNet-ks16_WHAM_sepclean"
 
-WAV2VEV2_MODEL_IDS = ["facebook/wav2vec2-base-960h", "facebook/wav2vec2-large-960h", "facebook/wav2vec2-large-960h-lv60", "facebook/wav2vec2-large-960h-lv60-self"]
+WAV2VEV2_MODEL_IDS = [
+    "facebook/wav2vec2-base-960h",
+    "facebook/wav2vec2-large-960h",
+    "facebook/wav2vec2-large-960h-lv60",
+    "facebook/wav2vec2-large-960h-lv60-self",
+]
 
 
 TTS_MODELS: Dict[str, AnyModel] = {}
@@ -66,7 +70,12 @@ def home(request: Request):
 
 
 def list_models(_):
-    all_models = {**TTS_MODELS, **ASR_MODELS, **SEP_MODELS, **{k: v[0] for k, v in ASR_HF_MODELS.items()}}
+    all_models = {
+        **TTS_MODELS,
+        **ASR_MODELS,
+        **SEP_MODELS,
+        **{k: v[0] for k, v in ASR_HF_MODELS.items()},
+    }
     return JSONResponse({k: v.__class__.__name__ for k, v in all_models.items()})
 
 
@@ -117,7 +126,9 @@ async def post_inference_asr(request: Request, model: AnyModel):
     return JSONResponse({"text": text})
 
 
-async def post_inference_asr_hf(request: Request, model: AnyModel, tokenizer: AnyTokenizer):
+async def post_inference_asr_hf(
+    request: Request, model: AnyModel, tokenizer: AnyTokenizer
+):
     start = time.time()
 
     print(request.headers)
@@ -133,9 +144,13 @@ async def post_inference_asr_hf(request: Request, model: AnyModel, tokenizer: An
             tmp.write(body)
             tmp.flush()
             speech, rate = soundfile.read(tmp.name)
-            if rate != 16000:
+            if rate != 16_000:
                 return JSONResponse(
-                    {"ok": False, "message": f"Invalid sampling rate of file. Make sure the uploaded audio file was sampled at 16000 Hz, not {rate} Hz"}, status_code=400
+                    {
+                        "ok": False,
+                        "message": f"Invalid sampling rate of file. Make sure the uploaded audio file was sampled at 16000 Hz, not {rate} Hz",
+                    },
+                    status_code=400,
                 )
     except Exception as exc:
         return JSONResponse(
