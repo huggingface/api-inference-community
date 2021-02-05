@@ -3,6 +3,7 @@ import time
 from mimetypes import guess_extension
 from typing import Any, Dict, Optional, Tuple
 
+import librosa
 import soundfile
 import torch
 import uvicorn
@@ -144,14 +145,16 @@ async def post_inference_asr_hf(
             tmp.write(body)
             tmp.flush()
             speech, rate = soundfile.read(tmp.name)
-            if rate != 16_000:
+            if rate < 16000:
                 return JSONResponse(
                     {
                         "ok": False,
-                        "message": f"Invalid sampling rate of file. Make sure the uploaded audio file was sampled at 16000 Hz, not {rate} Hz",
+                        "message": f"Invalid sampling rate of file. Make sure the uploaded audio file was sampled at 16000 Hz or higher, not {rate} Hz",
                     },
                     status_code=400,
                 )
+            elif rate > 16000:
+                speech = librosa.resample(speech, rate, 16000)
     except Exception as exc:
         return JSONResponse(
             {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
