@@ -145,6 +145,10 @@ async def post_inference_asr_hf(
             tmp.write(body)
             tmp.flush()
             speech, rate = soundfile.read(tmp.name)
+
+            if len(speech.shape) > 1:
+                # ogg can take dual channel input -> take only first input channel in this case
+                speech = speech[:, 0]
             if rate < 16000:
                 return JSONResponse(
                     {
