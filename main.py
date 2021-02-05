@@ -37,9 +37,9 @@ EXAMPLE_SEP_SEP_MODEL_ID = "julien-c/DPRNNTasNet-ks16_WHAM_sepclean"
 
 WAV2VEV2_MODEL_IDS = [
     "facebook/wav2vec2-base-960h",
-    "facebook/wav2vec2-large-960h",
-    "facebook/wav2vec2-large-960h-lv60",
-    "facebook/wav2vec2-large-960h-lv60-self",
+    # "facebook/wav2vec2-large-960h",
+    # "facebook/wav2vec2-large-960h-lv60",
+    # "facebook/wav2vec2-large-960h-lv60-self",
 ]
 
 
