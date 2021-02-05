@@ -5,10 +5,13 @@ from typing import Any, Dict, Optional
 
 import soundfile
 import uvicorn
+import torch
+
 from asteroid import separate
 from asteroid.models import BaseModel as AsteroidBaseModel
 from espnet2.bin.asr_inference import Speech2Text
 from espnet2.bin.tts_inference import Text2Speech
+from transformers import Wav2Vec2ForMaskedLM, Wav2Vec2Tokenizer
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
@@ -20,6 +23,7 @@ HF_HEADER_COMPUTE_TIME = "x-compute-time"
 
 # Type alias for all models
 AnyModel = Any
+AnyTokenizer = Any
 
 EXAMPLE_TTS_EN_MODEL_ID = (
     "julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train"
@@ -31,10 +35,14 @@ EXAMPLE_ASR_EN_MODEL_ID = "julien-c/mini_an4_asr_train_raw_bpe_valid"
 EXAMPLE_SEP_ENH_MODEL_ID = "mhu-coder/ConvTasNet_Libri1Mix_enhsingle"
 EXAMPLE_SEP_SEP_MODEL_ID = "julien-c/DPRNNTasNet-ks16_WHAM_sepclean"
 
+WAV2VEV2_MODEL_IDS = ["facebook/wav2vec2-base-960h", "facebook/wav2vec2-large-960h", "facebook/wav2vec2-large-960h-lv60", "facebook/wav2vec2-large-960h-lv60-self"]
+
 
 TTS_MODELS: Dict[str, AnyModel] = {}
 ASR_MODELS: Dict[str, AnyModel] = {}
 SEP_MODELS: Dict[str, AnyModel] = {}
+ASR_HF_MODELS: Dict[str, (AnyModel, AnyTokenizer)] = {}
+
 start_time = time.time()
 for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
     model = Text2Speech.from_pretrained(model_id, device="cpu")
@@ -45,6 +53,10 @@ for model_id in (EXAMPLE_ASR_EN_MODEL_ID,):
 for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
     model = AsteroidBaseModel.from_pretrained(model_id)
     SEP_MODELS[model_id] = model
+for model_id in WAV2VEV2_MODEL_IDS:
+    model = Wav2Vec2ForMaskedLM.from_pretrained(model_id)
+    tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
+    ASR_HF_MODELS[model_id] = (model, tokenizer)
 
 print("models.loaded", time.time() - start_time)
 
@@ -54,7 +66,7 @@ def home(request: Request):
 
 
 def list_models(_):
-    all_models = {**TTS_MODELS, **ASR_MODELS, **SEP_MODELS}
+    all_models = {**TTS_MODELS, **ASR_MODELS, **SEP_MODELS, **ASR_HF_MODELS}
     return JSONResponse({k: v.__class__.__name__ for k, v in all_models.items()})
 
 
@@ -105,6 +117,38 @@ async def post_inference_asr(request: Request, model: AnyModel):
     return JSONResponse({"text": text})
 
 
+async def post_inference_asr_hf(request: Request, model: AnyModel, tokenizer: AnyTokenizer):
+    start = time.time()
+
+    print(request.headers)
+    content_type = request.headers["content-type"]
+    print(content_type)
+    file_ext: Optional[str] = guess_extension(content_type, strict=False)
+    print(file_ext)
+
+    try:
+        body = await request.body()
+        with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
+            print(tmp, tmp.name)
+            tmp.write(body)
+            tmp.flush()
+            speech, rate = soundfile.read(tmp.name)
+    except Exception as exc:
+        return JSONResponse(
+            {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
+        )
+
+    input_values = tokenizer(speech, return_tensors="pt").input_values
+    logits = model(input_values).logits
+
+    predicted_ids = torch.argmax(logits, dim=-1)
+
+    text = tokenizer.decode(predicted_ids[0])
+    print(text)
+
+    return JSONResponse({"text": text})
+
+
 async def post_inference_sep(request: Request, model: AnyModel):
     start = time.time()
 
@@ -144,6 +188,10 @@ async def post_inference(request: Request) -> JSONResponse:
     if model_id in ASR_MODELS:
         model = ASR_MODELS.get(model_id)
         return await post_inference_asr(request, model)
+
+    if model_id in ASR_HF_MODELS:
+        model, tokenizer = ASR_HF_MODELS.get(model_id)
+        return await post_inference_asr_hf(request, model, tokenizer)
 
     if model_id in SEP_MODELS:
         model = SEP_MODELS.get(model_id)
