@@ -37,9 +37,9 @@ EXAMPLE_SEP_SEP_MODEL_ID = "julien-c/DPRNNTasNet-ks16_WHAM_sepclean"
 
 WAV2VEV2_MODEL_IDS = [
     "facebook/wav2vec2-base-960h",
-    "facebook/wav2vec2-large-960h",
-    "facebook/wav2vec2-large-960h-lv60",
-    "facebook/wav2vec2-large-960h-lv60-self",
+    # "facebook/wav2vec2-large-960h",
+    # "facebook/wav2vec2-large-960h-lv60",
+    # "facebook/wav2vec2-large-960h-lv60-self",
 ]
 
 
@@ -263,6 +263,8 @@ if __name__ == "__main__":
 
 # ASR wav2vec example:
 # curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# or in production:
+# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@sample02-orig.wav' http://api-audio.huggingface.co/models/facebook/wav2vec2-base-960h
 
 # SEP example:
 # curl -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
