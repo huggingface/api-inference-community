@@ -66,7 +66,7 @@ def home(request: Request):
 
 
 def list_models(_):
-    all_models = {**TTS_MODELS, **ASR_MODELS, **SEP_MODELS, **ASR_HF_MODELS}
+    all_models = {**TTS_MODELS, **ASR_MODELS, **SEP_MODELS, **{k: v[0] for k, v in ASR_HF_MODELS.items()}}
     return JSONResponse({k: v.__class__.__name__ for k, v in all_models.items()})
 
 
