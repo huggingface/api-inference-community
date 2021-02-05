@@ -144,7 +144,7 @@ async def post_inference_asr_hf(
             print(tmp, tmp.name)
             tmp.write(body)
             tmp.flush()
-            speech, rate = soundfile.read(tmp.name)
+            speech, rate = soundfile.read(tmp.name, dtype="float32")
 
             if len(speech.shape) > 1:
                 # ogg can take dual channel input -> take only first input channel in this case
