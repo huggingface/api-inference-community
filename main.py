@@ -1,7 +1,7 @@
 import tempfile
 import time
 from mimetypes import guess_extension
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import soundfile
 import uvicorn
@@ -41,7 +41,7 @@ WAV2VEV2_MODEL_IDS = ["facebook/wav2vec2-base-960h", "facebook/wav2vec2-large-96
 TTS_MODELS: Dict[str, AnyModel] = {}
 ASR_MODELS: Dict[str, AnyModel] = {}
 SEP_MODELS: Dict[str, AnyModel] = {}
-ASR_HF_MODELS: Dict[str, (AnyModel, AnyTokenizer)] = {}
+ASR_HF_MODELS: Dict[str, Tuple[AnyModel, AnyTokenizer]] = {}
 
 start_time = time.time()
 for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
