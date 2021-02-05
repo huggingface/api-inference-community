@@ -133,6 +133,10 @@ async def post_inference_asr_hf(request: Request, model: AnyModel, tokenizer: An
             tmp.write(body)
             tmp.flush()
             speech, rate = soundfile.read(tmp.name)
+            if rate != 16000:
+                return JSONResponse(
+                    {"ok": False, "message": f"Invalid sampling rate of file. Make sure the uploaded audio file was sampled at 16000 Hz, not {rate} Hz"}, status_code=400
+                )
     except Exception as exc:
         return JSONResponse(
             {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
