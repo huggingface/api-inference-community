@@ -1,9 +1,11 @@
 import tempfile
 import time
 from mimetypes import guess_extension
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
+import librosa
 import soundfile
+import torch
 import uvicorn
 from asteroid import separate
 from asteroid.models import BaseModel as AsteroidBaseModel
@@ -15,11 +17,13 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 
 # Type alias for all models
 AnyModel = Any
+AnyTokenizer = Any
 
 EXAMPLE_TTS_EN_MODEL_ID = (
     "julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train"
@@ -31,10 +35,19 @@ EXAMPLE_ASR_EN_MODEL_ID = "julien-c/mini_an4_asr_train_raw_bpe_valid"
 EXAMPLE_SEP_ENH_MODEL_ID = "mhu-coder/ConvTasNet_Libri1Mix_enhsingle"
 EXAMPLE_SEP_SEP_MODEL_ID = "julien-c/DPRNNTasNet-ks16_WHAM_sepclean"
 
+WAV2VEV2_MODEL_IDS = [
+    "facebook/wav2vec2-base-960h",
+    # "facebook/wav2vec2-large-960h",
+    # "facebook/wav2vec2-large-960h-lv60",
+    # "facebook/wav2vec2-large-960h-lv60-self",
+]
+
 
 TTS_MODELS: Dict[str, AnyModel] = {}
 ASR_MODELS: Dict[str, AnyModel] = {}
 SEP_MODELS: Dict[str, AnyModel] = {}
+ASR_HF_MODELS: Dict[str, Tuple[AnyModel, AnyTokenizer]] = {}
+
 start_time = time.time()
 for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
     model = Text2Speech.from_pretrained(model_id, device="cpu")
@@ -45,6 +58,10 @@ for model_id in (EXAMPLE_ASR_EN_MODEL_ID,):
 for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
     model = AsteroidBaseModel.from_pretrained(model_id)
     SEP_MODELS[model_id] = model
+for model_id in WAV2VEV2_MODEL_IDS:
+    model = Wav2Vec2ForCTC.from_pretrained(model_id)
+    tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
+    ASR_HF_MODELS[model_id] = (model, tokenizer)
 
 print("models.loaded", time.time() - start_time)
 
@@ -54,7 +71,12 @@ def home(request: Request):
 
 
 def list_models(_):
-    all_models = {**TTS_MODELS, **ASR_MODELS, **SEP_MODELS}
+    all_models = {
+        **TTS_MODELS,
+        **ASR_MODELS,
+        **SEP_MODELS,
+        **{k: v[0] for k, v in ASR_HF_MODELS.items()},
+    }
     return JSONResponse({k: v.__class__.__name__ for k, v in all_models.items()})
 
 
@@ -82,27 +104,97 @@ async def post_inference_asr(request: Request, model: AnyModel):
 
     print(request.headers)
     content_type = request.headers["content-type"]
-    print(content_type)
-    file_ext: Optional[str] = guess_extension(content_type, strict=False)
+    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
     print(file_ext)
 
     try:
         body = await request.body()
-        with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
-            print(tmp, tmp.name)
-            tmp.write(body)
-            tmp.flush()
-            speech, rate = soundfile.read(tmp.name)
     except Exception as exc:
         return JSONResponse(
             {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
         )
 
+    with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
+        print(tmp, tmp.name)
+        tmp.write(body)
+        tmp.flush()
+
+        try:
+            speech, rate = soundfile.read(tmp.name, dtype="float32")
+        except:
+            try:
+                speech, rate = librosa.load(tmp.name, sr=16_000)
+            except Exception as exc:
+                return JSONResponse(
+                    {"ok": False, "message": f"Invalid audio: {exc}"}, status_code=400
+                )    
+
+    if len(speech.shape) > 1:
+        # ogg can take dual channel input -> take only first input channel in this case
+        speech = speech[:, 0]
+    if rate != 16_000:
+        speech = librosa.resample(speech, rate, 16_000)
+
     outputs = model(speech)
     text, *_ = outputs[0]
     print(text)
 
-    return JSONResponse({"text": text})
+    return JSONResponse(
+        {"text": text},
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+    )
+
+
+async def post_inference_asr_hf(
+    request: Request, model: AnyModel, tokenizer: AnyTokenizer
+):
+    start = time.time()
+
+    print(request.headers)
+    content_type = request.headers["content-type"]
+    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
+    print(file_ext)
+
+    try:
+        body = await request.body()
+    except Exception as exc:
+        return JSONResponse(
+            {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
+        )
+
+    with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
+        print(tmp, tmp.name)
+        tmp.write(body)
+        tmp.flush()
+
+        try:
+            speech, rate = soundfile.read(tmp.name, dtype="float32")
+        except:
+            try:
+                speech, rate = librosa.load(tmp.name, sr=16_000)
+            except Exception as exc:
+                return JSONResponse(
+                    {"ok": False, "message": f"Invalid audio: {exc}"}, status_code=400
+                )
+
+    if len(speech.shape) > 1:
+        # ogg can take dual channel input -> take only first input channel in this case
+        speech = speech[:, 0]
+    if rate != 16_000:
+        speech = librosa.resample(speech, rate, 16_000)
+
+    input_values = tokenizer(speech, return_tensors="pt").input_values
+    logits = model(input_values).logits
+
+    predicted_ids = torch.argmax(logits, dim=-1)
+
+    text = tokenizer.decode(predicted_ids[0])
+    print(text)
+
+    return JSONResponse(
+        {"text": text},
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+    )
 
 
 async def post_inference_sep(request: Request, model: AnyModel):
@@ -145,6 +237,10 @@ async def post_inference(request: Request) -> JSONResponse:
         model = ASR_MODELS.get(model_id)
         return await post_inference_asr(request, model)
 
+    if model_id in ASR_HF_MODELS:
+        model, tokenizer = ASR_HF_MODELS.get(model_id)
+        return await post_inference_asr_hf(request, model, tokenizer)
+
     if model_id in SEP_MODELS:
         model = SEP_MODELS.get(model_id)
         return await post_inference_sep(request, model)
@@ -185,7 +281,16 @@ if __name__ == "__main__":
 # curl -XPOST --data '{"text": "My name is Julien"}' http://api-audio.huggingface.co/models/julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train | play -
 
 # ASR example:
-# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
+# curl -i -H "Content-Type: audio/x-wav" -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
+
+# ASR wav2vec example:
+# curl -i -H "Content-Type: audio/wav"  -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/flac" -XPOST --data-binary '@samples/sample1.flac'      http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/webm" -XPOST --data-binary '@samples/chrome.webm'       http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/ogg"  -XPOST --data-binary '@samples/firefox.oga'       http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+
+# or in production:
+# curl -i -H "Content-Type: audio/wav"  -XPOST --data-binary '@samples/sample02-orig.wav' http://api-audio.huggingface.co/models/facebook/wav2vec2-base-960h
 
 # SEP example:
-# curl -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
+# curl -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
