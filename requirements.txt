@@ -11,4 +11,4 @@ git+https://github.com/asteroid-team/asteroid@master
 librosa
 
 # Transformers
-transformers==4.3.0rc1
+transformers

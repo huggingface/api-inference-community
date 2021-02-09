@@ -17,7 +17,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
-from transformers import Wav2Vec2ForMaskedLM, Wav2Vec2Tokenizer
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 
@@ -59,7 +59,7 @@ for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
     model = AsteroidBaseModel.from_pretrained(model_id)
     SEP_MODELS[model_id] = model
 for model_id in WAV2VEV2_MODEL_IDS:
-    model = Wav2Vec2ForMaskedLM.from_pretrained(model_id)
+    model = Wav2Vec2ForCTC.from_pretrained(model_id)
     tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
     ASR_HF_MODELS[model_id] = (model, tokenizer)
 
