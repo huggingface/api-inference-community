@@ -109,15 +109,31 @@ async def post_inference_asr(request: Request, model: AnyModel):
 
     try:
         body = await request.body()
-        with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
-            print(tmp, tmp.name)
-            tmp.write(body)
-            tmp.flush()
-            speech, rate = soundfile.read(tmp.name)
     except Exception as exc:
         return JSONResponse(
             {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
         )
+
+    with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
+        print(tmp, tmp.name)
+        tmp.write(body)
+        tmp.flush()
+
+        try:
+            speech, rate = soundfile.read(tmp.name, dtype="float32")
+        except:
+            try:
+                speech, rate = librosa.load(tmp.name, sr=16_000)
+            except Exception as exc:
+                return JSONResponse(
+                    {"ok": False, "message": f"Invalid audio: {exc}"}, status_code=400
+                )    
+
+    if len(speech.shape) > 1:
+        # ogg can take dual channel input -> take only first input channel in this case
+        speech = speech[:, 0]
+    if rate != 16_000:
+        speech = librosa.resample(speech, rate, 16_000)
 
     outputs = model(speech)
     text, *_ = outputs[0]
