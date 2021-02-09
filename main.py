@@ -281,7 +281,7 @@ if __name__ == "__main__":
 # curl -XPOST --data '{"text": "My name is Julien"}' http://api-audio.huggingface.co/models/julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train | play -
 
 # ASR example:
-# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
+# curl -i -H "Content-Type: audio/x-wav" -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
 
 # ASR wav2vec example:
 # curl -i -H "Content-Type: audio/wav"  -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
