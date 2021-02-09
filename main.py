@@ -104,8 +104,7 @@ async def post_inference_asr(request: Request, model: AnyModel):
 
     print(request.headers)
     content_type = request.headers["content-type"]
-    print(content_type)
-    file_ext: Optional[str] = guess_extension(content_type, strict=False)
+    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
     print(file_ext)
 
     try:
@@ -124,7 +123,10 @@ async def post_inference_asr(request: Request, model: AnyModel):
     text, *_ = outputs[0]
     print(text)
 
-    return JSONResponse({"text": text})
+    return JSONResponse(
+        {"text": text},
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+    )
 
 
 async def post_inference_asr_hf(
@@ -134,35 +136,36 @@ async def post_inference_asr_hf(
 
     print(request.headers)
     content_type = request.headers["content-type"]
-    print(content_type)
-    file_ext: Optional[str] = guess_extension(content_type, strict=False)
+    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
     print(file_ext)
 
     try:
         body = await request.body()
-        with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
-            print(tmp, tmp.name)
-            tmp.write(body)
-            tmp.flush()
-            speech, rate = soundfile.read(tmp.name, dtype="float32")
-
-            if len(speech.shape) > 1:
-                # ogg can take dual channel input -> take only first input channel in this case
-                speech = speech[:, 0]
-            if rate < 16000:
-                return JSONResponse(
-                    {
-                        "ok": False,
-                        "message": f"Invalid sampling rate of file. Make sure the uploaded audio file was sampled at 16000 Hz or higher, not {rate} Hz",
-                    },
-                    status_code=400,
-                )
-            elif rate > 16000:
-                speech = librosa.resample(speech, rate, 16000)
     except Exception as exc:
         return JSONResponse(
             {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
         )
+
+    with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
+        print(tmp, tmp.name)
+        tmp.write(body)
+        tmp.flush()
+
+        try:
+            speech, rate = soundfile.read(tmp.name, dtype="float32")
+        except:
+            try:
+                speech, rate = librosa.load(tmp.name, sr=16_000)
+            except Exception as exc:
+                return JSONResponse(
+                    {"ok": False, "message": f"Invalid audio: {exc}"}, status_code=400
+                )
+
+    if len(speech.shape) > 1:
+        # ogg can take dual channel input -> take only first input channel in this case
+        speech = speech[:, 0]
+    if rate != 16_000:
+        speech = librosa.resample(speech, rate, 16_000)
 
     input_values = tokenizer(speech, return_tensors="pt").input_values
     logits = model(input_values).logits
@@ -172,7 +175,10 @@ async def post_inference_asr_hf(
     text = tokenizer.decode(predicted_ids[0])
     print(text)
 
-    return JSONResponse({"text": text})
+    return JSONResponse(
+        {"text": text},
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+    )
 
 
 async def post_inference_sep(request: Request, model: AnyModel):
@@ -259,12 +265,16 @@ if __name__ == "__main__":
 # curl -XPOST --data '{"text": "My name is Julien"}' http://api-audio.huggingface.co/models/julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train | play -
 
 # ASR example:
-# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
+# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
 
 # ASR wav2vec example:
-# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/wav"  -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/flac" -XPOST --data-binary '@samples/sample1.flac'      http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/webm" -XPOST --data-binary '@samples/chrome.webm'       http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/ogg"  -XPOST --data-binary '@samples/firefox.oga'       http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
+
 # or in production:
-# curl -i -H "Content-Type: audio/wav" -XPOST --data-binary '@sample02-orig.wav' http://api-audio.huggingface.co/models/facebook/wav2vec2-base-960h
+# curl -i -H "Content-Type: audio/wav"  -XPOST --data-binary '@samples/sample02-orig.wav' http://api-audio.huggingface.co/models/facebook/wav2vec2-base-960h
 
 # SEP example:
-# curl -XPOST --data-binary '@sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
+# curl -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
