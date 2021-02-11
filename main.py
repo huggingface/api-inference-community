@@ -1,9 +1,13 @@
+from io import BytesIO
 import tempfile
 import time
 from mimetypes import guess_extension
 from typing import Any, Dict, Optional, Tuple
 
+from PIL import Image
+
 import librosa
+import requests
 import soundfile
 import timm
 import torch
@@ -233,6 +237,37 @@ async def post_inference_sep(request: Request, model: AnyModel):
     )
 
 
+async def post_inference_timm(request: Request, model: torch.nn.Module):
+    start = time.time()
+
+    content_type = request.headers["content-type"]
+
+    if content_type == "application/json":
+        body = await request.json()
+        if "url" not in body:
+            return JSONResponse(
+                {"ok": False, "message": f"Invalid json, no url key"}, status_code=400
+            )
+        url = body["url"]
+        img = Image.open(requests.get(url, stream=True).raw)
+    else:
+        body = await request.body()
+        try:
+            img = Image.open(BytesIO(body))
+        except Exception as exc:
+            print(exc)
+            return JSONResponse(
+                {"ok": False, "message": f"Unable to open image from request"}, status_code=400
+            )
+
+    img = img.convert("RGB")
+    
+    return JSONResponse(
+        {"text": "hello"},
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+    )
+
+
 async def post_inference(request: Request) -> JSONResponse:
     model_id = request.path_params["model_id"]
 
@@ -251,6 +286,10 @@ async def post_inference(request: Request) -> JSONResponse:
     if model_id in SEP_MODELS:
         model = SEP_MODELS.get(model_id)
         return await post_inference_sep(request, model)
+
+    if model_id in TIMM_MODELS:
+        model = TIMM_MODELS.get(model_id)
+        return await post_inference_timm(request, model)
 
     return JSONResponse(status_code=404, content="Unknown or unsupported model")
 
