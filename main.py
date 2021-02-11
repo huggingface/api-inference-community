@@ -47,7 +47,7 @@ WAV2VEV2_MODEL_IDS = [
     # "facebook/wav2vec2-large-960h-lv60-self",
 ]
 
-with open('data/imagenet-simple-labels.json') as f:
+with open("data/imagenet-simple-labels.json") as f:
     IMAGENET_LABELS: List[str] = json.load(f)
 ## ^ from gh.com/anishathalye/imagenet-simple-labels
 
@@ -74,7 +74,9 @@ start_time = time.time()
 #     ASR_HF_MODELS[model_id] = (model, tokenizer)
 
 TIMM_MODELS["julien-c/timm-dpn92"] = timm.create_model("dpn92", pretrained=True).eval()
-TIMM_MODELS["sgugger/resnet50d"] = timm.create_model("resnet50d", pretrained=True).eval()
+TIMM_MODELS["sgugger/resnet50d"] = timm.create_model(
+    "resnet50d", pretrained=True
+).eval()
 # ^ They are not in eval mode by default
 
 print("models.loaded", time.time() - start_time)
@@ -142,7 +144,7 @@ async def post_inference_asr(request: Request, model: AnyModel):
             except Exception as exc:
                 return JSONResponse(
                     {"ok": False, "message": f"Invalid audio: {exc}"}, status_code=400
-                )    
+                )
 
     if len(speech.shape) > 1:
         # ogg can take dual channel input -> take only first input channel in this case
@@ -261,7 +263,8 @@ async def post_inference_timm(request: Request, model: torch.nn.Module):
         except Exception as exc:
             print(exc)
             return JSONResponse(
-                {"ok": False, "message": f"Unable to open image from request"}, status_code=400
+                {"ok": False, "message": f"Unable to open image from request"},
+                status_code=400,
             )
 
     img = img.convert("RGB")
@@ -269,10 +272,10 @@ async def post_inference_timm(request: Request, model: torch.nn.Module):
     # Data handling config
     config = model.default_cfg
 
-    if isinstance(config['input_size'], tuple):
-        img_size = config['input_size'][-2:]
+    if isinstance(config["input_size"], tuple):
+        img_size = config["input_size"][-2:]
     else:
-        img_size = config['input_size']
+        img_size = config["input_size"]
 
     transform = timm.data.transforms_factory.transforms_imagenet_eval(
         img_size=img_size,
