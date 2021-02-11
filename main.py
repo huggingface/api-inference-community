@@ -354,15 +354,18 @@ if __name__ == "__main__":
 # wget https://assets.amazon.science/c2/65/08e161cb4e96a7e007d6c3a4fef5/sample02-orig.wav
 
 
+# ================
 # TTS example:
 # curl -XPOST --data '{"text": "My name is Julien"}' http://127.0.0.1:8000/models/julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train | play -
 # curl -XPOST --data '{"text": "请您说得慢些好吗"}' http://127.0.0.1:8000/models/julien-c/kan-bayashi_csmsc_tacotron2 | play -
 # or in production:
 # curl -XPOST --data '{"text": "My name is Julien"}' http://api-audio.huggingface.co/models/julien-c/ljspeech_tts_train_tacotron2_raw_phn_tacotron_g2p_en_no_space_train | play -
 
+# ================
 # ASR example:
 # curl -i -H "Content-Type: audio/x-wav" -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/julien-c/mini_an4_asr_train_raw_bpe_valid
 
+# ================
 # ASR wav2vec example:
 # curl -i -H "Content-Type: audio/wav"  -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
 # curl -i -H "Content-Type: audio/flac" -XPOST --data-binary '@samples/sample1.flac'      http://127.0.0.1:8000/models/facebook/wav2vec2-base-960h
@@ -372,9 +375,16 @@ if __name__ == "__main__":
 # or in production:
 # curl -i -H "Content-Type: audio/wav"  -XPOST --data-binary '@samples/sample02-orig.wav' http://api-audio.huggingface.co/models/facebook/wav2vec2-base-960h
 
+# ================
 # SEP example:
 # curl -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
 
-# timm examples:
+# ================
+# TIMM examples:
 # curl -i -H "Content-Type: image/jpeg"        -XPOST --data-binary '@samples/plane.jpg'       http://127.0.0.1:8000/models/julien-c/timm-dpn92
+# curl -i -H "Content-Type: image/jpeg"        -XPOST --data-binary '@samples/plane.jpg'       http://127.0.0.1:8000/models/sgugger/resnet50d
 # curl -i -H "Content-Type: application/json"  -XPOST --data        '{"url": "https://i.picsum.photos/id/543/536/354.jpg?hmac=O-U6guSk3J8UDMCjnqQHaL8EAOR9yHXZtgA90Bf5UTc"}'      http://127.0.0.1:8000/models/julien-c/timm-dpn92
+# curl -i -H "Content-Type: application/json"  -XPOST --data        '{"url": "https://huggingface.co/front/assets/transformers-demo.png"}'      http://127.0.0.1:8000/models/sgugger/resnet50d
+
+# or in production:
+# curl -i -H "Content-Type: application/json"  -XPOST --data        '{"url": "https://huggingface.co/front/assets/transformers-demo.png"}'      http://api-audio.huggingface.co/models/sgugger/resnet50d
