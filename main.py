@@ -1,10 +1,9 @@
-from io import BytesIO
+import json
 import tempfile
 import time
+from io import BytesIO
 from mimetypes import guess_extension
-from typing import Any, Dict, Optional, Tuple
-
-from PIL import Image
+from typing import Any, Dict, List, Optional, Tuple
 
 import librosa
 import requests
@@ -16,6 +15,7 @@ from asteroid import separate
 from asteroid.models import BaseModel as AsteroidBaseModel
 from espnet2.bin.asr_inference import Speech2Text
 from espnet2.bin.tts_inference import Text2Speech
+from PIL import Image
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
@@ -46,6 +46,10 @@ WAV2VEV2_MODEL_IDS = [
     # "facebook/wav2vec2-large-960h-lv60",
     # "facebook/wav2vec2-large-960h-lv60-self",
 ]
+
+with open('data/imagenet-simple-labels.json') as f:
+    IMAGENET_LABELS: List[str] = json.load(f)
+## ^ from gh.com/anishathalye/imagenet-simple-labels
 
 
 TTS_MODELS: Dict[str, AnyModel] = {}
