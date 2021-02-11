@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import librosa
 import soundfile
+import timm
 import torch
 import uvicorn
 from asteroid import separate
@@ -47,21 +48,26 @@ TTS_MODELS: Dict[str, AnyModel] = {}
 ASR_MODELS: Dict[str, AnyModel] = {}
 SEP_MODELS: Dict[str, AnyModel] = {}
 ASR_HF_MODELS: Dict[str, Tuple[AnyModel, AnyTokenizer]] = {}
+TIMM_MODELS: Dict[str, torch.nn.Module] = {}
 
 start_time = time.time()
-for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
-    model = Text2Speech.from_pretrained(model_id, device="cpu")
-    TTS_MODELS[model_id] = model
-for model_id in (EXAMPLE_ASR_EN_MODEL_ID,):
-    model = Speech2Text.from_pretrained(model_id, device="cpu")
-    ASR_MODELS[model_id] = model
-for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
-    model = AsteroidBaseModel.from_pretrained(model_id)
-    SEP_MODELS[model_id] = model
-for model_id in WAV2VEV2_MODEL_IDS:
-    model = Wav2Vec2ForCTC.from_pretrained(model_id)
-    tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
-    ASR_HF_MODELS[model_id] = (model, tokenizer)
+# for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
+#     model = Text2Speech.from_pretrained(model_id, device="cpu")
+#     TTS_MODELS[model_id] = model
+# for model_id in (EXAMPLE_ASR_EN_MODEL_ID,):
+#     model = Speech2Text.from_pretrained(model_id, device="cpu")
+#     ASR_MODELS[model_id] = model
+# for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
+#     model = AsteroidBaseModel.from_pretrained(model_id)
+#     SEP_MODELS[model_id] = model
+# for model_id in WAV2VEV2_MODEL_IDS:
+#     model = Wav2Vec2ForCTC.from_pretrained(model_id)
+#     tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
+#     ASR_HF_MODELS[model_id] = (model, tokenizer)
+
+TIMM_MODELS["julien-c/timm-dpn92"] = timm.create_model("dpn92", pretrained=True)
+TIMM_MODELS["sgugger/resnet50d"] = timm.create_model("resnet50d", pretrained=True)
+
 
 print("models.loaded", time.time() - start_time)
 
@@ -76,6 +82,7 @@ def list_models(_):
         **ASR_MODELS,
         **SEP_MODELS,
         **{k: v[0] for k, v in ASR_HF_MODELS.items()},
+        **TIMM_MODELS,
     }
     return JSONResponse({k: v.__class__.__name__ for k, v in all_models.items()})
 
