@@ -69,9 +69,9 @@ start_time = time.time()
 #     tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
 #     ASR_HF_MODELS[model_id] = (model, tokenizer)
 
-TIMM_MODELS["julien-c/timm-dpn92"] = timm.create_model("dpn92", pretrained=True)
-TIMM_MODELS["sgugger/resnet50d"] = timm.create_model("resnet50d", pretrained=True)
-
+TIMM_MODELS["julien-c/timm-dpn92"] = timm.create_model("dpn92", pretrained=True).eval()
+TIMM_MODELS["sgugger/resnet50d"] = timm.create_model("resnet50d", pretrained=True).eval()
+# ^ They are not in eval mode by default
 
 print("models.loaded", time.time() - start_time)
 
