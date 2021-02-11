@@ -261,7 +261,29 @@ async def post_inference_timm(request: Request, model: torch.nn.Module):
             )
 
     img = img.convert("RGB")
-    
+
+    # Data handling config
+    config = model.default_cfg
+
+    if isinstance(config['input_size'], tuple):
+        img_size = config['input_size'][-2:]
+    else:
+        img_size = config['input_size']
+
+    transform = timm.data.transforms_factory.transforms_imagenet_eval(
+        img_size=img_size,
+        interpolation=config["interpolation"],
+        mean=config["mean"],
+        std=config["std"],
+    )
+
+    input_tensor = transform(img)
+    input_tensor = input_tensor.unsqueeze(0)
+    # ^ batch size = 1
+    with torch.no_grad():
+        labels = model(input_tensor)
+
+
     return JSONResponse(
         {"text": "hello"},
         headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
