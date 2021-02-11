@@ -12,3 +12,6 @@ librosa
 
 # Transformers
 transformers
+
+# timm
+timm
