@@ -301,3 +301,7 @@ if __name__ == "__main__":
 
 # SEP example:
 # curl -XPOST --data-binary '@samples/sample02-orig.wav' http://127.0.0.1:8000/models/mhu-coder/ConvTasNet_Libri1Mix_enhsingle | play -
+
+# timm examples:
+# curl -i -H "Content-Type: image/jpeg"        -XPOST --data-binary '@samples/plane.jpg'       http://127.0.0.1:8000/models/julien-c/timm-dpn92
+# curl -i -H "Content-Type: application/json"  -XPOST --data        '{"url": "https://i.picsum.photos/id/543/536/354.jpg?hmac=O-U6guSk3J8UDMCjnqQHaL8EAOR9yHXZtgA90Bf5UTc"}'      http://127.0.0.1:8000/models/julien-c/timm-dpn92
