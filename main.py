@@ -288,11 +288,16 @@ async def post_inference_timm(request: Request, model: torch.nn.Module):
     input_tensor = input_tensor.unsqueeze(0)
     # ^ batch size = 1
     with torch.no_grad():
-        labels = model(input_tensor)
+        output = model(input_tensor)
 
+    probs = output.squeeze(0).softmax(dim=0)
+
+    values, indices = torch.topk(probs, k=5)
+
+    labels = [IMAGENET_LABELS[i] for i in indices]
 
     return JSONResponse(
-        {"text": "hello"},
+        [{"label": label, "score": float(values[i])} for i, label in enumerate(labels)],
         headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
     )
 
