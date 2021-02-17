@@ -109,72 +109,37 @@ async def post_inference_tts(request: Request, model: AnyModel):
     )
 
 
-async def post_inference_asr(request: Request, model: AnyModel):
-    start = time.time()
 
-    print(request.headers)
-    content_type = request.headers["content-type"]
-    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
-    print(file_ext)
-
-    try:
-        body = await request.body()
-    except Exception as exc:
-        return JSONResponse(
-            {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
-        )
-
-    with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
-        print(tmp, tmp.name)
-        tmp.write(body)
-        tmp.flush()
-
-        try:
-            speech, rate = soundfile.read(tmp.name, dtype="float32")
-        except:
-            try:
-                speech, rate = librosa.load(tmp.name, sr=16_000)
-            except Exception as exc:
-                return JSONResponse(
-                    {"ok": False, "message": f"Invalid audio: {exc}"}, status_code=400
-                )
-
-    if len(speech.shape) > 1:
-        # ogg can take dual channel input -> take only first input channel in this case
-        speech = speech[:, 0]
-    if rate != 16_000:
-        speech = librosa.resample(speech, rate, 16_000)
-
-    outputs = model(speech)
-    text, *_ = outputs[0]
-    print(text)
-
-    return JSONResponse(
-        {"text": text},
-        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
-    )
-
-
-async def post_inference_asr_hf(
-    request: Request, model: AnyModel, tokenizer: AnyTokenizer
+async def post_inference_asr(
+    request: Request, model_id: str,
 ):
     start = time.time()
 
-    print(request.headers)
-    content_type = request.headers["content-type"]
-    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
-    print(file_ext)
+    content_type = request.headers["content-type"].split(";")[0]
 
-    try:
-        body = await request.body()
-    except Exception as exc:
-        return JSONResponse(
-            {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
-        )
+
+    if content_type == "application/json":
+        body = await request.json()
+        if "url" not in body:
+            return JSONResponse(
+                {"ok": False, "message": f"Invalid json, no url key"}, status_code=400
+            )
+        url = body["url"]
+        r = requests.get(url, stream=True)
+        file_ext: Optional[str] = guess_extension(r.headers.get("content-type", ""), strict=False)
+        blob = r.content
+    else:
+        file_ext: Optional[str] = guess_extension(content_type, strict=False)
+        try:
+            blob = await request.body()
+        except Exception as exc:
+            return JSONResponse(
+                {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
+            )
 
     with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
         print(tmp, tmp.name)
-        tmp.write(body)
+        tmp.write(blob)
         tmp.flush()
 
         try:
@@ -193,12 +158,23 @@ async def post_inference_asr_hf(
     if rate != 16_000:
         speech = librosa.resample(speech, rate, 16_000)
 
-    input_values = tokenizer(speech, return_tensors="pt").input_values
-    logits = model(input_values).logits
+    ##
+    ## model-specific forward pass
 
-    predicted_ids = torch.argmax(logits, dim=-1)
+    if model_id in ASR_HF_MODELS:
+        model, tokenizer = ASR_HF_MODELS.get(model_id)
 
-    text = tokenizer.decode(predicted_ids[0])
+        input_values = tokenizer(speech, return_tensors="pt").input_values
+        logits = model(input_values).logits
+
+        predicted_ids = torch.argmax(logits, dim=-1)
+
+        text = tokenizer.decode(predicted_ids[0])
+    else:
+        model = ASR_MODELS.get(model_id)
+        outputs = model(speech)
+        text, *_ = outputs[0]
+
     print(text)
 
     return JSONResponse(
@@ -250,8 +226,8 @@ async def post_inference_timm(request: Request, model: torch.nn.Module):
         url = body["url"]
         img = Image.open(requests.get(url, stream=True).raw)
     else:
-        body = await request.body()
         try:
+            body = await request.body()
             img = Image.open(BytesIO(body))
         except Exception as exc:
             print(exc)
@@ -302,13 +278,8 @@ async def post_inference(request: Request) -> JSONResponse:
         model = TTS_MODELS.get(model_id)
         return await post_inference_tts(request, model)
 
-    if model_id in ASR_MODELS:
-        model = ASR_MODELS.get(model_id)
-        return await post_inference_asr(request, model)
-
-    if model_id in ASR_HF_MODELS:
-        model, tokenizer = ASR_HF_MODELS.get(model_id)
-        return await post_inference_asr_hf(request, model, tokenizer)
+    if model_id in ASR_MODELS or model_id in ASR_HF_MODELS:
+        return await post_inference_asr(request, model_id)
 
     if model_id in SEP_MODELS:
         model = SEP_MODELS.get(model_id)

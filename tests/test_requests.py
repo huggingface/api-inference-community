@@ -8,6 +8,7 @@ sys.path.append(SRC_DIR)  # isort:skip
 
 import requests
 from main import (
+    EXAMPLE_ASR_EN_MODEL_ID,
     EXAMPLE_TTS_EN_MODEL_ID,
     EXAMPLE_TTS_ZH_MODEL_ID,
     HF_HEADER_COMPUTE_TIME,
@@ -16,6 +17,14 @@ from main import (
 
 
 ENDPOINT = "http://localhost:8000"
+
+
+AUDIO_SAMPLE_FILES = [
+    "samples/sample02-orig.wav",
+    "samples/sample1.flac",
+    "samples/chrome.webm",
+    "samples/firefox.oga",
+]
 
 
 def endpoint_model(id: str) -> str:
@@ -77,3 +86,34 @@ class TimmTest(unittest.TestCase):
         print(r.headers.get(HF_HEADER_COMPUTE_TIME))
         body = r.json()
         self.assertIsInstance(body, list)
+
+
+class ASRTest(unittest.TestCase):
+    def test_asr_file_upload(self):
+        for model_id in (EXAMPLE_ASR_EN_MODEL_ID, *WAV2VEV2_MODEL_IDS):
+            for audio_file in AUDIO_SAMPLE_FILES:
+                with self.subTest():
+                    with open(os.path.join(SRC_DIR, audio_file), "rb") as f:
+                        r = requests.post(
+                            url=endpoint_model(model_id),
+                            data=f,
+                            headers={"content-type": "audio/x-wav"},
+                        )
+                    r.raise_for_status()
+                    print(r.headers.get(HF_HEADER_COMPUTE_TIME))
+                    body = r.json()
+                    print(body)
+                    self.assertIsInstance(body, dict)
+
+    def test_asr_url(self):
+        for model_id in (EXAMPLE_ASR_EN_MODEL_ID, *WAV2VEV2_MODEL_IDS):
+            with self.subTest():
+                r = requests.post(
+                    url=endpoint_model(model_id),
+                    json={"url": "https://cdn-media.huggingface.co/speech_samples/sample1.flac"},
+                )
+                r.raise_for_status()
+                print(r.headers.get(HF_HEADER_COMPUTE_TIME))
+                body = r.json()
+                print(body)
+                self.assertIsInstance(body, list)
