@@ -53,3 +53,27 @@ class TTSTest(unittest.TestCase):
         r.raise_for_status()
         print(r.headers.get(HF_HEADER_COMPUTE_TIME))
         self.assertEqual(r.headers.get("content-type"), "audio/x-wav")
+
+
+class TimmTest(unittest.TestCase):
+    def test_resnet50d_file_upload(self):
+        with open(os.path.join(SRC_DIR, "samples/plane.jpg"), "rb") as f:
+            r = requests.post(
+                url=endpoint_model("sgugger/resnet50d"),
+                data=f,
+                headers={"content-type": "image/jpeg"},
+            )
+        r.raise_for_status()
+        print(r.headers.get(HF_HEADER_COMPUTE_TIME))
+        body = r.json()
+        self.assertIsInstance(body, list)
+
+    def test_resnet50d_url(self):
+        r = requests.post(
+            url=endpoint_model("sgugger/resnet50d"),
+            json={"url": "https://huggingface.co/front/assets/transformers-demo.png"},
+        )
+        r.raise_for_status()
+        print(r.headers.get(HF_HEADER_COMPUTE_TIME))
+        body = r.json()
+        self.assertIsInstance(body, list)
