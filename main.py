@@ -7,6 +7,7 @@ from mimetypes import guess_extension
 from typing import Any, Dict, List, Optional, Tuple
 
 import librosa
+import psutil
 import requests
 import soundfile
 import timm
@@ -64,6 +65,14 @@ TIMM_MODELS: Dict[str, torch.nn.Module] = {}
 
 def home(request: Request):
     return JSONResponse({"ok": True})
+
+
+def health(_):
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return JSONResponse(
+        {**process.as_dict(attrs=["memory_percent"]), "rss": mem_info.rss}
+    )
 
 
 def list_models(_):
@@ -314,6 +323,7 @@ async def post_inference(request: Request) -> JSONResponse:
 
 routes = [
     Route("/", home),
+    Route("/health", health),
     Route("/models", list_models),
     Route("/models/{model_id:path}", post_inference, methods=["POST"]),
 ]
