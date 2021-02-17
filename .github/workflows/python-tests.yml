@@ -23,6 +23,10 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install -r requirements
+        pip install -r requirements.txt
+
+    - name: Launch server
+      run: |
+        python main.py &
 
     - run: make test
