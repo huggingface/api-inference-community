@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import time
 from io import BytesIO
@@ -17,6 +18,7 @@ from espnet2.bin.asr_inference import Speech2Text
 from espnet2.bin.tts_inference import Text2Speech
 from PIL import Image
 from starlette.applications import Starlette
+from starlette.background import BackgroundTask
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -87,10 +89,14 @@ async def post_inference_tts(request: Request, model: AnyModel):
 
     outputs = model(text)
     speech = outputs[0]
-    filename = "out-{}.wav".format(int(time.time() * 1e3))
-    soundfile.write(filename, speech.numpy(), model.fs, "PCM_16")
+
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        soundfile.write(tmp.name, speech.numpy(), model.fs, "PCM_16")
+
     return FileResponse(
-        filename, headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)}
+        tmp.name,
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+        background=BackgroundTask(lambda f: os.unlink(f), tmp.name),
     )
 
 
