@@ -109,14 +109,13 @@ async def post_inference_tts(request: Request, model: AnyModel):
     )
 
 
-
 async def post_inference_asr(
-    request: Request, model_id: str,
+    request: Request,
+    model_id: str,
 ):
     start = time.time()
 
     content_type = request.headers["content-type"].split(";")[0]
-
 
     if content_type == "application/json":
         body = await request.json()
@@ -126,7 +125,9 @@ async def post_inference_asr(
             )
         url = body["url"]
         r = requests.get(url, stream=True)
-        file_ext: Optional[str] = guess_extension(r.headers.get("content-type", ""), strict=False)
+        file_ext: Optional[str] = guess_extension(
+            r.headers.get("content-type", ""), strict=False
+        )
         blob = r.content
     else:
         file_ext: Optional[str] = guess_extension(content_type, strict=False)

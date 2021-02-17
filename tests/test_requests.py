@@ -1,10 +1,12 @@
 import os
 import sys
 import unittest
+from mimetypes import guess_type
 
 
 SRC_DIR = os.path.join(os.path.dirname(__file__), "..")  # isort:skip
 sys.path.append(SRC_DIR)  # isort:skip
+
 
 import requests
 from main import (
@@ -19,11 +21,18 @@ from main import (
 ENDPOINT = "http://localhost:8000"
 
 
-AUDIO_SAMPLE_FILES = [
+AUDIO_SAMPLE_LOCAL_FILES = [
     "samples/sample02-orig.wav",
     "samples/sample1.flac",
     "samples/chrome.webm",
     "samples/firefox.oga",
+]
+
+AUDIO_SAMPLE_REMOTE_URLS = [
+    "https://cdn-media.huggingface.co/speech_samples/sample02-orig.wav",
+    "https://cdn-media.huggingface.co/speech_samples/sample1.flac",
+    "https://cdn-media.huggingface.co/speech_samples/chrome.webm",
+    "https://cdn-media.huggingface.co/speech_samples/firefox.oga",
 ]
 
 
@@ -90,14 +99,16 @@ class TimmTest(unittest.TestCase):
 
 class ASRTest(unittest.TestCase):
     def test_asr_file_upload(self):
-        for model_id in (EXAMPLE_ASR_EN_MODEL_ID, *WAV2VEV2_MODEL_IDS):
-            for audio_file in AUDIO_SAMPLE_FILES:
+        # EXAMPLE_ASR_EN_MODEL_ID is too slow,
+        # let's handle it separately if needed.
+        for model_id in WAV2VEV2_MODEL_IDS:
+            for audio_file in AUDIO_SAMPLE_LOCAL_FILES:
                 with self.subTest():
                     with open(os.path.join(SRC_DIR, audio_file), "rb") as f:
                         r = requests.post(
                             url=endpoint_model(model_id),
                             data=f,
-                            headers={"content-type": "audio/x-wav"},
+                            headers={"content-type": guess_type(audio_file)[0]},
                         )
                     r.raise_for_status()
                     print(r.headers.get(HF_HEADER_COMPUTE_TIME))
@@ -106,14 +117,17 @@ class ASRTest(unittest.TestCase):
                     self.assertIsInstance(body, dict)
 
     def test_asr_url(self):
-        for model_id in (EXAMPLE_ASR_EN_MODEL_ID, *WAV2VEV2_MODEL_IDS):
-            with self.subTest():
-                r = requests.post(
-                    url=endpoint_model(model_id),
-                    json={"url": "https://cdn-media.huggingface.co/speech_samples/sample1.flac"},
-                )
-                r.raise_for_status()
-                print(r.headers.get(HF_HEADER_COMPUTE_TIME))
-                body = r.json()
-                print(body)
-                self.assertIsInstance(body, list)
+        # EXAMPLE_ASR_EN_MODEL_ID is too slow,
+        # let's handle it separately if needed.
+        for model_id in WAV2VEV2_MODEL_IDS:
+            for audio_url in AUDIO_SAMPLE_REMOTE_URLS:
+                with self.subTest():
+                    r = requests.post(
+                        url=endpoint_model(model_id),
+                        json={"url": audio_url},
+                    )
+                    r.raise_for_status()
+                    print(r.headers.get(HF_HEADER_COMPUTE_TIME))
+                    body = r.json()
+                    print(body)
+                    self.assertIsInstance(body, dict)
