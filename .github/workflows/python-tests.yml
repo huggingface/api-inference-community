@@ -13,6 +13,10 @@ jobs:
         python-version: ["3.8"]
 
     steps:
+    - run: |
+        sudo apt-get install ffmpeg libsndfile1-dev
+
+
     - uses: actions/checkout@v2
 
     - name: Set up Python ${{ matrix.python-version }}
