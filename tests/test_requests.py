@@ -11,6 +11,8 @@ sys.path.append(SRC_DIR)  # isort:skip
 import requests
 from main import (
     EXAMPLE_ASR_EN_MODEL_ID,
+    EXAMPLE_SEP_ENH_MODEL_ID,
+    EXAMPLE_SEP_SEP_MODEL_ID,
     EXAMPLE_TTS_EN_MODEL_ID,
     EXAMPLE_TTS_ZH_MODEL_ID,
     HF_HEADER_COMPUTE_TIME,
@@ -19,6 +21,10 @@ from main import (
 
 
 ENDPOINT = "http://localhost:8000"
+
+# To test the production env remotely:
+if os.environ.get("PRODUCTION") is not None:
+    ENDPOINT = "http://api-audio.huggingface.co"
 
 
 AUDIO_SAMPLE_LOCAL_FILES = [
@@ -131,3 +137,19 @@ class ASRTest(unittest.TestCase):
                     body = r.json()
                     print(body)
                     self.assertIsInstance(body, dict)
+
+
+class SEPTest(unittest.TestCase):
+    def test_sep_file_upload(self):
+        for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
+            for audio_file in AUDIO_SAMPLE_LOCAL_FILES:
+                with self.subTest():
+                    with open(os.path.join(SRC_DIR, audio_file), "rb") as f:
+                        r = requests.post(
+                            url=endpoint_model(model_id),
+                            data=f,
+                            headers={"content-type": guess_type(audio_file)[0]},
+                        )
+                    r.raise_for_status()
+                    print(r.headers.get(HF_HEADER_COMPUTE_TIME))
+                    self.assertEqual(r.headers.get("content-type"), "audio/x-wav")

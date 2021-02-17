@@ -206,10 +206,13 @@ async def post_inference_sep(request: Request, model: AnyModel):
     # FIXME: how to deal with multiple sources?
     est = est_srcs[0]
 
-    filename = "out-{}.wav".format(int(time.time() * 1e3))
-    soundfile.write(filename, est, int(model.sample_rate), "PCM_16")
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        soundfile.write(tmp.name, est, int(model.sample_rate), "PCM_16")
+
     return FileResponse(
-        filename, headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)}
+        tmp.name,
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+        background=BackgroundTask(lambda f: os.unlink(f), tmp.name),
     )
 
 
