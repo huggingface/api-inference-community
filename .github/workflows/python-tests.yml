@@ -1,0 +1,40 @@
+name: Python-tests
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8"]
+
+    steps:
+    - run: |
+        sudo apt-get install ffmpeg libsndfile1-dev
+
+
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip wheel
+        pip install -r requirements.txt
+
+    - name: Launch server and wait until loaded
+      run: |
+        python main.py &
+        until $(curl --output /dev/null --silent --head --fail http://localhost:8000); do
+            printf '.'
+            sleep 5
+        done
+
+    - run: make test

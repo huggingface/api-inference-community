@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import time
 from io import BytesIO
@@ -6,6 +7,7 @@ from mimetypes import guess_extension
 from typing import Any, Dict, List, Optional, Tuple
 
 import librosa
+import psutil
 import requests
 import soundfile
 import timm
@@ -17,12 +19,14 @@ from espnet2.bin.asr_inference import Speech2Text
 from espnet2.bin.tts_inference import Text2Speech
 from PIL import Image
 from starlette.applications import Starlette
+from starlette.background import BackgroundTask
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+
 
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 
@@ -58,32 +62,17 @@ SEP_MODELS: Dict[str, AnyModel] = {}
 ASR_HF_MODELS: Dict[str, Tuple[AnyModel, AnyTokenizer]] = {}
 TIMM_MODELS: Dict[str, torch.nn.Module] = {}
 
-start_time = time.time()
-for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
-    model = Text2Speech.from_pretrained(model_id, device="cpu")
-    TTS_MODELS[model_id] = model
-for model_id in (EXAMPLE_ASR_EN_MODEL_ID,):
-    model = Speech2Text.from_pretrained(model_id, device="cpu")
-    ASR_MODELS[model_id] = model
-for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
-    model = AsteroidBaseModel.from_pretrained(model_id)
-    SEP_MODELS[model_id] = model
-for model_id in WAV2VEV2_MODEL_IDS:
-    model = Wav2Vec2ForCTC.from_pretrained(model_id)
-    tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
-    ASR_HF_MODELS[model_id] = (model, tokenizer)
-
-TIMM_MODELS["julien-c/timm-dpn92"] = timm.create_model("dpn92", pretrained=True).eval()
-TIMM_MODELS["sgugger/resnet50d"] = timm.create_model(
-    "resnet50d", pretrained=True
-).eval()
-# ^ Those are not in eval mode by default
-
-print("models.loaded", time.time() - start_time)
-
 
 def home(request: Request):
     return JSONResponse({"ok": True})
+
+
+def health(_):
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return JSONResponse(
+        {**process.as_dict(attrs=["memory_percent"]), "rss": mem_info.rss}
+    )
 
 
 def list_models(_):
@@ -109,79 +98,49 @@ async def post_inference_tts(request: Request, model: AnyModel):
 
     outputs = model(text)
     speech = outputs[0]
-    filename = "out-{}.wav".format(int(time.time() * 1e3))
-    soundfile.write(filename, speech.numpy(), model.fs, "PCM_16")
+
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        soundfile.write(tmp.name, speech.numpy(), model.fs, "PCM_16")
+
     return FileResponse(
-        filename, headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)}
-    )
-
-
-async def post_inference_asr(request: Request, model: AnyModel):
-    start = time.time()
-
-    print(request.headers)
-    content_type = request.headers["content-type"]
-    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
-    print(file_ext)
-
-    try:
-        body = await request.body()
-    except Exception as exc:
-        return JSONResponse(
-            {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
-        )
-
-    with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
-        print(tmp, tmp.name)
-        tmp.write(body)
-        tmp.flush()
-
-        try:
-            speech, rate = soundfile.read(tmp.name, dtype="float32")
-        except:
-            try:
-                speech, rate = librosa.load(tmp.name, sr=16_000)
-            except Exception as exc:
-                return JSONResponse(
-                    {"ok": False, "message": f"Invalid audio: {exc}"}, status_code=400
-                )
-
-    if len(speech.shape) > 1:
-        # ogg can take dual channel input -> take only first input channel in this case
-        speech = speech[:, 0]
-    if rate != 16_000:
-        speech = librosa.resample(speech, rate, 16_000)
-
-    outputs = model(speech)
-    text, *_ = outputs[0]
-    print(text)
-
-    return JSONResponse(
-        {"text": text},
+        tmp.name,
         headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+        background=BackgroundTask(lambda f: os.unlink(f), tmp.name),
     )
 
 
-async def post_inference_asr_hf(
-    request: Request, model: AnyModel, tokenizer: AnyTokenizer
+async def post_inference_asr(
+    request: Request,
+    model_id: str,
 ):
     start = time.time()
 
-    print(request.headers)
-    content_type = request.headers["content-type"]
-    file_ext: Optional[str] = guess_extension(content_type.split(";")[0], strict=False)
-    print(file_ext)
+    content_type = request.headers["content-type"].split(";")[0]
 
-    try:
-        body = await request.body()
-    except Exception as exc:
-        return JSONResponse(
-            {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
+    if content_type == "application/json":
+        body = await request.json()
+        if "url" not in body:
+            return JSONResponse(
+                {"ok": False, "message": f"Invalid json, no url key"}, status_code=400
+            )
+        url = body["url"]
+        r = requests.get(url, stream=True)
+        file_ext: Optional[str] = guess_extension(
+            r.headers.get("content-type", ""), strict=False
         )
+        blob = r.content
+    else:
+        file_ext: Optional[str] = guess_extension(content_type, strict=False)
+        try:
+            blob = await request.body()
+        except Exception as exc:
+            return JSONResponse(
+                {"ok": False, "message": f"Invalid body: {exc}"}, status_code=400
+            )
 
     with tempfile.NamedTemporaryFile(suffix=file_ext) as tmp:
         print(tmp, tmp.name)
-        tmp.write(body)
+        tmp.write(blob)
         tmp.flush()
 
         try:
@@ -200,12 +159,23 @@ async def post_inference_asr_hf(
     if rate != 16_000:
         speech = librosa.resample(speech, rate, 16_000)
 
-    input_values = tokenizer(speech, return_tensors="pt").input_values
-    logits = model(input_values).logits
+    ##
+    ## model-specific forward pass
 
-    predicted_ids = torch.argmax(logits, dim=-1)
+    if model_id in ASR_HF_MODELS:
+        model, tokenizer = ASR_HF_MODELS.get(model_id)
 
-    text = tokenizer.decode(predicted_ids[0])
+        input_values = tokenizer(speech, return_tensors="pt").input_values
+        logits = model(input_values).logits
+
+        predicted_ids = torch.argmax(logits, dim=-1)
+
+        text = tokenizer.decode(predicted_ids[0])
+    else:
+        model = ASR_MODELS.get(model_id)
+        outputs = model(speech)
+        text, *_ = outputs[0]
+
     print(text)
 
     return JSONResponse(
@@ -236,10 +206,13 @@ async def post_inference_sep(request: Request, model: AnyModel):
     # FIXME: how to deal with multiple sources?
     est = est_srcs[0]
 
-    filename = "out-{}.wav".format(int(time.time() * 1e3))
-    soundfile.write(filename, est, int(model.sample_rate), "PCM_16")
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        soundfile.write(tmp.name, est, int(model.sample_rate), "PCM_16")
+
     return FileResponse(
-        filename, headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)}
+        tmp.name,
+        headers={HF_HEADER_COMPUTE_TIME: "{:.3f}".format(time.time() - start)},
+        background=BackgroundTask(lambda f: os.unlink(f), tmp.name),
     )
 
 
@@ -257,8 +230,8 @@ async def post_inference_timm(request: Request, model: torch.nn.Module):
         url = body["url"]
         img = Image.open(requests.get(url, stream=True).raw)
     else:
-        body = await request.body()
         try:
+            body = await request.body()
             img = Image.open(BytesIO(body))
         except Exception as exc:
             print(exc)
@@ -309,13 +282,8 @@ async def post_inference(request: Request) -> JSONResponse:
         model = TTS_MODELS.get(model_id)
         return await post_inference_tts(request, model)
 
-    if model_id in ASR_MODELS:
-        model = ASR_MODELS.get(model_id)
-        return await post_inference_asr(request, model)
-
-    if model_id in ASR_HF_MODELS:
-        model, tokenizer = ASR_HF_MODELS.get(model_id)
-        return await post_inference_asr_hf(request, model, tokenizer)
+    if model_id in ASR_MODELS or model_id in ASR_HF_MODELS:
+        return await post_inference_asr(request, model_id)
 
     if model_id in SEP_MODELS:
         model = SEP_MODELS.get(model_id)
@@ -330,6 +298,7 @@ async def post_inference(request: Request) -> JSONResponse:
 
 routes = [
     Route("/", home),
+    Route("/health", health),
     Route("/models", list_models),
     Route("/models/{model_id:path}", post_inference, methods=["POST"]),
 ]
@@ -347,6 +316,34 @@ middlewares = [
 app = Starlette(debug=True, routes=routes, middleware=middlewares)
 
 if __name__ == "__main__":
+    ## Load all models
+
+    start_time = time.time()
+    for model_id in (EXAMPLE_TTS_EN_MODEL_ID, EXAMPLE_TTS_ZH_MODEL_ID):
+        model = Text2Speech.from_pretrained(model_id, device="cpu")
+        TTS_MODELS[model_id] = model
+    for model_id in (EXAMPLE_ASR_EN_MODEL_ID,):
+        model = Speech2Text.from_pretrained(model_id, device="cpu")
+        ASR_MODELS[model_id] = model
+    for model_id in (EXAMPLE_SEP_ENH_MODEL_ID, EXAMPLE_SEP_SEP_MODEL_ID):
+        model = AsteroidBaseModel.from_pretrained(model_id)
+        SEP_MODELS[model_id] = model
+    for model_id in WAV2VEV2_MODEL_IDS:
+        model = Wav2Vec2ForCTC.from_pretrained(model_id)
+        tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
+        ASR_HF_MODELS[model_id] = (model, tokenizer)
+
+    TIMM_MODELS["julien-c/timm-dpn92"] = timm.create_model(
+        "dpn92", pretrained=True
+    ).eval()
+    TIMM_MODELS["sgugger/resnet50d"] = timm.create_model(
+        "resnet50d", pretrained=True
+    ).eval()
+    # ^ Those are not in eval mode by default
+
+    print("models.loaded", time.time() - start_time)
+
+    ## Start server
     uvicorn.run(app, host="0.0.0.0", port=8000, timeout_keep_alive=0)
 
 
