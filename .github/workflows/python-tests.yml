@@ -29,8 +29,12 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Launch server
+    - name: Launch server and wait until loaded
       run: |
         python main.py &
+        until $(curl --output /dev/null --silent --head --fail http://localhost:8000); do
+            printf '.'
+            sleep 5
+        done
 
     - run: make test
