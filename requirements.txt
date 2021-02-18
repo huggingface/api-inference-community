@@ -10,7 +10,7 @@ uvicorn
 git+https://github.com/julien-c/espnet.git@hf_model_hub
 
 # Asteroid
-git+https://github.com/asteroid-team/asteroid@master
+asteroid>=0.4.2
 
 # Transformers
 transformers
