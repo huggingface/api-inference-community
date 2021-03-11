@@ -46,9 +46,13 @@ EXAMPLE_SEP_SEP_MODEL_ID = "julien-c/DPRNNTasNet-ks16_WHAM_sepclean"
 
 WAV2VEV2_MODEL_IDS = [
     "facebook/wav2vec2-base-960h",
-    # "facebook/wav2vec2-large-960h",
-    # "facebook/wav2vec2-large-960h-lv60",
     "facebook/wav2vec2-large-960h-lv60-self",
+    "facebook/wav2vec2-large-xlsr-53-dutch",
+    "facebook/wav2vec2-large-xlsr-53-france",
+    "facebook/wav2vec2-large-xlsr-53-german",
+    "facebook/wav2vec2-large-xlsr-53-italian",
+    "facebook/wav2vec2-large-xlsr-53-spanish",
+    "facebook/wav2vec2-large-xlsr-53-portuguese",
 ]
 
 with open("data/imagenet-simple-labels.json") as f:
