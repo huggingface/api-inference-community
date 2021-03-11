@@ -13,7 +13,11 @@ git+https://github.com/julien-c/espnet.git@hf_model_hub
 asteroid>=0.4.2
 
 # Transformers
-transformers
+git+https://github.com/huggingface/transformers
+
+# S2T related deps
+torchaudio
+sentencepiece
 
 # timm
 timm

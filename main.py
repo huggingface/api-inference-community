@@ -25,7 +25,12 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+from transformers import (
+    Wav2Vec2ForCTC,
+    Wav2Vec2Tokenizer,
+    Speech2TextForConditionalGeneration,
+    Speech2TextProcessor,
+)
 
 
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
@@ -53,6 +58,20 @@ WAV2VEV2_MODEL_IDS = [
     "facebook/wav2vec2-large-xlsr-53-italian",
     "facebook/wav2vec2-large-xlsr-53-spanish",
     "facebook/wav2vec2-large-xlsr-53-portuguese",
+]
+
+SPEECH_TO_TEXT_MODEL_IDS = [
+    "facebook/s2t-small-librispeech-asr",
+    "facebook/s2t-medium-librispeech-asr",
+    "facebook/s2t-large-librispeech-asr",
+    "facebook/s2t-small-mustc-en-de-st",
+    "facebook/s2t-small-mustc-en-es-st",
+    "facebook/s2t-small-mustc-en-fr-st",
+    "facebook/s2t-small-mustc-en-it-st",
+    "facebook/s2t-small-mustc-en-nl-st",
+    "facebook/s2t-small-mustc-en-pt-st",
+    "facebook/s2t-small-mustc-en-ro-st",
+    "facebook/s2t-small-mustc-en-ru-st",
 ]
 
 with open("data/imagenet-simple-labels.json") as f:
@@ -167,14 +186,22 @@ async def post_inference_asr(
     ## model-specific forward pass
 
     if model_id in ASR_HF_MODELS:
-        model, tokenizer = ASR_HF_MODELS.get(model_id)
+        if model_id in SPEECH_TO_TEXT_MODEL_IDS:
+            model, processor = ASR_HF_MODELS.get(model_id)
+            
+            inputs = processor(speech, return_tensors="pt")
+            generated_ids = model.generate(input_ids=inputs["features"], attention_mask=inputs["attention_mask"])
+            
+            text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        else:
+            model, tokenizer = ASR_HF_MODELS.get(model_id)
 
-        input_values = tokenizer(speech, return_tensors="pt").input_values
-        logits = model(input_values).logits
+            input_values = tokenizer(speech, return_tensors="pt").input_values
+            logits = model(input_values).logits
 
-        predicted_ids = torch.argmax(logits, dim=-1)
+            predicted_ids = torch.argmax(logits, dim=-1)
 
-        text = tokenizer.decode(predicted_ids[0])
+            text = tokenizer.decode(predicted_ids[0])
     else:
         model = ASR_MODELS.get(model_id)
         outputs = model(speech)
@@ -336,6 +363,10 @@ if __name__ == "__main__":
         model = Wav2Vec2ForCTC.from_pretrained(model_id)
         tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_id)
         ASR_HF_MODELS[model_id] = (model, tokenizer)
+    for model_id in SPEECH_TO_TEXT_MODEL_IDS:
+        model = Speech2TextForConditionalGeneration.from_pretrained(model_id)
+        processor = Speech2TextProcessor.from_pretrained(model_id)
+        ASR_HF_MODELS[model_id] = (model, processor)
 
     TIMM_MODELS["julien-c/timm-dpn92"] = timm.create_model(
         "dpn92", pretrained=True
