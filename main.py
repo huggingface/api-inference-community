@@ -48,7 +48,7 @@ WAV2VEV2_MODEL_IDS = [
     "facebook/wav2vec2-base-960h",
     "facebook/wav2vec2-large-960h-lv60-self",
     "facebook/wav2vec2-large-xlsr-53-dutch",
-    "facebook/wav2vec2-large-xlsr-53-france",
+    "facebook/wav2vec2-large-xlsr-53-french",
     "facebook/wav2vec2-large-xlsr-53-german",
     "facebook/wav2vec2-large-xlsr-53-italian",
     "facebook/wav2vec2-large-xlsr-53-spanish",
