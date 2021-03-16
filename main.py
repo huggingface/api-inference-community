@@ -26,10 +26,10 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Route
 from transformers import (
-    Wav2Vec2ForCTC,
-    Wav2Vec2Tokenizer,
     Speech2TextForConditionalGeneration,
     Speech2TextProcessor,
+    Wav2Vec2ForCTC,
+    Wav2Vec2Tokenizer,
 )
 
 
@@ -188,10 +188,12 @@ async def post_inference_asr(
     if model_id in ASR_HF_MODELS:
         if model_id in SPEECH_TO_TEXT_MODEL_IDS:
             model, processor = ASR_HF_MODELS.get(model_id)
-            
+
             inputs = processor(speech, return_tensors="pt")
-            generated_ids = model.generate(input_ids=inputs["features"], attention_mask=inputs["attention_mask"])
-            
+            generated_ids = model.generate(
+                input_ids=inputs["features"], attention_mask=inputs["attention_mask"]
+            )
+
             text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
         else:
             model, tokenizer = ASR_HF_MODELS.get(model_id)
