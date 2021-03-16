@@ -13,7 +13,7 @@ git+https://github.com/julien-c/espnet.git@hf_model_hub
 asteroid>=0.4.2
 
 # Transformers
-git+https://github.com/huggingface/transformers
+transformers>=4.4.0
 
 # S2T related deps
 torchaudio
