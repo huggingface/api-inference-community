@@ -27,6 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
+        pip install pytest
         pip install -r common/requirements.txt
         pip install -r speechbrain/requirements.txt
 
