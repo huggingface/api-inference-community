@@ -2,11 +2,8 @@ import json
 import subprocess
 from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
-from urllib.parse import urlparse
 
-import httpx
 import numpy as np
-from PIL import Image
 from pydantic import BaseModel, ConstrainedFloat, ConstrainedInt, ConstrainedList
 
 
@@ -85,6 +82,9 @@ def check_params(params, tag):
 def check_inputs(inputs, tag):
     if tag in INPUTS_MAPPING:
         INPUTS_MAPPING[tag].parse_obj(inputs)
+    else:
+        if not isinstance(inputs, str):
+            raise ValueError("The inputs is invalid, we expect a string")
     return True
 
 
@@ -176,26 +176,13 @@ def ffmpeg_read(bpayload: bytes) -> np.array:
 
 
 def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
+    from PIL import Image
+
     img = Image.open(BytesIO(bpayload))
     return img, {}
 
 
 def normalize_payload_audio(bpayload: bytes) -> Tuple[Any, Dict]:
-    exc = None
-    try:
-        data = json.loads(bpayload)
-        if "url" in data:
-            parsed = urlparse(data["url"])
-            if parsed.netloc != "cdn-media.huggingface.co":
-                exc = ValueError(
-                    "We don't support any other domain than `cdn-media.huggingface.co"
-                )
-                raise Exception("Break")
-            bpayload = httpx.get(data["url"], timeout=2).content
-    except Exception:
-        pass
-    if exc is not None:
-        raise exc
     inputs = ffmpeg_read(bpayload)
     if len(inputs.shape) > 1:
         # ogg can take dual channel input -> take only first input channel in this case

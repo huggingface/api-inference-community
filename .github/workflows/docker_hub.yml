@@ -42,17 +42,64 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build and push
+      - name: Build and push (allennlp)
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: ./Dockerfile
+          context: allennlp
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and push (asteroid)
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: asteroid
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+      - name: Build and push (flair)
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: flair
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and push (espnet)
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: espnet
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and push (speechbrain)
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: speechbrain
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and push (timm)
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: timm
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache

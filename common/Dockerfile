@@ -6,6 +6,7 @@ LABEL maintainer="me <me@example.com>"
 
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
+COPY ./prestart.sh /app/
 
 
 # Most DL models are quite large in terms of memory, using workers is a HUGE
@@ -14,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Feel free to override if it does not make sense for your library.
 ARG max_workers=1
 ENV MAX_WORKERS=$max_workers
+ENV HUGGINGFACE_HUB_CACHE=/data
 
 # Necessary on GPU environment docker.
 # TIMEOUT env variable is used by nvcr.io/nvidia/pytorch:xx for another purpose
@@ -24,3 +26,4 @@ ENV MAX_WORKERS=$max_workers
 # If UVICORN_TIMEOUT is too low, uvicorn will simply never loads as it will
 # kill workers all the time before they finish.
 RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
+COPY ./app /app/app

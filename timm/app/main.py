@@ -10,7 +10,6 @@ from starlette.routing import Route
 
 logger = logging.getLogger(__name__)
 
-
 # Add the allowed tasks
 # Supported tasks are:
 # - text-generation
@@ -61,3 +60,10 @@ async def startup_event():
     model_id = os.environ["MODEL_ID"]
 
     app.pipeline = get_pipeline(task, model_id)
+
+
+if __name__ == "__main__":
+    task = os.environ["TASK"]
+    model_id = os.environ["MODEL_ID"]
+
+    get_pipeline(task, model_id)

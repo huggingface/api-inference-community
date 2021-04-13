@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from app.pipelines import Pipeline
 
@@ -16,7 +16,7 @@ class TokenClassificationPipeline(Pipeline):
             "Please implement TokenClassificationPipeline __init__ function"
         )
 
-    def __call__(self, inputs: Dict[str, str]) -> Dict[str, Any]:
+    def __call__(self, inputs: Dict[str, str]) -> List[Dict[str, Any]]:
         """
         Args:
             inputs (:obj:`str`):

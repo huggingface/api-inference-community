@@ -8,6 +8,10 @@ from starlette.applications import Starlette
 from starlette.routing import Route
 
 
+TASK = os.getenv("TASK")
+MODEL_ID = os.getenv("MODEL_ID")
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -59,5 +63,11 @@ async def startup_event():
 
     task = os.environ["TASK"]
     model_id = os.environ["MODEL_ID"]
-
     app.pipeline = get_pipeline(task, model_id)
+
+
+if __name__ == "__main__":
+    task = os.environ["TASK"]
+    model_id = os.environ["MODEL_ID"]
+
+    get_pipeline(task, model_id)

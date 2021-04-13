@@ -2,11 +2,8 @@ import json
 import subprocess
 from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
-from urllib.parse import urlparse
 
-import httpx
 import numpy as np
-from PIL import Image
 from pydantic import BaseModel, ConstrainedFloat, ConstrainedInt, ConstrainedList
 
 
@@ -62,23 +59,39 @@ class ZeroShotCheck(BaseModel):
     multi_label: Optional[bool] = None
 
 
-MAPPING = {
+class Question(BaseModel):
+    question: str
+    context: str
+
+
+PARAMS_MAPPING = {
     "conversational": TextGenerationCheck,
     "text-generation": TextGenerationCheck,
     "fill-mask": FillMaskCheck,
     "zero-shot-classification": ZeroShotCheck,
 }
+INPUTS_MAPPING = {"question-answering": Question}
 
 
 def check_params(params, tag):
-    if tag in MAPPING:
-        MAPPING[tag](**params)
+    if tag in PARAMS_MAPPING:
+        PARAMS_MAPPING[tag].parse_obj(params)
+    return True
+
+
+def check_inputs(inputs, tag):
+    if tag in INPUTS_MAPPING:
+        INPUTS_MAPPING[tag].parse_obj(inputs)
+    else:
+        if not isinstance(inputs, str):
+            raise ValueError("The inputs is invalid, we expect a string")
     return True
 
 
 def normalize_payload(bpayload: bytes, task: str) -> Tuple[Any, Dict]:
     if task in {
         "automatic-speech-recognition",
+        "audio-source-separation",
     }:
         return normalize_payload_audio(bpayload)
     elif task in {
@@ -163,26 +176,13 @@ def ffmpeg_read(bpayload: bytes) -> np.array:
 
 
 def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
+    from PIL import Image
+
     img = Image.open(BytesIO(bpayload))
     return img, {}
 
 
 def normalize_payload_audio(bpayload: bytes) -> Tuple[Any, Dict]:
-    exc = None
-    try:
-        data = json.loads(bpayload)
-        if "url" in data:
-            parsed = urlparse(data["url"])
-            if parsed.netloc != "cdn-media.huggingface.co":
-                exc = ValueError(
-                    "We don't support any other domain than `cdn-media.huggingface.co"
-                )
-                raise Exception("Break")
-            bpayload = httpx.get(data["url"], timeout=2).content
-    except Exception:
-        pass
-    if exc is not None:
-        raise exc
     inputs = ffmpeg_read(bpayload)
     if len(inputs.shape) > 1:
         # ogg can take dual channel input -> take only first input channel in this case
@@ -206,4 +206,5 @@ def normalize_payload_nlp(bpayload: bytes, task: str) -> Tuple[Any, Dict]:
     else:
         inputs = payload
     check_params(parameters, task)
+    check_inputs(inputs, task)
     return inputs, parameters

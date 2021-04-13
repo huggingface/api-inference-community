@@ -30,10 +30,18 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
 }
 
 
+PIPELINE = None
+
+
 def get_pipeline(task: str, model_id: str) -> Pipeline:
-    if task not in ALLOWED_TASKS:
-        raise EnvironmentError(f"{task} is not a valid pipeline for model : {model_id}")
-    return ALLOWED_TASKS[task](model_id)
+    global PIPELINE
+    if PIPELINE is None:
+        if task not in ALLOWED_TASKS:
+            raise EnvironmentError(
+                f"{task} is not a valid pipeline for model : {model_id}"
+            )
+        PIPELINE = ALLOWED_TASKS[task](model_id)
+    return PIPELINE
 
 
 routes = [
@@ -61,3 +69,10 @@ async def startup_event():
     model_id = os.environ["MODEL_ID"]
 
     app.pipeline = get_pipeline(task, model_id)
+
+
+if __name__ == "__main__":
+    task = os.environ["TASK"]
+    model_id = os.environ["MODEL_ID"]
+
+    get_pipeline(task, model_id)

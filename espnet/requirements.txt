@@ -1,3 +1,5 @@
 starlette==0.14.2
 numpy==1.20.2
+pydantic==1.8.1
 -e git+https://github.com/julien-c/espnet.git@hf_model_hub#egg=espnet
+torch==1.8.1

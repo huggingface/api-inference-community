@@ -1,7 +1,10 @@
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from app.pipelines import Pipeline
-from PIL import Image
+
+
+if TYPE_CHECKING:
+    from PIL import Image
 
 
 class ImageClassificationPipeline(Pipeline):
@@ -14,7 +17,7 @@ class ImageClassificationPipeline(Pipeline):
             "Please implement ImageClassificationPipeline __init__ function"
         )
 
-    def __call__(self, inputs: Image.Image) -> List[Dict[str, Any]]:
+    def __call__(self, inputs: "Image.Image") -> List[Dict[str, Any]]:
         """
         Args:
             inputs (:obj:`PIL.Image`):

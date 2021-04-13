@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from app.pipelines import Pipeline
 from flair.data import Sentence
@@ -12,7 +12,7 @@ class TokenClassificationPipeline(Pipeline):
     ):
         self.tagger = SequenceTagger.load(model_id)
 
-    def __call__(self, inputs: str) -> Dict[str, Any]:
+    def __call__(self, inputs: str) -> List[Dict[str, Any]]:
         """
         Args:
             inputs (:obj:`str`):

@@ -8,7 +8,12 @@ from PIL import Image
 
 class ImageClassificationPipeline(Pipeline):
     def __init__(self, model_id: str):
-        self.model = timm.create_model(model_id).eval()
+        if "resnet50d" in model_id:
+            self.model = timm.create_model("resnet50d", pretrained=True).eval()
+        elif "dpn92" in model_id:
+            self.model = timm.create_model("dpn92", pretrained=True).eval()
+        else:
+            raise EnvironmentError("Cannot detect the correct arch for this model")
 
     def __call__(self, inputs: Image.Image) -> List[Dict[str, Any]]:
         """
@@ -45,7 +50,8 @@ class ImageClassificationPipeline(Pipeline):
 
         values, indices = torch.topk(probs, k=5)
         labels = [
-            {"label": IMAGENET_LABELS[i], "score": v} for i, v in zip(indices, values)
+            {"label": IMAGENET_LABELS[i], "score": v.item()}
+            for i, v in zip(indices, values)
         ]
         return labels
 
