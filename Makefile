@@ -16,6 +16,5 @@ style:
 
 
 test:
-	pytest -sv --rootdir common/ common/
-	pytest -sv --rootdir speechbrain/ speechbrain/
+	pytest -sv --rootdir tests/
 

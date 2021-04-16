@@ -3,3 +3,5 @@ __pycache__/
 
 # Speechbrain artefact.
 pretrained_checkpoints
+
+*.egg-info/

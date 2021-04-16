@@ -34,7 +34,11 @@ class DockerImageTests(unittest.TestCase):
     def create_docker(self, name: str) -> str:
         rand = str(uuid.uuid4())[:5]
         tag = f"{name}:{rand}"
-        with cd(os.path.join(os.path.dirname(os.path.dirname(__file__)), name)):
+        with cd(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), "docker_images", name
+            )
+        ):
             subprocess.run(["docker", "build", ".", "-t", tag])
         return tag
 
