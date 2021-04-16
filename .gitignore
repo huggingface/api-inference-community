@@ -5,3 +5,5 @@ __pycache__/
 pretrained_checkpoints
 
 *.egg-info/
+build/
+dist/

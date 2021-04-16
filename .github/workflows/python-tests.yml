@@ -28,7 +28,5 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install pytest pillow
-        pip install -r common/requirements.txt
-        pip install -r speechbrain/requirements.txt
-
+        pip install -r requirements.txt
     - run: make test

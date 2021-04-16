@@ -10,5 +10,7 @@ setup(
     author_email="nicolas@huggingface.co",
     license="MIT",
     packages=["api_inference_community"],
+    python_requires=">=3.6.0",
     zip_safe=False,
+    install_requires=list(line for line in open("requirements.txt", "r")),
 )

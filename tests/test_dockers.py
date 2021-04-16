@@ -30,6 +30,10 @@ class cd:
         os.chdir(self.savedPath)
 
 
+@unittest.skipIf(
+    "RUN_DOCKER_TESTS" not in os.environ,
+    "Docker tests are slow, set `RUN_DOCKER_TESTS=1` environement variable to run them",
+)
 class DockerImageTests(unittest.TestCase):
     def create_docker(self, name: str) -> str:
         rand = str(uuid.uuid4())[:5]
@@ -39,7 +43,8 @@ class DockerImageTests(unittest.TestCase):
                 os.path.dirname(os.path.dirname(__file__)), "docker_images", name
             )
         ):
-            subprocess.run(["docker", "build", ".", "-t", tag])
+            proc = subprocess.run(["docker", "build", ".", "-t", tag])
+        self.assertEqual(proc.returncode, 0)
         return tag
 
     def test_allennlp(self):
@@ -187,6 +192,7 @@ class DockerImageTests(unittest.TestCase):
             proc.terminate()
             proc.wait(5)
 
+        self.assertEqual(proc.returncode, 0)
         self.assertGreater(
             counter[200],
             0,
@@ -204,3 +210,4 @@ class DockerImageTests(unittest.TestCase):
             self.assertEqual(response.content, b'{"ok":"ok"}')
             proc2.terminate()
             proc2.wait(5)
+        self.assertEqual(proc2.returncode, 0)

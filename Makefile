@@ -16,5 +16,5 @@ style:
 
 
 test:
-	pytest -sv --rootdir tests/
+	pytest -sv tests/
 
