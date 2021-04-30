@@ -28,5 +28,5 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install pytest pillow httpx
-        pip install -r requirements.txt
+        pip install -e .
     - run: make test
