@@ -10,7 +10,9 @@ class AutomaticSpeechRecognitionPipeline(Pipeline):
     def __init__(self, model_id: str):
         self.model = EncoderDecoderASR.from_hparams(source=model_id)
         # Reduce latency
-        self.model.modules.beam_searcher.beam_size = 1
+        self.model.modules.decoder.beam_size = 1
+        # Please define a `self.sampling_rate` for this pipeline
+        # to automatically read the input correctly
         self.sampling_rate = 16000
 
     def __call__(self, inputs: np.array) -> Dict[str, str]:
