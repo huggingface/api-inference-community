@@ -45,6 +45,7 @@ class FeatureExtractionTestCase(TestCase):
 
         content = json.loads(response.content)
         self.assertEqual(type(content), list)
+        self.assertEqual({type(item) for item in content}, {float})
 
         with TestClient(self.app) as client:
             response = client.post("/", json=inputs)
@@ -55,6 +56,7 @@ class FeatureExtractionTestCase(TestCase):
         )
         content = json.loads(response.content)
         self.assertEqual(type(content), list)
+        self.assertEqual({type(item) for item in content}, {float})
 
     def test_malformed_sentence(self):
         with TestClient(self.app) as client:
