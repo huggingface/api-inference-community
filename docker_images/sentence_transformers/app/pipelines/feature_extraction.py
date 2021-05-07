@@ -1,7 +1,8 @@
-from typing import Any, Dict, List
+from typing import List
 
 from app.pipelines import Pipeline
 from sentence_transformers import SentenceTransformer
+
 
 class FeatureExtractionPipeline(Pipeline):
     def __init__(

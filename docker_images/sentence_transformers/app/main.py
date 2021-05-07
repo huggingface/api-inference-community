@@ -7,6 +7,7 @@ from app.pipelines import FeatureExtractionPipeline, Pipeline
 from starlette.applications import Starlette
 from starlette.routing import Route
 
+
 logger = logging.getLogger(__name__)
 
 # Add the allowed tasks
