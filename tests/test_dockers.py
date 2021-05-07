@@ -72,6 +72,13 @@ class DockerImageTests(unittest.TestCase):
         #     "julien-c/mini_an4_asr_train_raw_bpe_valid",
         # ),
 
+    def test_sentence_transformers(self):
+        self.framework_docker_test(
+            "sentence_transformers",
+            "feature-extraction",
+            "bert-base-uncased",
+        )
+
     def test_flair(self):
         self.framework_docker_test(
             "flair", "token-classification", "flair/chunk-english-fast"
