@@ -13,7 +13,7 @@ class FeatureExtractionPipeline(Pipeline):
     def __call__(self, inputs: str) -> List[float]:
         """
         Args:
-            inputs (:obj:`List[str]`):
+            inputs (:obj:`str`):
                 a string to get the features of.
         Return:
             A :obj:`list` of floats: The features computed by the model.
