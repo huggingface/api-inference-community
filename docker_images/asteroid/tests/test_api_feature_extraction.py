@@ -8,16 +8,16 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "question-answering" not in ALLOWED_TASKS,
-    "question-answering not implemented",
+    "feature-extraction" not in ALLOWED_TASKS,
+    "feature-extraction not implemented",
 )
-class QuestionAnsweringTestCase(TestCase):
+class FeatureExtractionTestCase(TestCase):
     def setUp(self):
-        model_id = TESTABLE_MODELS["question-answering"]
+        model_id = TESTABLE_MODELS["feature-extraction"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = model_id
-        os.environ["TASK"] = "question-answering"
+        os.environ["TASK"] = "feature-extraction"
         from app.main import app
 
         self.app = app
@@ -33,7 +33,7 @@ class QuestionAnsweringTestCase(TestCase):
             del os.environ["TASK"]
 
     def test_simple(self):
-        inputs = {"question": "Where do I live ?", "context": "I live in New-York"}
+        inputs = "Hello, my name is John and I live in New York"
 
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": inputs})
@@ -42,8 +42,9 @@ class QuestionAnsweringTestCase(TestCase):
             response.status_code,
             200,
         )
+
         content = json.loads(response.content)
-        self.assertEqual(set(content.keys()), {"answer", "start", "end", "score"})
+        self.assertEqual(type(content), list)
 
         with TestClient(self.app) as client:
             response = client.post("/", json=inputs)
@@ -53,15 +54,17 @@ class QuestionAnsweringTestCase(TestCase):
             200,
         )
         content = json.loads(response.content)
-        self.assertEqual(set(content.keys()), {"answer", "start", "end", "score"})
+        self.assertEqual(type(content), list)
 
-    def test_malformed_question(self):
+    def test_malformed_sentence(self):
         with TestClient(self.app) as client:
-            response = client.post("/", data=b"Where do I live ?")
+            response = client.post("/", data=b"\xc3\x28")
 
         self.assertEqual(
             response.status_code,
             400,
         )
-        content = json.loads(response.content)
-        self.assertEqual(set(content.keys()), {"error"})
+        self.assertEqual(
+            response.content,
+            b'{"error":"\'utf-8\' codec can\'t decode byte 0xc3 in position 0: invalid continuation byte"}',
+        )

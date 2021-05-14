@@ -1,8 +1,8 @@
 import os
 from unittest import TestCase, skipIf
 
+from api_inference_community.validation import ffmpeg_read
 from app.main import ALLOWED_TASKS
-from app.validation import ffmpeg_read
 from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
 
@@ -77,11 +77,9 @@ class AudioSourceSeparationTestCase(TestCase):
             response.status_code,
             200,
         )
-        self.assertEqual(response.headers["content-type"], "audio/flac")
+        self.assertEqual(response.header["content-type"], "audio/wav")
         audio = ffmpeg_read(response.content)
-
-        self.assertEqual(len(audio.shape), 1)
-        self.assertGreater(audio.shape[0], 1000)
+        self.assertEqual(audio.shape, (10,))
 
     def test_webm_audiofile(self):
         bpayload = self.read("sample1.webm")
@@ -93,8 +91,6 @@ class AudioSourceSeparationTestCase(TestCase):
             response.status_code,
             200,
         )
-        self.assertEqual(response.headers["content-type"], "audio/flac")
+        self.assertEqual(response.header["content-type"], "audio/wav")
         audio = ffmpeg_read(response.content)
-
-        self.assertEqual(len(audio.shape), 1)
-        self.assertGreater(audio.shape[0], 1000)
+        self.assertEqual(audio.shape, (10,))

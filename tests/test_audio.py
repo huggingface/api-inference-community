@@ -2,7 +2,7 @@ import os
 from unittest import TestCase
 
 import numpy as np
-from api_inference_community.validation import normalize_payload_audio
+from api_inference_community.validation import ffmpeg_convert, normalize_payload_audio
 
 
 class ValidationTestCase(TestCase):
@@ -15,7 +15,6 @@ class ValidationTestCase(TestCase):
 
     def test_original_audiofile(self):
         bpayload = self.read("sample1.flac")
-
         payload, params = normalize_payload_audio(bpayload, 16000)
         self.assertEqual(params, {})
         self.assertEqual(type(payload), np.ndarray)
@@ -42,3 +41,27 @@ class ValidationTestCase(TestCase):
     def test_original_webm(self):
         bpayload = self.read("sample1.webm")
         payload, params = normalize_payload_audio(bpayload, 16000)
+
+    def test_ffmpeg_convert(self):
+        bpayload = self.read("sample1.flac")
+        sampling_rate = 16000
+        self.assertEqual(len(bpayload), 282378)
+        waveform, params = normalize_payload_audio(bpayload, sampling_rate)
+        self.assertEqual(waveform.shape, (219040,))
+
+        out = ffmpeg_convert(waveform, sampling_rate)
+        self.assertEqual(len(out), 280204)
+        waveform2, params = normalize_payload_audio(out, sampling_rate)
+        self.assertEqual(waveform2.shape, (219040,))
+
+    def test_ffmpeg_convert_8k_sampling(self):
+        bpayload = self.read("sample1.flac")
+        sampling_rate = 8000
+        self.assertEqual(len(bpayload), 282378)
+        waveform, params = normalize_payload_audio(bpayload, sampling_rate)
+        self.assertEqual(waveform.shape, (109520,))
+
+        out = ffmpeg_convert(waveform, sampling_rate)
+        self.assertEqual(len(out), 258996)
+        waveform2, params = normalize_payload_audio(out, sampling_rate)
+        self.assertEqual(waveform2.shape, (109520,))

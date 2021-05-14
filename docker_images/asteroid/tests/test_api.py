@@ -9,13 +9,16 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    "audio-source-separation": "mhu-coder/ConvTasNet_Libri1Mix_enhsingle"
+    #  IMPLEMENT_THIS
+    # "automatic-speech-recognition": "mysample-ASR",
+    # "text-generation": "mysample-gpt2",
 }
 
 
 ALL_TASKS = {
     "automatic-speech-recognition",
     "audio-source-separation",
+    "feature-extraction",
     "image-classification",
     "question-answering",
     "text-generation",
