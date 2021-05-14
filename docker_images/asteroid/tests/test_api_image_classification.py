@@ -23,8 +23,14 @@ class ImageClassificationTestCase(TestCase):
         self.app = app
 
     def tearDown(self):
-        os.environ["MODEL_ID"] = self.old_model_id
-        os.environ["TASK"] = self.old_task
+        if self.old_model_id is not None:
+            os.environ["MODEL_ID"] = self.old_model_id
+        else:
+            del os.environ["MODEL_ID"]
+        if self.old_task is not None:
+            os.environ["TASK"] = self.old_task
+        else:
+            del os.environ["TASK"]
 
     def read(self, filename: str) -> bytes:
         dirname = os.path.dirname(os.path.abspath(__file__))
@@ -45,7 +51,7 @@ class ImageClassificationTestCase(TestCase):
         )
         content = json.loads(response.content)
         self.assertEqual(type(content), list)
-        self.assertEqual(set(type(el) for el in content), dict)
+        self.assertEqual(set(type(el) for el in content), {dict})
         self.assertEqual(
             set(k for el in content for k in el.keys()), {"label", "score"}
         )
@@ -62,7 +68,7 @@ class ImageClassificationTestCase(TestCase):
         )
         content = json.loads(response.content)
         self.assertEqual(type(content), list)
-        self.assertEqual(set(type(el) for el in content), dict)
+        self.assertEqual(set(type(el) for el in content), {dict})
         self.assertEqual(
             set(k for el in content for k in el.keys()), {"label", "score"}
         )
