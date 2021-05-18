@@ -42,12 +42,9 @@ class SentenceSimilarityTestCase(TestCase):
         ]
         inputs = {"source_sentence": source_sentence, "sentences": sentences}
 
-        print("sending request")
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": inputs})
 
-        print(response)
-        print(response.json())
         self.assertEqual(
             response.status_code,
             200,
