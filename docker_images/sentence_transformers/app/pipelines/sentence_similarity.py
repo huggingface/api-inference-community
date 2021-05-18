@@ -1,7 +1,8 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from app.pipelines import Pipeline
 from sentence_transformers import SentenceTransformer, util
+
 
 class SentenceSimilarityPipeline(Pipeline):
     def __init__(
@@ -21,8 +22,9 @@ class SentenceSimilarityPipeline(Pipeline):
         Return:
             A :obj:`list` of floats: Cosine similarity between `source_sentence` and each sentence from `sentences`.
         """
-        embeddings1 = self.model.encode(inputs["source_sentence"], convert_to_tensor=True)
+        embeddings1 = self.model.encode(
+            inputs["source_sentence"], convert_to_tensor=True
+        )
         embeddings2 = self.model.encode(inputs["sentences"], convert_to_tensor=True)
         similarities = util.pytorch_cos_sim(embeddings1, embeddings2).tolist()[0]
         return similarities
-

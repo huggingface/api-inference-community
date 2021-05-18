@@ -34,7 +34,12 @@ class SentenceSimilarityTestCase(TestCase):
 
     def test_simple(self):
         source_sentence = "I am a very happy man"
-        sentences = ["What is this?", "I am a super happy man", "I am a sad man", "I am a happy dog"]
+        sentences = [
+            "What is this?",
+            "I am a super happy man",
+            "I am a sad man",
+            "I am a happy dog",
+        ]
         inputs = {"source_sentence": source_sentence, "sentences": sentences}
 
         print("sending request")

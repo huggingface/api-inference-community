@@ -63,9 +63,11 @@ class Question(BaseModel):
     question: str
     context: str
 
+
 class SentenceSimilarityCheck(BaseModel):
     source_sentence: str
     sentences: List[str]
+
 
 PARAMS_MAPPING = {
     "conversational": TextGenerationCheck,
@@ -76,8 +78,9 @@ PARAMS_MAPPING = {
 
 INPUTS_MAPPING = {
     "question-answering": Question,
-    "sentence-similarity": SentenceSimilarityCheck
+    "sentence-similarity": SentenceSimilarityCheck,
 }
+
 
 def check_params(params, tag):
     if tag in PARAMS_MAPPING:
