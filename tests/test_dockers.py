@@ -84,6 +84,12 @@ class DockerImageTests(unittest.TestCase):
             "bert-base-uncased",
         )
 
+        self.framework_docker_test(
+            "sentence_transformers",
+            "sentence-similarity",
+            "paraphrase-distilroberta-base-v1",
+        )
+
     def test_flair(self):
         self.framework_docker_test(
             "flair", "token-classification", "flair/chunk-english-fast"

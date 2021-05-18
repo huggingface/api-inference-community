@@ -1,7 +1,7 @@
 import json
 import subprocess
 from io import BytesIO
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from pydantic import BaseModel, ConstrainedFloat, ConstrainedInt, ConstrainedList
@@ -63,6 +63,9 @@ class Question(BaseModel):
     question: str
     context: str
 
+class SentenceSimilarityCheck(BaseModel):
+    source_sentence: str
+    sentences: List[str]
 
 PARAMS_MAPPING = {
     "conversational": TextGenerationCheck,
@@ -70,8 +73,11 @@ PARAMS_MAPPING = {
     "fill-mask": FillMaskCheck,
     "zero-shot-classification": ZeroShotCheck,
 }
-INPUTS_MAPPING = {"question-answering": Question}
 
+INPUTS_MAPPING = {
+    "question-answering": Question,
+    "sentence-similarity": SentenceSimilarityCheck
+}
 
 def check_params(params, tag):
     if tag in PARAMS_MAPPING:

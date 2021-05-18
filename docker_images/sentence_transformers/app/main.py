@@ -3,7 +3,7 @@ import os
 from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
-from app.pipelines import FeatureExtractionPipeline, Pipeline
+from app.pipelines import FeatureExtractionPipeline, SentenceSimilarityPipeline, Pipeline
 from starlette.applications import Starlette
 from starlette.routing import Route
 
@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 # You can check the requirements and expectations of each pipelines in their respective
 # directories. Implement directly within the directories.
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
-    "feature-extraction": FeatureExtractionPipeline
+    "feature-extraction": FeatureExtractionPipeline,
+    "sentence-similarity": SentenceSimilarityPipeline,
 }
 
 

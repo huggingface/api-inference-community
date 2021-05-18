@@ -10,6 +10,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
     "feature-extraction": "bert-base-uncased",
+    "sentence-similarity": "paraphrase-distilroberta-base-v1"
 }
 
 
@@ -19,6 +20,7 @@ ALL_TASKS = {
     "feature-extraction",
     "image-classification",
     "question-answering",
+    'sentence-similarity'
     "text-generation",
     "text-to-speech",
 }
