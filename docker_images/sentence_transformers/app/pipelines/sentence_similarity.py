@@ -27,5 +27,4 @@ class SentenceSimilarityPipeline(Pipeline):
         )
         embeddings2 = self.model.encode(inputs["sentences"], convert_to_tensor=True)
         similarities = util.pytorch_cos_sim(embeddings1, embeddings2).tolist()[0]
-        print(similarities)
         return similarities

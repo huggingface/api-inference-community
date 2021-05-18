@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List, Union
 
 from app.pipelines import Pipeline
 
@@ -16,13 +16,14 @@ class SentenceSimilarityPipeline(Pipeline):
             "Please implement SentenceSimilarityPipeline __init__ function"
         )
 
-    def __call__(self, source_sentence: str, sentences: List[str]) -> List[float]:
+    def __call__(self, inputs: Dict[str, Union[str, List[str]]]) -> List[float]:
         """
         Args:
-            source_sentence (:obj:`str`):
-                a string that will be compared to every sentence in `sentences`.
-            sentences (:obj:`List[str]`):
-                a list of sentences to be compared against source_sentence.
+            inputs (:obj:`dict`):
+                a dictionary containing two keys, 'source_sentence' mapping
+                to the sentence that will be compared against all the others,
+                and 'sentences', mapping to a list of strings to which the
+                source will be compared.
         Return:
             A :obj:`list` of floats: Some similarity measure between `source_sentence` and each sentence from `sentences`.
         """
