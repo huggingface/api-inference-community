@@ -4,7 +4,7 @@ their own docker so that the widgets on the hub can work as the `transformers` o
 
 The hardware to run the API will be provided by Hugging Face for now.
 
-The `common` folder is intended to be a starter point for all new libs that 
+The `docker_images/common` folder is intended to be a starter point for all new libs that 
 want to be integrated.
 
 ### Adding a new container from a new lib.
@@ -21,6 +21,30 @@ want to be integrated.
 5. Pass the test suite `pytest -sv --rootdir docker_images/example/ docker_images/example/`
 6. Enjoy !
 
+### Developping while updating `api-inference-community`.
+
+If you ever come across a bug within `api-inference-community` or want to update it
+the developpement process is slightly more involved.
+
+- First, make sure you need to change this package, each framework is very autonomous
+ so if your code can get away by being standalone go that way first as it's much simpler.
+- If you can make the change only in `api-inference-community` without depending on it
+that's also a great option. Make sure to add the proper tests to your PR.
+- Finally, the best way to go is to develop locally using `manage.py` command:
+- Do the necessary modifications within `api-inference-community` first.
+- Install it locally in your environment with `pip install -e .`
+- Install your package dependencies locally.
+- Run your webserver locally: `./manage.py start --framework example --task audio-source-separation --model-id MY_MODEL`
+- When everything is working, you will need to split your PR in two, 1 for the `api-inference-community` part.
+  The second one will be for your package specific modifications and will only land once the `api-inference-community`
+  tag has landed.
+- This workflow is still work in progress, don't hesitate to ask questions to maintainers.
+
+Another similar command `./manage.py docker --framework example --task audio-source-separation --model-id MY_MODEL`
+Will launch the server, but this time in a protected, controlled docker environment making sure the behavior
+will be exactly the one in the API.
+
+
 
 ### Available tasks
 
@@ -31,5 +55,5 @@ want to be integrated.
 - **Audio source separation**: Input is some audio, and the output is n audio files that sum up to the original audio but contain individual soures of sound (either speakers or instruments for instant).
 - **Token classification**: Input is some text, and the output is a list of entities mentionned in the text. Entities can be anything remarquable like locations, organisations, persons, times etc...
 - **Text to speech**: Input is some text, and the output is an audio file saying the text...
-
+- **Sentence Similarity**: Input is some sentence and a list of reference sentences, and the list of similarity scores.
 
