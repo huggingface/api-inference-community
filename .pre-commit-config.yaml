@@ -56,3 +56,9 @@ repos:
         files: ^docker_images/flair/
         entry: mypy docker_images/flair/
         pass_filenames: false
+      - id: mypy
+        args: [--ignore-missing-imports]
+        additional_dependencies: [tokenize-rt==3.2.0]
+        files: ^docker_images/sentence_transformers/
+        entry: mypy docker_images/sentence_transformers/
+        pass_filenames: false
