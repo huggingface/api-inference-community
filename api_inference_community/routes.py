@@ -92,12 +92,11 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
             data = ffmpeg_convert(waveform, sampling_rate)
             headers["content-type"] = "audio/flac"
             return Response(data, headers=headers, status_code=status_code)
-    else:
-        return JSONResponse(
-            outputs,
-            headers=headers,
-            status_code=status_code,
-        )
+    return JSONResponse(
+        outputs,
+        headers=headers,
+        status_code=status_code,
+    )
 
 
 def get_input_characters(inputs) -> int:
