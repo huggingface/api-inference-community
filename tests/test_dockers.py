@@ -84,6 +84,12 @@ class DockerImageTests(unittest.TestCase):
             "bert-base-uncased",
         )
 
+        self.framework_docker_test(
+            "sentence_transformers",
+            "sentence-similarity",
+            "paraphrase-distilroberta-base-v1",
+        )
+
     def test_flair(self):
         self.framework_docker_test(
             "flair", "token-classification", "flair/chunk-english-fast"
@@ -145,6 +151,19 @@ class DockerImageTests(unittest.TestCase):
                 url,
                 json={
                     "inputs": {"question": "This is a test", "context": "Some context"}
+                },
+                timeout=timeout,
+            )
+            self.assertIn(response.status_code, {200, 400})
+            counter[response.status_code] += 1
+
+            response = httpx.post(
+                url,
+                json={
+                    "inputs": {
+                        "source_sentence": "This is a test",
+                        "sentences": ["Some context", "Something else"],
+                    }
                 },
                 timeout=timeout,
             )

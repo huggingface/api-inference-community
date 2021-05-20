@@ -21,6 +21,7 @@ ALL_TASKS = {
     "feature-extraction",
     "image-classification",
     "question-answering",
+    "sentence-similarity",
     "text-generation",
     "text-to-speech",
 }
