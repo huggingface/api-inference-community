@@ -75,7 +75,6 @@ PARAMS_MAPPING = {
     "fill-mask": FillMaskCheck,
     "zero-shot-classification": ZeroShotCheck,
 }
-
 INPUTS_MAPPING = {
     "question-answering": Question,
     "sentence-similarity": SentenceSimilarityCheck,
