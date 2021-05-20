@@ -6,7 +6,7 @@ from app.pipelines import (  # AutomaticSpeechRecognitionPipeline,
     Pipeline,
     TextToSpeechPipeline,
 )
-from app.routes import pipeline_route, status_ok
+from api_inference_community.routes import pipeline_route, status_ok
 from starlette.applications import Starlette
 from starlette.routing import Route
 
