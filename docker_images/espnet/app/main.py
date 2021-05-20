@@ -6,6 +6,7 @@ from api_inference_community.routes import pipeline_route, status_ok
 from app.pipelines import (  # AutomaticSpeechRecognitionPipeline,
     Pipeline,
     TextToSpeechPipeline,
+    AutomaticSpeechRecognitionPipeline,
 )
 from starlette.applications import Starlette
 from starlette.routing import Route
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "text-to-speech": TextToSpeechPipeline,
     # Disabling this it's waaayy too slow.
-    # "automatic-speech-recognition": AutomaticSpeechRecognitionPipeline,
+    "automatic-speech-recognition": AutomaticSpeechRecognitionPipeline,
 }
 
 
