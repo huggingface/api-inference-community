@@ -65,7 +65,19 @@ class SentenceSimilarityTestCase(TestCase):
         self.assertEqual(type(content), list)
         self.assertEqual({type(item) for item in content}, {float})
 
-    def test_malformed_sentence(self):
+    def test_missing_input_sentences(self):
+        source_sentence = "I am a very happy man"
+        inputs = {"source_sentence": source_sentence}
+
+        with TestClient(self.app) as client:
+            response = client.post("/", json={"inputs": inputs})
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+    def test_malformed_input(self):
         with TestClient(self.app) as client:
             response = client.post("/", data=b"\xc3\x28")
 
