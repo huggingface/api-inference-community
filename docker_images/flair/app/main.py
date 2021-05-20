@@ -2,8 +2,8 @@ import logging
 import os
 from typing import Dict, Type
 
+from api_inference_community.routes import pipeline_route, status_ok
 from app.pipelines import Pipeline, TokenClassificationPipeline
-from app.routes import pipeline_route, status_ok
 from starlette.applications import Starlette
 from starlette.routing import Route
 
