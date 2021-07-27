@@ -25,7 +25,6 @@ jobs:
         workdir: api-inference-community
         run: |
           pip install --upgrade pip
-          pip install pytest pillow httpx huggingface_hub
-          pip install -e .
+          pip install -e .[test]
       - run: make test
         workdir: api-inference-community
