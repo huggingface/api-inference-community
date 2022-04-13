@@ -6,7 +6,9 @@ RUN apt-get update -y && \
     apt-get install libsndfile1 ffmpeg -y
 
 COPY ./requirements.txt /app
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install torch==1.11 && \
+    pip install Cython numpy==1.21.6
+RUN pip install -r requirements.txt
 COPY ./prestart.sh /app/
 
 

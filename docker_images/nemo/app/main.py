@@ -5,7 +5,9 @@ from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
 from app.pipelines import Pipeline
-from app.pipelines.automatic_speech_recognition import AutomaticSpeechRecognitionPipeline
+from app.pipelines.automatic_speech_recognition import (
+    AutomaticSpeechRecognitionPipeline,
+)
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.gzip import GZipMiddleware
