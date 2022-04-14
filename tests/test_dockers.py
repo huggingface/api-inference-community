@@ -273,6 +273,11 @@ class DockerImageTests(unittest.TestCase):
             dataset_column="file",
         )
 
+    def test_nemo(self):
+        self.framework_docker_test(
+            "nemo", "automatic-speech-recognition", "nvidia/stt_en_conformer_ctc_medium"
+        )
+
     def test_generic(self):
         self.framework_docker_test(
             "generic",
