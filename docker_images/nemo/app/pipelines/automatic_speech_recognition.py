@@ -1,18 +1,15 @@
+import os
+import tempfile
+import uuid
 from typing import Dict
 
-import os
 import librosa
+import nemo.collections.asr as nemo_asr
 import numpy as np
-import uuid
-import tempfile
 import soundfile
-
 from app.pipelines import Pipeline
 from huggingface_hub import hf_hub_download
 from huggingface_hub.hf_api import HfFolder
-
-
-import nemo.collections.asr as nemo_asr
 
 
 class AutomaticSpeechRecognitionPipeline(Pipeline):

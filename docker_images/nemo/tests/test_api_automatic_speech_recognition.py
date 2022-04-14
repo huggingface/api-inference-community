@@ -52,7 +52,8 @@ class AutomaticSpeecRecognitionTestCase(TestCase):
             response = client.post("/", data=bpayload)
 
         self.assertEqual(
-            response.status_code, 200,
+            response.status_code,
+            200,
         )
         content = json.loads(response.content)
         self.assertEqual(set(content.keys()), {"text"})
@@ -64,7 +65,8 @@ class AutomaticSpeecRecognitionTestCase(TestCase):
             response = client.post("/", data=bpayload)
 
         self.assertEqual(
-            response.status_code, 400,
+            response.status_code,
+            400,
         )
         self.assertEqual(response.content, b'{"error":"Malformed soundfile"}')
 
@@ -75,7 +77,8 @@ class AutomaticSpeecRecognitionTestCase(TestCase):
             response = client.post("/", data=bpayload)
 
         self.assertEqual(
-            response.status_code, 200,
+            response.status_code,
+            200,
         )
         content = json.loads(response.content)
         self.assertEqual(set(content.keys()), {"text"})
@@ -87,7 +90,8 @@ class AutomaticSpeecRecognitionTestCase(TestCase):
             response = client.post("/", data=bpayload)
 
         self.assertEqual(
-            response.status_code, 200,
+            response.status_code,
+            200,
         )
         content = json.loads(response.content)
         self.assertEqual(set(content.keys()), {"text"})
