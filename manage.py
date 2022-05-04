@@ -31,13 +31,14 @@ class DockerPopen(subprocess.Popen):
         return super().__exit__(exc_type, exc_val, traceback)
 
 
-def create_docker(name: str) -> str:
+def create_docker(name: str, is_gpu: bool) -> str:
     rand = str(uuid.uuid4())[:5]
     tag = f"{name}:{rand}"
     with cd(
         os.path.join(os.path.dirname(os.path.dirname(__file__)), "docker_images", name)
     ):
-        subprocess.run(["docker", "build", ".", "-t", tag])
+        gpu = ["-f", "GpuDockerfile"] if is_gpu else []
+        subprocess.run(["docker", "build", ".", "-t", tag, *gpu])
     return tag
 
 
@@ -156,22 +157,28 @@ def start(args):
     sys.path.append(local_path)
     os.environ["MODEL_ID"] = model_id
     os.environ["TASK"] = task
+    if args.gpu:
+        os.environ["COMPUTE_TYPE"] = "gpu"
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")
 
 
 def docker(args):
     model_id, task, framework = resolve_task_framework(args)
 
-    tag = create_docker(framework)
+    tag = create_docker(framework, is_gpu=args.gpu)
+    gpu = ["--gpus", "all"] if args.gpu else []
     run_docker_command = [
         "docker",
         "run",
+        *gpu,
         "-p",
         "8000:80",
         "-e",
         f"TASK={task}",
         "-e",
         f"MODEL_ID={model_id}",
+        "-e",
+        f"COMPUTE_TYPE={'gpu' if args.gpu else 'cpu'}",
         "-v",
         "/tmp:/data",
         "-t",
@@ -207,6 +214,11 @@ def main():
         type=str,
         help="Which framework to load",
     )
+    parser_start.add_argument(
+        "--gpu",
+        action="store_true",
+        help="Using gpu ?",
+    )
     parser_start.set_defaults(func=start)
     parser_docker = subparsers.add_parser(
         "docker", help="Start a docker version of a model inference"
@@ -226,6 +238,11 @@ def main():
         "--framework",
         type=str,
         help="Which framework to load",
+    )
+    parser_docker.add_argument(
+        "--gpu",
+        action="store_true",
+        help="Using gpu ?",
     )
     parser_docker.set_defaults(func=docker)
     parser_show = subparsers.add_parser(
