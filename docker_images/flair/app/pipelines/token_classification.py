@@ -28,7 +28,7 @@ class TokenClassificationPipeline(Pipeline):
         sentence: Sentence = Sentence(inputs)
 
         # Also show scores for recognized NEs
-        self.tagger.predict(sentence, all_tag_prob=True, label_name="predicted")
+        self.tagger.predict(sentence, label_name="predicted")
 
         entities = []
         for span in sentence.get_spans("predicted"):
@@ -36,9 +36,9 @@ class TokenClassificationPipeline(Pipeline):
                 continue
             current_entity = {
                 "entity_group": span.tag,
-                "word": span.to_original_text(),
-                "start": span.tokens[0].start_pos,
-                "end": span.tokens[-1].end_pos,
+                "word": span.text,
+                "start": span.tokens[0].start_position,
+                "end": span.tokens[-1].end_position,
                 "score": span.score,
             }
 
