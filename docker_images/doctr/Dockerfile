@@ -4,6 +4,8 @@ LABEL maintainer="me <me@example.com>"
 # Add any system dependency here
 RUN apt-get update -y && apt-get install libgl1-mesa-glx -y
 
+RUN pip install --no-cache-dir -U pip
+RUN pip install --no-cache-dir torch==1.11
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/
