@@ -5,6 +5,7 @@ LABEL maintainer="me <me@example.com>"
 # RUN apt-get update -y && apt-get install libXXX -y
 RUN apt-get update -y && apt-get install ffmpeg -y
 
+RUN pip install --no-cache-dir torch==1.11
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/

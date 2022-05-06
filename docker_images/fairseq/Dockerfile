@@ -5,11 +5,11 @@ LABEL maintainer="me <me@example.com>"
 # RUN apt-get update -y && apt-get install libXXX -y
 RUN apt-get update -y && apt-get install ffmpeg espeak-ng -y
 
+RUN pip install --no-cache-dir numpy==1.22 torch==1.11
 COPY ./requirements.txt /app
 RUN pip install -U pip
 # This will make further requirements.txt changes faster
 # Numpy is REQUIRED because pkusage requires numpy to be already installed
-RUN pip install --no-cache-dir numpy==1.22 torch==1.10.1
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/
 

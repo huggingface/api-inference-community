@@ -1,4 +1,5 @@
 starlette==0.14.2
-api-inference-community==0.0.19
--e git+https://github.com/speechbrain/speechbrain@develop#egg=speechbrain
-transformers==4.11.0
+api-inference-community==0.0.23
+huggingface_hub==0.5.1
+speechbrain==0.5.11
+transformers==4.18.0
