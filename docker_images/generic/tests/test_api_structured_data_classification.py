@@ -12,10 +12,7 @@ from tests.test_api import TESTABLE_MODELS
     "tabular-classification not implemented",
 )
 @parameterized_class(
-    [
-        {"model_id": model_id}
-        for model_id in TESTABLE_MODELS["tabular-classification"]
-    ]
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["tabular-classification"]]
 )
 class TabularClassificationTestCase(TestCase):
     def setUp(self):

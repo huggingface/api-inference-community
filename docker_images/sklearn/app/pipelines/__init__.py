@@ -8,8 +8,6 @@ from app.pipelines.feature_extraction import FeatureExtractionPipeline
 from app.pipelines.image_classification import ImageClassificationPipeline
 from app.pipelines.question_answering import QuestionAnsweringPipeline
 from app.pipelines.sentence_similarity import SentenceSimilarityPipeline
-from app.pipelines.tabular_classification import (
-    TabularClassificationPipeline,
-)
+from app.pipelines.tabular_classification import TabularClassificationPipeline
 from app.pipelines.text_to_speech import TextToSpeechPipeline
 from app.pipelines.token_classification import TokenClassificationPipeline
