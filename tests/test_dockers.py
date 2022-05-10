@@ -149,7 +149,7 @@ class DockerImageTests(unittest.TestCase):
     def test_sklearn(self):
         self.framework_docker_test(
             "sklearn",
-            "structured-data-classification",
+            "tabular-classification",
             "julien-c/wine-quality",
         )
 
@@ -426,7 +426,6 @@ class DockerImageTests(unittest.TestCase):
             )
             self.assertIn(response.status_code, {200, 400})
             counter[response.status_code] += 1
-
             response = httpx.post(
                 url,
                 json={

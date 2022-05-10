@@ -10,7 +10,7 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
     # This is very slow the first time as fasttext model is large.
     "feature-extraction": ["osanseviero/fasttext_english"],
     "image-classification": ["osanseviero/fastai_cat_vs_dog"],
-    "structured-data-classification": ["osanseviero/wine-quality"],
+    "tabular-classification": ["osanseviero/wine-quality"],
     "text-classification": ["osanseviero/fasttext_nearest"],
     "text-to-image": ["osanseviero/BigGAN-deep-128"],
     "token-classification": ["osanseviero/en_core_web_sm"],

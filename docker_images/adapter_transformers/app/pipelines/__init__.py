@@ -9,8 +9,8 @@ from app.pipelines.image_classification import ImageClassificationPipeline
 from app.pipelines.question_answering import QuestionAnsweringPipeline
 from app.pipelines.sentence_similarity import SentenceSimilarityPipeline
 from app.pipelines.speech_segmentation import SpeechSegmentationPipeline
-from app.pipelines.structured_data_classification import (
-    StructuredDataClassificationPipeline,
+from app.pipelines.tabular_classification import (
+    TabularClassificationPipeline,
 )
 from app.pipelines.text_classification import TextClassificationPipeline
 from app.pipelines.text_to_speech import TextToSpeechPipeline
