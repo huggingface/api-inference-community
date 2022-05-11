@@ -9,44 +9,12 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    # IMPLEMENT_THIS
-    "image-classification": [
-        # Binary classifier.
-        "espejelomar/identify-my-cat",
-        # Multilabel classifier.
-        "fastai/fastbook_04_mnist_basics",
-    ]
+    "image-classification": ["fastai/fastbook_04_mnist_basics"]
 }
 
 
 ALL_TASKS = {
-    "audio-classification",
-    "audio-to-audio",
-    "automatic-speech-recognition",
-    "feature-extraction",
     "image-classification",
-    "question-answering",
-    "sentence-similarity",
-    "speech-segmentation",
-    "structured-data-classification",
-    "text-classification",
-    "text-to-image",
-    "text-to-speech",
-    "token-classification",
-    "conversational",
-    "feature-extraction",
-    "question-answering",
-    "sentence-similarity",
-    "fill-mask",
-    "table-question-answering",
-    "structured-data-classification",
-    "summarization",
-    "text2text-generation",
-    "text-classification",
-    "text-to-image",
-    "text-to-speech",
-    "token-classification",
-    "zero-shot-classification",
 }
 
 

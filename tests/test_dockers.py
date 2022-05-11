@@ -243,12 +243,9 @@ class DockerImageTests(unittest.TestCase):
     def test_fastai(self):
         # Single Output Unit, RGB
         self.framework_docker_test(
-            "fastai", "image-classification", "espejelomar/identify-my-cat"
-        )
-        # Multiple Output Units, Grayscale
-        self.framework_docker_test(
             "fastai", "image-classification", "fastai/fastbook_04_mnist_basics"
         )
+        self.framework_invalid_test("fastai")
 
     def test_doctr(self):
         self.framework_docker_test(
