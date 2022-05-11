@@ -239,7 +239,7 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "keras", "image-classification", "nateraw/keras-mnist-convnet"
         )
-    
+
     def test_fastai(self):
         # Single Output Unit, RGB
         self.framework_docker_test(
