@@ -16,14 +16,17 @@ want to be integrated.
     - `docker_images/example/app/main.py`
     - `docker_images/example/app/pipelines/{task_name}.py` 
     to implement the desired functionnality. All required code is marked with `IMPLEMENT_THIS` markup.
-3. Feel free to customize anything required by your lib everywhere you want. The only real requirements, are to honor the HTTP endpoints, in the same fashion as the `common` folder for all your supported tasks.
-4. Edit `example/tests/test_api.py` to add TESTABLE_MODELS.
-5. Pass the test suite `pytest -sv --rootdir docker_images/example/ docker_images/example/`
-6. Submit your PR and enjoy !
+3. Remove:
+    - Any pipeline files in `docker_images/example/app/pipelines/` that are not used.
+    - Any imports of the pipelines you deleted from `docker_images/example/app/pipelines/__init__.py`
+4. Feel free to customize anything required by your lib everywhere you want. The only real requirements, are to honor the HTTP endpoints, in the same fashion as the `common` folder for all your supported tasks.
+5. Edit `example/tests/test_api.py` to add TESTABLE_MODELS.
+6. Pass the test suite `pytest -sv --rootdir docker_images/example/ docker_images/example/`
+7. Submit your PR and enjoy !
 
 ### Going the full way
 
-Doing the first 6 steps is good enough to get started, however in the process 
+Doing the first 7 steps is good enough to get started, however in the process 
 you can anticipate some problems corrections early on. Maintainers will help you
 along the way if you don't feel confident to follow those steps yourself
 
