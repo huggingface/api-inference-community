@@ -132,7 +132,7 @@ def resolve(model_id: str) -> [str, str]:
 
 
 def resolve_task_framework(args):
-    model_id = args.model_id
+    model_id = args.model
     task = args.task
     framework = args.framework
     if task is None or framework is None:
@@ -199,9 +199,8 @@ def main():
         "start", help="Start a local version of a model inference"
     )
     parser_start.add_argument(
-        "--model-id",
+        "model",
         type=str,
-        required=True,
         help="Which model_id to start.",
     )
     parser_start.add_argument(
@@ -224,9 +223,8 @@ def main():
         "docker", help="Start a docker version of a model inference"
     )
     parser_docker.add_argument(
-        "--model-id",
+        "model",
         type=str,
-        required=True,
         help="Which model_id to docker.",
     )
     parser_docker.add_argument(
