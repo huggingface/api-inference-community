@@ -5,7 +5,7 @@ import os
 import time
 from typing import Any, Dict
 
-from api_inference_community.validation import ffmpeg_convert, normalize_payload
+from api_inference_community.validation import ffmpeg_convert, normalize_payload, AUDIO_INPUTS, IMAGE_INPUTS
 from pydantic import ValidationError
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -13,7 +13,6 @@ from starlette.responses import JSONResponse, Response
 
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 HF_HEADER_COMPUTE_TYPE = "x-compute-type"
-HF_HEADER_COMPUTE_CHARACTERS = "x-compute-characters"
 COMPUTE_TYPE = os.getenv("COMPUTE_TYPE", "cpu")
 
 logger = logging.getLogger(__name__)
@@ -66,12 +65,12 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
             pass
 
     status_code = 200
-    n_characters = 0
     if os.getenv("DEBUG", "0") in {"1", "true"}:
         outputs = pipe(inputs)
     try:
         outputs = pipe(inputs)
-        n_characters = get_input_characters(inputs)
+        task = os.getenv("TASK")
+        metrics = get_metric(inputs, task, pipe)
     except (AssertionError, ValueError) as e:
         outputs = {"error": str(e)}
         status_code = 400
@@ -91,7 +90,7 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
         "access-control-expose-headers": f"{HF_HEADER_COMPUTE_TYPE}, {HF_HEADER_COMPUTE_TIME}",
     }
     if status_code == 200:
-        headers[HF_HEADER_COMPUTE_CHARACTERS] = f"{n_characters}"
+        headers.update(**{k: str(v) for k, v in metrics.items()})
         task = os.getenv("TASK")
         if task == "text-to-speech":
             # Special case, right now everything is flac audio we can output
@@ -132,6 +131,24 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
     )
 
 
+def get_metric(inputs, task, pipe):
+    if task in AUDIO_INPUTS:
+        return {"x-compute-audio-length": get_audio_length(inputs, pipe.sampling_rate)}
+    elif task in IMAGE_INPUTS:
+        return {"x-compute-images": 1}
+    else:
+        return {"x-compute-characters": get_input_characters(inputs)}
+
+
+def get_audio_length(inputs, sampling_rate: int) -> float:
+    if isinstance(inputs, dict):
+        # Should only apply for internal AsrLive
+        length_in_s = inputs["raw"].shape[0] / inputs["sampling_rate"]
+    else:
+        length_in_s = inputs.shape[0] / sampling_rate
+    return length_in_s
+
+
 def get_input_characters(inputs) -> int:
     if isinstance(inputs, str):
         return len(inputs)
@@ -139,7 +156,7 @@ def get_input_characters(inputs) -> int:
         return sum(get_input_characters(input_) for input_ in inputs)
     elif isinstance(inputs, dict):
         return sum(get_input_characters(input_) for input_ in inputs.values())
-    return -1
+    return 0
 
 
 async def status_ok(request):
