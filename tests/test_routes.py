@@ -58,7 +58,7 @@ class ValidationTestCase(TestCase):
             response.status_code,
             200,
         )
-        self.assertEqual(response.headers["x-compute-characters"], '4')
+        self.assertEqual(response.headers["x-compute-characters"], "4")
         self.assertEqual(response.content, b'{"some":"json serializable"}')
 
     def test_invalid_pipeline(self):
