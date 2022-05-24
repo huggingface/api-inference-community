@@ -53,11 +53,12 @@ class ValidationTestCase(TestCase):
             app.get_pipeline = get_pipeline
 
         with TestClient(app) as client:
-            response = client.post("/", data=b"")
+            response = client.post("/", data=b"Some")
         self.assertEqual(
             response.status_code,
             200,
         )
+        self.assertEqual(response.headers["x-compute-characters"], "4")
         self.assertEqual(response.content, b'{"some":"json serializable"}')
 
     def test_invalid_pipeline(self):
@@ -219,6 +220,7 @@ class ValidationTestCase(TestCase):
             200,
         )
         self.assertEqual(response.headers["content-type"], "application/json")
+        self.assertEqual(response.headers["x-compute-audio-length"], "13.69")
         data = json.loads(response.content)
         self.assertEqual(len(data), 1)
         self.assertEqual(set(data[0].keys()), {"blob", "label", "content-type"})
@@ -270,3 +272,53 @@ class ValidationTestCase(TestCase):
             200,
         )
         self.assertTrue(isinstance(image, Image.Image))
+
+    def test_image_classification_pipeline(self):
+        os.environ["TASK"] = "image-classification"
+
+        class Pipeline:
+            def __init__(self):
+                pass
+
+            def __call__(self, input_: Image.Image):
+                return [{"label_0": 1.0}]
+
+        def get_pipeline():
+            return Pipeline()
+
+        routes = [
+            Route("/{whatever:path}", status_ok),
+            Route("/{whatever:path}", pipeline_route, methods=["POST"]),
+        ]
+
+        app = Starlette(routes=routes)
+
+        @app.on_event("startup")
+        async def startup_event():
+            logger = logging.getLogger("uvicorn.access")
+            handler = logging.StreamHandler()
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            )
+            logger.handlers = [handler]
+
+            # Link between `api-inference-community` and framework code.
+            app.get_pipeline = get_pipeline
+
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(dirname, "samples", "plane.jpg")
+        with open(filename, "rb") as f:
+            data = f.read()
+        with TestClient(app) as client:
+            response = client.post("/", data=data)
+
+        resp_data = json.loads(response.content)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(
+            response.headers["x-compute-images"],
+            "1",
+        )
+        self.assertEqual(resp_data, [{"label_0": 1.0}])
