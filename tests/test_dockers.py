@@ -243,7 +243,7 @@ class DockerImageTests(unittest.TestCase):
     def test_fastai(self):
         # Single Output Unit, RGB
         self.framework_docker_test(
-            "fastai", "image-classification", "fastai/fastbook_04_mnist_basics"
+            "fastai", "image-classification", "fastai/fastbook_02_bears_classifier"
         )
         self.framework_invalid_test("fastai")
 
