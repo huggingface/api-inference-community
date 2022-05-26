@@ -28,11 +28,18 @@ class PipelineTestCase(TestCase):
             len(ALLOWED_TASKS.keys()), 0, "You need to implement at least one task"
         )
 
+    # def test_unsupported_tasks(self):
+    #     unsupported_tasks = ALL_TASKS - ALLOWED_TASKS.keys()
+    #     for unsupported_task in unsupported_tasks:
+    #         with self.subTest(msg=unsupported_task, task=unsupported_task):
+    #             os.environ["TASK"] = unsupported_task
+    #             os.environ["MODEL_ID"] = "XX"
+    #             with self.assertRaises(EnvironmentError):
+    #                 get_pipeline()
+
     def test_unsupported_tasks(self):
         unsupported_tasks = ALL_TASKS - ALLOWED_TASKS.keys()
         for unsupported_task in unsupported_tasks:
             with self.subTest(msg=unsupported_task, task=unsupported_task):
-                os.environ["TASK"] = unsupported_task
-                os.environ["MODEL_ID"] = "XX"
                 with self.assertRaises(EnvironmentError):
-                    get_pipeline()
+                    get_pipeline(unsupported_task, model_id="XX")
