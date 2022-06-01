@@ -152,7 +152,7 @@ class TableQuestionAnsweringValidationTestCase(TestCase):
             normalize_payload_nlp(bpayload, "table-question-answering")
 
 
-class StructuredDataClassificationValidationTestCase(TestCase):
+class TabularDataValidationTestCase(TestCase):
     def test_valid_input(self):
         data = {
             "Repository": ["Transformers", "Datasets", "Tokenizers"],
@@ -162,7 +162,7 @@ class StructuredDataClassificationValidationTestCase(TestCase):
         inputs = {"data": data}
         bpayload = json.dumps({"inputs": inputs}).encode("utf-8")
         normalized_inputs, processed_params = normalize_payload_nlp(
-            bpayload, "structured-data-classification"
+            bpayload, "tabular-classification"
         )
         self.assertEqual(processed_params, {})
         self.assertEqual(inputs, normalized_inputs)
@@ -176,13 +176,13 @@ class StructuredDataClassificationValidationTestCase(TestCase):
         inputs = {"data": data}
         bpayload = json.dumps({"inputs": inputs}).encode("utf-8")
         with self.assertRaises(ValidationError):
-            normalize_payload_nlp(bpayload, "structured-data-classification")
+            normalize_payload_nlp(bpayload, "tabular-classification")
 
     def test_invalid_data_type(self):
         inputs = {"data": "Invalid data"}
         bpayload = json.dumps({"inputs": inputs}).encode("utf-8")
         with self.assertRaises(ValidationError):
-            normalize_payload_nlp(bpayload, "structured-data-classification")
+            normalize_payload_nlp(bpayload, "tabular-classification")
 
 
 class SummarizationValidationTestCase(TestCase):

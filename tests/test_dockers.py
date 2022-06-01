@@ -149,7 +149,7 @@ class DockerImageTests(unittest.TestCase):
     def test_sklearn(self):
         self.framework_docker_test(
             "sklearn",
-            "structured-data-classification",
+            "tabular-classification",
             "julien-c/wine-quality",
         )
 
