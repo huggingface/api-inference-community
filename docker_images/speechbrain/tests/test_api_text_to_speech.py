@@ -44,7 +44,6 @@ class TextToSpeechTestCase(TestCase):
     def test_simple(self):
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": "This is some text"})
-        print(response.text)
         self.assertEqual(
             response.status_code,
             200,
