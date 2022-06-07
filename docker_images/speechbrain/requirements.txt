@@ -3,3 +3,4 @@ api-inference-community==0.0.23
 huggingface_hub==0.5.1
 speechbrain==0.5.11
 transformers==4.18.0
+git+https://github.com/speechbrain/speechbrain@develop
