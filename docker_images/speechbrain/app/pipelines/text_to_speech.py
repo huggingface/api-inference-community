@@ -33,6 +33,6 @@ class TextToSpeechPipeline(Pipeline):
         Return:
             A :obj:`np.array` and a :obj:`int`: The raw waveform as a numpy array, and the sampling rate as an int.
         """
-        mel_output, _, _ = self.model.encode_text("Example text!")
+        mel_output, _, _ = self.model.encode_text(inputs)
         waveforms = self.vocoder_model.decode_batch(mel_output).numpy()
         return waveforms, self.sampling_rate
