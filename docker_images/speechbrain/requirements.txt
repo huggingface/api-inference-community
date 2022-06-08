@@ -1,5 +1,5 @@
 starlette==0.14.2
 api-inference-community==0.0.23
 huggingface_hub==0.5.1
-speechbrain==0.5.11
 transformers==4.18.0
+git+https://github.com/speechbrain/speechbrain@969e4d3aa6f8e5e3ac7d2fee1e7ee4d9ab14506e

@@ -184,6 +184,12 @@ class DockerImageTests(unittest.TestCase):
             "speechbrain/asr-wav2vec2-commonvoice-fr",
         )
 
+        self.framework_docker_test(
+            "speechbrain",
+            "text-to-speech",
+            "speechbrain/tts-tacotron2-ljspeech",
+        )
+
         self.framework_invalid_test("speechbrain")
 
         # source-separation
