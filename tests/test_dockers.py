@@ -251,6 +251,11 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "fastai", "image-classification", "fastai/fastbook_02_bears_classifier"
         )
+        self.framework_docker_test(
+            "fastai",
+            "image-classification",
+            "Kieranm/britishmus_plate_material_classifier",
+        )
         self.framework_invalid_test("fastai")
 
     def test_doctr(self):
