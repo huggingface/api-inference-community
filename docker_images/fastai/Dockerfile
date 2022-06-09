@@ -5,6 +5,9 @@ LABEL maintainer="Omar Espejel <espejelomar@gmail.com>"
 # RUN apt-get update -y && apt-get install libXXX -y
 
 COPY ./requirements.txt /app
+# This enables better docker caching so adding new requirements doesn't
+# retrigger reinstalling the whole pytorch.
+RUN pip install torch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/
 
