@@ -33,7 +33,6 @@ ALL_TASKS = {
     "sentence-similarity",
     "fill-mask",
     "table-question-answering",
-    "tabular-classification",
     "tabular-regression",
     "summarization",
     "text2text-generation",
