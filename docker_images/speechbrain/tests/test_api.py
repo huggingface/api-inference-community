@@ -29,6 +29,9 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
         # ASR with EncoderDecoderASR
         "speechbrain/asr-crdnn-commonvoice-it",
     ],
+    "text-to-speech": [
+        "speechbrain/tts-tacotron2-ljspeech",
+    ],
 }
 
 
