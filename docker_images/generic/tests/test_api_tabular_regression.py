@@ -12,10 +12,7 @@ from tests.test_api import TESTABLE_MODELS
     "tabular-regresson not implemented",
 )
 @parameterized_class(
-    [
-        {"model_id": model_id}
-        for model_id in TESTABLE_MODELS["tabular-regression"]
-    ]
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["tabular-regression"]]
 )
 class TabularRegressionTestCase(TestCase):
     def setUp(self):

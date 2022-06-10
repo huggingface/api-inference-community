@@ -8,9 +8,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Must contain at least one example of each implemented pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
-TESTABLE_MODELS: Dict[str, str] = {
-    "tabular-classification": "julien-c/wine-quality"
-}
+TESTABLE_MODELS: Dict[str, str] = {"tabular-classification": "julien-c/wine-quality"}
 
 
 ALL_TASKS = {
