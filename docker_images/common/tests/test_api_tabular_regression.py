@@ -8,16 +8,16 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "structured-data-classification" not in ALLOWED_TASKS,
-    "structured-data-classification not implemented",
+    "tabular-regression" not in ALLOWED_TASKS,
+    "tabular-regression not implemented",
 )
-class StructuredDataClassificationTestCase(TestCase):
+class TabularRegressionTestCase(TestCase):
     def setUp(self):
-        model_id = TESTABLE_MODELS["structured-data-classification"]
+        model_id = TESTABLE_MODELS["tabular-regression"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = model_id
-        os.environ["TASK"] = "structured-data-classification"
+        os.environ["TASK"] = "tabular-regression"
 
         from app.main import app
 

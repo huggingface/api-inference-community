@@ -21,7 +21,7 @@ ALL_TASKS = {
     "image-classification",
     "question-answering",
     "sentence-similarity",
-    "structure-data-classification",
+    "structured-data-classification",
     "text-generation",
     "text-to-speech",
     "token-classification",

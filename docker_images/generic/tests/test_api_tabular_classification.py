@@ -8,21 +8,18 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "structured-data-classification" not in TESTABLE_MODELS,
-    "structured-data-classification not implemented",
+    "tabular-classification" not in TESTABLE_MODELS,
+    "tabular-classification not implemented",
 )
 @parameterized_class(
-    [
-        {"model_id": model_id}
-        for model_id in TESTABLE_MODELS["structured-data-classification"]
-    ]
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["tabular-classification"]]
 )
-class StructuredDataClassificationTestCase(TestCase):
+class TabularClassificationTestCase(TestCase):
     def setUp(self):
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.model_id
-        os.environ["TASK"] = "structured-data-classification"
+        os.environ["TASK"] = "tabular-classification"
 
         from app.main import app, get_pipeline
 

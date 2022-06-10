@@ -1,5 +1,3 @@
 from app.pipelines.base import Pipeline, PipelineException  # isort:skip
 
-from app.pipelines.structured_data_classification import (
-    StructuredDataClassificationPipeline,
-)
+from app.pipelines.tabular_data_pipeline import TabularDataPipeline

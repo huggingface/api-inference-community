@@ -8,7 +8,7 @@ from huggingface_hub import cached_download, hf_hub_url
 DEFAULT_FILENAME = "sklearn_model.joblib"
 
 
-class StructuredDataClassificationPipeline(Pipeline):
+class TabularDataPipeline(Pipeline):
     def __init__(self, model_id: str):
         self.model = joblib.load(
             open(cached_download(hf_hub_url(model_id, DEFAULT_FILENAME)), "rb")
