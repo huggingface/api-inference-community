@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import joblib
+from app.pipelines import Pipeline
 from huggingface_hub import snapshot_download
-from pipelines import Pipeline
 
 
 DEFAULT_FILENAME = "sklearn_model.joblib"

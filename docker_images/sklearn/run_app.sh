@@ -7,4 +7,4 @@ conda init bash
 source ~/.bashrc
 conda activate api-inference-model-env
 pip install api-inference-community
-python app/run_app.py
+python run_app.py

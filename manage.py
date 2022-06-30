@@ -161,8 +161,8 @@ def start(args):
     if args.gpu:
         os.environ["COMPUTE_TYPE"] = "gpu"
 
-    env_creator = Path(local_path) / "app" / "env_setup.py"
-    app_runner = Path(local_path) / "app" / "run_app.sh"
+    env_creator = Path(local_path) / "env_setup.py"
+    app_runner = Path(local_path) / "run_app.sh"
     print(local_path, env_creator, env_creator.exists(), app_runner.exists())
     if env_creator.exists() and app_runner.exists():
         # This means the task has a separate step to create an environment
