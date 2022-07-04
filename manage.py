@@ -6,7 +6,6 @@ import os
 import subprocess
 import sys
 import uuid
-from pathlib import Path
 
 from huggingface_hub import HfApi
 
@@ -155,30 +154,12 @@ def start(args):
     local_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), "docker_images", framework
     )
-
+    sys.path.append(local_path)
     os.environ["MODEL_ID"] = model_id
     os.environ["TASK"] = task
     if args.gpu:
         os.environ["COMPUTE_TYPE"] = "gpu"
-
-    env_creator = Path(local_path) / "env_setup.py"
-    app_runner = Path(local_path) / "run_app.sh"
-    print(local_path, env_creator, env_creator.exists(), app_runner.exists())
-    if env_creator.exists() and app_runner.exists():
-        # This means the task has a separate step to create an environment
-        # before running the model. We should therefore first call it, and then
-        # run the model in another process with the newly created environment.
-        print(1)
-        subprocess.run(["python", str(env_creator)], env=os.environ)
-        print(2)
-        with cd(local_path):
-            subprocess.run(["bash", str(app_runner)], env=os.environ)
-        print(3)
-    else:
-        # This branch is for projects which don't need a separate environment
-        # creation step and we already have the requirements installed.
-        sys.path.append(local_path)
-        uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")
 
 
 def docker(args):
