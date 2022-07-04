@@ -7,5 +7,3 @@ pretrained_checkpoints
 *.egg-info/
 build/
 dist/
-
-.vscode
