@@ -27,6 +27,7 @@ async def pipeline_route(request: Request) -> Response:
     start = time.time()
     payload = await request.body()
     task = os.environ["TASK"]
+    # breakpoint()
     if os.getenv("DEBUG", "0") in {"1", "true"}:
         pipe = request.app.get_pipeline()
     try:

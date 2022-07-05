@@ -44,5 +44,6 @@ class TabularDataPipeline(Pipeline):
         column_values = list(inputs["data"].values())
         rows = list(zip(*column_values))
         # TODO: we should do sth with the warnings.
-        with warnings.filterwarnings("ignore"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
             return self.model.predict(rows).tolist()

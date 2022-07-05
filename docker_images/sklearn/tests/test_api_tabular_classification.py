@@ -50,9 +50,8 @@ class TabularClassificationTestCase(TestCase):
         data = self.data
         expected_output_len = len(next(iter(data["data"].values())))
 
-        inputs = {"data": data}
         with TestClient(self.app) as client:
-            response = client.post("/", json={"inputs": inputs})
+            response = client.post("/", json={"inputs": data})
         self.assertEqual(
             response.status_code,
             200,
@@ -73,7 +72,7 @@ class TabularClassificationTestCase(TestCase):
         self.assertEqual(set(content.keys()), {"error"})
 
     def test_missing_columns(self):
-        data = self.data.copy()
+        data = self.data["data"].copy()
         data.pop(next(iter(data.keys())))
 
         inputs = {"data": data}
