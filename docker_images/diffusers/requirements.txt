@@ -1,0 +1,5 @@
+starlette==0.14.2
+api-inference-community==0.0.23
+git+https://github.com/huggingface/diffusers.git
+einops
+transformers
