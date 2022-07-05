@@ -1,15 +1,8 @@
-from typing import TYPE_CHECKING
-
-import numpy
 import numpy as np
 import torch
 from app.pipelines import Pipeline
 from diffusers import DiffusionPipeline
 from PIL import Image
-
-
-if TYPE_CHECKING:
-    from PIL import Image
 
 
 class TextToImagePipeline(Pipeline):
