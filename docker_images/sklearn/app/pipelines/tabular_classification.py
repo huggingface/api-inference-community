@@ -1,4 +1,5 @@
 import json
+import warnings
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -42,4 +43,6 @@ class TabularDataPipeline(Pipeline):
         """
         column_values = list(inputs["data"].values())
         rows = list(zip(*column_values))
-        return self.model.predict(rows).tolist()
+        # TODO: we should do sth with the warnings.
+        with warnings.filterwarnings("ignore"):
+            return self.model.predict(rows).tolist()
