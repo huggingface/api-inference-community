@@ -4,7 +4,9 @@ LABEL maintainer="Omar <omar@huggingface.co>"
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y
 
-RUN pip install --no-cache-dir torch==1.12.0
+RUN pip3 install --no-cache-dir torch==1.12.0 --extra-index-url https://download.pytorch.org/whl/cpu
+
+
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/
