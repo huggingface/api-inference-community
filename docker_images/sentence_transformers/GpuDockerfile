@@ -18,6 +18,7 @@ RUN pip install uvloop gunicorn httptools uvicorn
 RUN ln -fs /usr/share/zoneinfo/Europe/Dublin /etc/localtime
 
 WORKDIR /app/
+RUN pip install --no-cache-dir torch==1.12.0
 COPY ./requirements.txt /app/
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
