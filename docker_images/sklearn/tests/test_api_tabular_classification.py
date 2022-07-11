@@ -8,14 +8,6 @@ from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
 
 
-def _get_cwd():
-    """Return the current working directory.
-
-    Only works if we're using pytest.
-    """
-    return Path(os.getenv("PYTEST_CURRENT_TEST").split("::")[0]).parent
-
-
 @skipIf(
     "tabular-classification" not in ALLOWED_TASKS,
     "tabular-classification not implemented",

@@ -11,7 +11,7 @@ from huggingface_hub import snapshot_download
 DEFAULT_FILENAME = "sklearn_model.joblib"
 
 
-class TabularDataPipeline(Pipeline):
+class TabularClassificationPipeline(Pipeline):
     def __init__(self, model_id: str):
         cached_folder = snapshot_download(repo_id=model_id)
         try:
