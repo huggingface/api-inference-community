@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 from unittest import TestCase, skipIf
 
 from app.main import ALLOWED_TASKS
@@ -13,15 +14,19 @@ from tests.test_api import TESTABLE_MODELS
 )
 class TabularClassificationTestCase(TestCase):
     def setUp(self):
-        model_id = TESTABLE_MODELS["tabular-classification"]
+        test_case = TESTABLE_MODELS["tabular-classification"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
-        os.environ["MODEL_ID"] = model_id
+        os.environ["MODEL_ID"] = test_case["repo_id"]
         os.environ["TASK"] = "tabular-classification"
 
         from app.main import app
 
         self.app = app
+        self.test_data = test_case["input"]
+        self.data = json.load(
+            open(Path(os.path.dirname(__file__)) / "samples" / self.test_data, "r")
+        )
 
     def tearDown(self):
         if self.old_model_id is not None:
@@ -34,30 +39,18 @@ class TabularClassificationTestCase(TestCase):
             del os.environ["TASK"]
 
     def test_simple(self):
-        data = {
-            "1": [7.4, 7.8],
-            "2": [0.7, 0.88],
-            "3": [7.4, 7.8],
-            "4": [7.4, 7.8],
-            "5": [7.4, 7.8],
-            "6": [7.4, 7.8],
-            "7": [7.4, 7.8],
-            "8": [7.4, 7.8],
-            "9": [7.4, 7.8],
-            "10": [7.4, 7.8],
-            "11": [7.4, 7.8],
-        }
+        data = self.data
+        expected_output_len = len(next(iter(data["data"].values())))
 
-        inputs = {"data": data}
         with TestClient(self.app) as client:
-            response = client.post("/", json={"inputs": inputs})
+            response = client.post("/", json={"inputs": data})
         self.assertEqual(
             response.status_code,
             200,
         )
         content = json.loads(response.content)
         self.assertEqual(type(content), list)
-        self.assertEqual(len(content), 2)
+        self.assertEqual(len(content), expected_output_len)
 
     def test_malformed_input(self):
         with TestClient(self.app) as client:
@@ -71,11 +64,13 @@ class TabularClassificationTestCase(TestCase):
         self.assertEqual(set(content.keys()), {"error"})
 
     def test_missing_columns(self):
-        data = {"1": [7.4, 7.8], "2": [0.7, 0.88]}
+        data = self.data["data"].copy()
+        data.pop(next(iter(data.keys())))
 
         inputs = {"data": data}
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": inputs})
+
         self.assertEqual(
             response.status_code,
             400,

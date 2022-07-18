@@ -4,7 +4,7 @@ import os
 from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
-from app.pipelines import Pipeline, TabularDataPipeline
+from app.pipelines import Pipeline, TabularClassificationPipeline
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.gzip import GZipMiddleware
@@ -34,14 +34,14 @@ logger = logging.getLogger(__name__)
 # directories. Implement directly within the directories.
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     # IMPLEMENT_THIS: Add your implemented tasks here!
-    "tabular-classification": TabularDataPipeline
+    "tabular-classification": TabularClassificationPipeline
 }
 
 
 @functools.lru_cache()
-def get_pipeline() -> Pipeline:
-    task = os.environ["TASK"]
-    model_id = os.environ["MODEL_ID"]
+def get_pipeline(task=None, model_id=None) -> Pipeline:
+    task = task or os.environ["TASK"]
+    model_id = model_id or os.environ["MODEL_ID"]
     if task not in ALLOWED_TASKS:
         raise EnvironmentError(
             f"{task} is not a valid pipeline for model : {model_id} ({','.join(ALLOWED_TASKS.keys())})"

@@ -1,29 +1,40 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
-LABEL maintainer="Omar Sanseviero omar@huggingface.co"
+FROM mambaorg/micromamba
+LABEL maintainer="Adrin Jalali adrin@hf.co"
 
-# Add any system dependency here
-# RUN apt-get update -y && apt-get install libXXX -y
+# micromamba comes with a default non-root user. But we need root to install
+# our required system packages.
+USER root
+RUN apt-get update && apt-get install -y curl jq
+USER $MAMBAUSER
 
-COPY ./requirements.txt /app
-RUN pip install --no-cache-dir -r requirements.txt
-COPY ./prestart.sh /app/
+# Most our dockerfiles start from tiangolo/uvicorn-gunicorn:python3.8, but
+# since here we'd like to start from micromamba, we copy necessary files from
+# the uvicorn docker image using `COPY --from=...` commands. These steps are
+# taken from:
+# https://github.com/tiangolo/uvicorn-gunicorn-docker/blob/master/docker-images/python3.8-slim.dockerfile
+
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /start.sh /start.sh
+RUN chmod +x /start.sh
+
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /gunicorn_conf.py /gunicorn_conf.py
+
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /start-reload.sh /start-reload.sh
+RUN chmod +x /start-reload.sh
+
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /app /app
+WORKDIR /app/
+
+ENV PYTHONPATH=/app
+
+EXPOSE 80
 
 
-# Most DL models are quite large in terms of memory, using workers is a HUGE
-# slowdown because of the fork and GIL with python.
-# Using multiple pods seems like a better default strategy.
-# Feel free to override if it does not make sense for your library.
-ARG max_workers=1
-ENV MAX_WORKERS=$max_workers
+# This part is new and only specific to scikit-learn image.
 ENV HUGGINGFACE_HUB_CACHE=/data
 
-# Necessary on GPU environment docker.
-# TIMEOUT env variable is used by nvcr.io/nvidia/pytorch:xx for another purpose
-# rendering TIMEOUT defined by uvicorn impossible to use correctly
-# We're overriding it to be renamed UVICORN_TIMEOUT
-# UVICORN_TIMEOUT is a useful variable for very large models that take more
-# than 30s (the default) to load in memory.
-# If UVICORN_TIMEOUT is too low, uvicorn will simply never loads as it will
-# kill workers all the time before they finish.
-RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
 COPY ./app /app/app
+
+COPY run_app.sh /run_app.sh
+RUN chmod +x /run_app.sh
+
+CMD /run_app.sh

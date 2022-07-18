@@ -5,10 +5,17 @@ from unittest import TestCase, skipIf
 from app.main import ALLOWED_TASKS, get_pipeline
 
 
-# Must contain at least one example of each implemented pipeline
-# Tests do not check the actual values of the model output, so small dummy
-# models are recommended for faster tests.
-TESTABLE_MODELS: Dict[str, str] = {"tabular-classification": "julien-c/wine-quality"}
+# Must contain at least one example of each implemented pipeline Tests do not
+# check the actual values of the model output, so small dummy models are
+# recommended for faster tests. Note: make sure all models require
+# scikit-learn=1.0.2, and if you change that, make sure README.md of sklearn
+# folder is also updated.
+TESTABLE_MODELS: Dict[str, str] = {
+    "tabular-classification": {
+        "repo_id": "scikit-learn/iris-demo",
+        "input": "iris.json",
+    }
+}
 
 
 ALL_TASKS = {
