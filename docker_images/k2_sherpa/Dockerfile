@@ -5,9 +5,9 @@ LABEL maintainer="Yenda <jtrmal@gmail.com>"
 RUN apt-get update -y && apt-get install cmake ffmpeg -y && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements.txt /app
-RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir k2==1.16.dev20220622+cpu.torch1.11.0 -f https://k2-fsa.org/nightly/whl/
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir k2==1.17.dev20220719+cpu.torch1.11.0  -f https://k2-fsa.org/nightly/whl/
 RUN git clone --single-branch --depth 1 https://github.com/k2-fsa/sherpa && cd sherpa  && pip install -r ./requirements.txt && python3 setup.py install --verbose
 
 COPY ./prestart.sh /app/
