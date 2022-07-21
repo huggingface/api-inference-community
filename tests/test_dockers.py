@@ -153,6 +153,13 @@ class DockerImageTests(unittest.TestCase):
             "julien-c/wine-quality",
         )
 
+    def test_k2_sherpa(self):
+        self.framework_docker_test(
+            "k2_sherpa",
+            "automatic-speech-recognition",
+            "csukuangfj/icefall-asr-librispeech-pruned-transducer-stateless3-2022-05-13",
+        )
+
     def test_spacy(self):
         self.framework_docker_test(
             "spacy",

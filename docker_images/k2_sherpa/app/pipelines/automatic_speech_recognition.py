@@ -1,10 +1,10 @@
-from typing import Dict, List
+from typing import Dict
 
+import app.common as cx
 import numpy as np
 import torch
-import torchaudio
-import app.common as cx
 from app.pipelines import Pipeline
+
 
 torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
