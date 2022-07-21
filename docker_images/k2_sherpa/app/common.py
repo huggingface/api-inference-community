@@ -51,6 +51,7 @@ def model_from_hfconfig(hf_repo, hf_config):
     if decoding_method == "modified_beam_search":
         assert num_active_paths >= 1, num_active_paths
 
+    assert bpe_model_filename is not None or token_filename is not None
     if bpe_model_filename:
         assert token_filename is None
 

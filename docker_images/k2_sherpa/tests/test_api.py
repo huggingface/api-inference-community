@@ -10,7 +10,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, List[str]] = {
     "automatic-speech-recognition": [
-        "csukuangfj/icefall-asr-librispeech-pruned-transducer-stateless3-2022-05-13"
+        "jtrmal/icefall-asr-librispeech-pruned-transducer-stateless3-2022-05-13"
     ],
 }
 
