@@ -1,0 +1,4 @@
+starlette==0.14.2
+api-inference-community==0.0.25
+huggingface_hub==0.10.1
+diffusers==0.7.2
