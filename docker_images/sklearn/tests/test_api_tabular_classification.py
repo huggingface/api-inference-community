@@ -4,28 +4,29 @@ from pathlib import Path
 from unittest import TestCase, skipIf
 
 from app.main import ALLOWED_TASKS
+from parameterized import parameterized_class
 from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
 
 
+@parameterized_class(ALLOWED_TASKS["tabular-classification"])
 @skipIf(
     "tabular-classification" not in ALLOWED_TASKS,
     "tabular-classification not implemented",
 )
 class TabularClassificationTestCase(TestCase):
+    # self.repo_id and self.input are provided by parameterized_class
     def setUp(self):
-        test_case = TESTABLE_MODELS["tabular-classification"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
-        os.environ["MODEL_ID"] = test_case["repo_id"]
+        os.environ["MODEL_ID"] = self.repo_id
         os.environ["TASK"] = "tabular-classification"
 
         from app.main import app
 
         self.app = app
-        self.test_data = test_case["input"]
         self.data = json.load(
-            open(Path(os.path.dirname(__file__)) / "samples" / self.test_data, "r")
+            open(Path(os.path.dirname(__file__)) / "samples" / self.input, "r")
         )
 
     def tearDown(self):

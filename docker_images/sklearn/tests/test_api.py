@@ -11,12 +11,22 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # scikit-learn=1.0.2, and if you change that, make sure README.md of sklearn
 # folder is also updated.
 TESTABLE_MODELS: Dict[str, str] = {
+    "tabular-classification": [
+        {
+            "repo_id": "scikit-learn/iris-demo",
+            "input": "iris.json",
+        },
+        {"repo_id": "skops-tests/no-config-iris", "input": "iris.json"},
+        {"repo_id": "skops-tests/bad-config-iris", "input": "iris.json"},
+    ]
+}
+
+TESTABLE_MODELS: Dict[str, str] = {
     "tabular-classification": {
         "repo_id": "scikit-learn/iris-demo",
         "input": "iris.json",
     }
 }
-
 
 ALL_TASKS = {
     "automatic-speech-recognition",
