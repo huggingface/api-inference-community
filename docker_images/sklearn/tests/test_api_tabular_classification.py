@@ -10,6 +10,16 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @parameterized_class(ALLOWED_TASKS["tabular-classification"])
+@parameterized_class(TESTABLE_MODELS["tabular-classification"])
+class TestTestCase(TestCase):
+    def setup(self):
+        print(dir(self))
+
+    def test_me(self):
+        pass
+
+
+@parameterized_class(ALLOWED_TASKS["tabular-classification"])
 @skipIf(
     "tabular-classification" not in ALLOWED_TASKS,
     "tabular-classification not implemented",
