@@ -77,6 +77,10 @@ if __name__ == "__main__":
 
     # Now we remove the config file and push to a new repo
     os.remove(Path(local_repo) / "config.json")
+    # The only valid file name for a model pickle file if no config.json is
+    # available is `sklearn_model.joblib`, otherwise the backend will fail to
+    # find the file.
+    os.rename(Path(local_repo) / pkl_name, Path(local_repo) / "sklearn_model.joblib")
 
     push_repo(
         repo_name=f"iris-sklearn-{version}-without-config",
