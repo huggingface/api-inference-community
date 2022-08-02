@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from app.pipelines import Pipeline
@@ -9,7 +10,9 @@ class FeatureExtractionPipeline(Pipeline):
         self,
         model_id: str,
     ):
-        self.model = SentenceTransformer(model_id)
+        self.model = SentenceTransformer(
+            model_id, use_auth_token=os.getenv("HF_API_TOKEN")
+        )
 
     def __call__(self, inputs: str) -> List[float]:
         """

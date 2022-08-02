@@ -1,14 +1,15 @@
 FROM tiangolo/uvicorn-gunicorn:python3.8
-LABEL maintainer="Omar <omar@huggingface.co>"
+LABEL maintainer="Yenda <jtrmal@gmail.com>"
 
 # Add any system dependency here
-# RUN apt-get update -y && apt-get install libXXX -y
-
-RUN pip3 install --no-cache-dir torch==1.12.0 --extra-index-url https://download.pytorch.org/whl/cpu
-
+RUN apt-get update -y && apt-get install cmake ffmpeg -y && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements.txt /app
+RUN pip install --no-cache-dir torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir k2==1.17.dev20220719+cpu.torch1.11.0  -f https://k2-fsa.org/nightly/whl/
+RUN git clone --single-branch --depth 1 https://github.com/k2-fsa/sherpa && cd sherpa  && pip install -r ./requirements.txt && python3 setup.py install --verbose
+
 COPY ./prestart.sh /app/
 
 
@@ -19,8 +20,6 @@ COPY ./prestart.sh /app/
 ARG max_workers=1
 ENV MAX_WORKERS=$max_workers
 ENV HUGGINGFACE_HUB_CACHE=/data
-ENV SENTENCE_TRANSFORMERS_HOME=/data
-ENV TRANSFORMERS_CACHE=/data
 
 # Necessary on GPU environment docker.
 # TIMEOUT env variable is used by nvcr.io/nvidia/pytorch:xx for another purpose
@@ -32,3 +31,4 @@ ENV TRANSFORMERS_CACHE=/data
 # kill workers all the time before they finish.
 RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
 COPY ./app /app/app
+
