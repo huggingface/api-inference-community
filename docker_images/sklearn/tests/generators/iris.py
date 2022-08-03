@@ -51,9 +51,7 @@ if __name__ == "__main__":
     version = sys.argv[1]
 
     X, y = load_iris(return_X_y=True, as_frame=True)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    X_train, X_test, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
 
     est = make_pipeline(StandardScaler(), LogisticRegression()).fit(X_train, y_train)
 
@@ -67,7 +65,7 @@ if __name__ == "__main__":
         requirements=[f"scikit-learn={sklearn.__version__}"],
         dst=local_repo,
         task="tabular-classification",
-        data=X,
+        data=X_test,
     )
 
     push_repo(
