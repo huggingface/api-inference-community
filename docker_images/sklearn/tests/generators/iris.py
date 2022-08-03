@@ -29,10 +29,7 @@ def push_repo(repo_name, local_repo):
 
     client = HfApi()
 
-    try:
-        client.model_info(repo_id=repo_id, token=token)
-    except HTTPError:
-        client.create_repo(repo_id=repo_id, token=token, repo_type="model")
+  client.create_repo(repo_id=repo_id, token=token, repo_type="model", exist_ok=True)
 
     client.upload_folder(
         repo_id=repo_id,
