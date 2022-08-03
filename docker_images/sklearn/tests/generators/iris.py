@@ -9,7 +9,6 @@ from tempfile import mkdtemp, mkstemp
 
 import sklearn
 from huggingface_hub import HfApi
-from requests import HTTPError
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -29,7 +28,7 @@ def push_repo(repo_name, local_repo):
 
     client = HfApi()
 
-  client.create_repo(repo_id=repo_id, token=token, repo_type="model", exist_ok=True)
+    client.create_repo(repo_id=repo_id, token=token, repo_type="model", exist_ok=True)
 
     client.upload_folder(
         repo_id=repo_id,
