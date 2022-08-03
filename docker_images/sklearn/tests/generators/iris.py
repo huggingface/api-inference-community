@@ -87,10 +87,8 @@ if __name__ == "__main__":
         local_repo=local_repo,
     )
 
-    # generate and save sample input data
-    sample = dict()
-    for column in X.columns:
-        sample[column] = X[column][:10].to_list()
+    # take the first 10 rows as a sample input to the model.
+    sample = X_test.head(10).to_dict(orient="list")
 
     payload = {"data": sample}
     with open(
