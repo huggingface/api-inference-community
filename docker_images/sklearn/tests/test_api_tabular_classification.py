@@ -3,29 +3,37 @@ import os
 from pathlib import Path
 from unittest import TestCase, skipIf
 
+import pytest
 from app.main import ALLOWED_TASKS
+from parameterized import parameterized_class
 from starlette.testclient import TestClient
-from tests.test_api import TESTABLE_MODELS
+from tests.test_api import TEST_CASES, TESTABLE_MODELS
 
 
+@parameterized_class(
+    [{"test_case": x} for x in TESTABLE_MODELS["tabular-classification"]]
+)
 @skipIf(
     "tabular-classification" not in ALLOWED_TASKS,
     "tabular-classification not implemented",
 )
 class TabularClassificationTestCase(TestCase):
+    # self.repo_id and self.input are provided by parameterized_class
     def setUp(self):
-        test_case = TESTABLE_MODELS["tabular-classification"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
-        os.environ["MODEL_ID"] = test_case["repo_id"]
+        os.environ["MODEL_ID"] = self.test_case
         os.environ["TASK"] = "tabular-classification"
 
         from app.main import app
 
+        self.case_data = TEST_CASES["tabular-classification"][self.test_case]
+
         self.app = app
-        self.test_data = test_case["input"]
-        self.data = json.load(
-            open(Path(os.path.dirname(__file__)) / "samples" / self.test_data, "r")
+        sample_folder = Path(__file__).parent / "generators" / "samples"
+        self.data = json.load(open(sample_folder / self.case_data["input"], "r"))
+        self.expected_output = json.load(
+            open(sample_folder / self.case_data["output"], "r")
         )
 
     def tearDown(self):
@@ -38,19 +46,26 @@ class TabularClassificationTestCase(TestCase):
         else:
             del os.environ["TASK"]
 
-    def test_simple(self):
+    def _check_requirement(self, requirement):
+        if not requirement:
+            pytest.skip("Skipping test because requirements are not met.")
+
+    def test_success_code(self):
+        # This test does a sanity check on the output and checks the response
+        # code which should be 200. This requires the model to be from the
+        # latest sklearn which is the one installed locally.
+        self._check_requirement(not self.case_data["old_sklearn"])
+
         data = self.data
-        expected_output_len = len(next(iter(data["data"].values())))
+        expected_output_len = len(self.expected_output)
 
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": data})
-        self.assertEqual(
-            response.status_code,
-            200,
-        )
+
+        assert response.status_code == 200
         content = json.loads(response.content)
-        self.assertEqual(type(content), list)
-        self.assertEqual(len(content), expected_output_len)
+        assert type(content) == list
+        assert len(content) == expected_output_len
 
     def test_malformed_input(self):
         with TestClient(self.app) as client:
