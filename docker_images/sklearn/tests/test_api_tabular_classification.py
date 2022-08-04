@@ -67,6 +67,18 @@ class TabularClassificationTestCase(TestCase):
         assert type(content) == list
         assert len(content) == expected_output_len
 
+    def test_wrong_sklearn_version(self):
+        self._check_requirement(self.case_data["old_sklearn"])
+
+        data = self.data
+        with TestClient(self.app) as client:
+            response = client.post("/", json={"inputs": data})
+
+        assert response.status_code == 200
+        content = json.loads(response.content)
+        # TODO: fix this here.
+        assert content == {}
+
     def test_malformed_input(self):
         with TestClient(self.app) as client:
             response = client.post("/", data=b"Where do I live ?")

@@ -1,4 +1,5 @@
 import json
+import logging
 import warnings
 from pathlib import Path
 from typing import Dict, List, Union
@@ -10,6 +11,8 @@ from huggingface_hub import snapshot_download
 
 
 DEFAULT_FILENAME = "sklearn_model.joblib"
+
+logger = logging.getLogger()
 
 
 class TabularClassificationPipeline(Pipeline):
@@ -65,12 +68,12 @@ class TabularClassificationPipeline(Pipeline):
             extra = given_cols - expected
             missing = expected - given_cols
             if extra:
-                warnings.warn(
+                logger.warn(
                     f"The following columns were given but not expected: {extra}"
                 )
 
             if missing:
-                warnings.warn(
+                logger.warn(
                     f"The following columns were expected but not given: {missing}"
                 )
 
@@ -80,8 +83,7 @@ class TabularClassificationPipeline(Pipeline):
         data = pd.DataFrame(inputs["data"], columns=self.columns)
         res = self.model.predict(data).tolist()
 
-        if self._load_warnings:
+        if getattr(self, "_load_warnings", None):
             for w in self._load_warnings:
-                warnings.warn(w)
-
+                logger.warn(w.message)
         return res
