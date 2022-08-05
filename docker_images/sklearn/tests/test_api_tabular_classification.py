@@ -68,16 +68,26 @@ class TabularClassificationTestCase(TestCase):
         assert len(content) == expected_output_len
 
     def test_wrong_sklearn_version(self):
+        # if the wrong sklearn version is used the model will be loaded and
+        # gives an output, but warnings are raised. This test makes sure the
+        # right warnings are raised and that the output is included in the
+        # error message.
         self._check_requirement(self.case_data["old_sklearn"])
 
         data = self.data
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": data})
 
-        assert response.status_code == 200
+        assert response.status_code == 400
         content = json.loads(response.content)
-        # TODO: fix this here.
-        assert content == {}
+        assert "error" in content
+        assert "warnings" in content
+        wrong_versions = [
+            w for w in content["warnings"] if "Trying to unpickle estimator" in w
+        ]
+        assert len(wrong_versions)
+        error_message = json.loads(content["error"])
+        assert error_message["output"] == self.expected_output
 
     def test_malformed_input(self):
         with TestClient(self.app) as client:

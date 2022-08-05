@@ -18,18 +18,16 @@ logger = logging.getLogger()
 class TabularClassificationPipeline(Pipeline):
     def __init__(self, model_id: str):
         cached_folder = snapshot_download(repo_id=model_id)
+        self._load_warnings = []
         try:
             with open(Path(cached_folder) / "config.json") as f:
                 # this is the default path for configuration of a scikit-learn
                 # project. If the project is created using `skops`, it should have
                 # this file.
                 config = json.load(f)
-        except Exception as e:
-            print(e)
+        except Exception:
             # If for whatever reason we fail to detect requirements of the
             # project, we install the latest scikit-learn.
-            #
-            # TODO: we should log this, or warn or something.
             config = dict()
 
         self.model_file = (
@@ -41,7 +39,7 @@ class TabularClassificationPipeline(Pipeline):
             if len(record) > 0:
                 # if there's a warning while loading the model, we save it so
                 # that it can be raised to the user when __call__ is called.
-                self._load_warnings = record
+                self._load_warnings += record
 
         # use column names from the config file if available, to give the data
         # to the model in the right order.
@@ -60,6 +58,7 @@ class TabularClassificationPipeline(Pipeline):
             A :obj:`list` of floats or strings: The classification output for
             each row.
         """
+        _warnings = []
         if self.columns:
             # TODO: we should probably warn if columns are not configured, we
             # really do need them.
@@ -68,22 +67,40 @@ class TabularClassificationPipeline(Pipeline):
             extra = given_cols - expected
             missing = expected - given_cols
             if extra:
-                logger.warn(
+                warnings.append(
                     f"The following columns were given but not expected: {extra}"
                 )
 
             if missing:
-                logger.warn(
+                _warnings.append(
                     f"The following columns were expected but not given: {missing}"
                 )
 
         # We convert the inputs to a pandas DataFrame, and use self.columns
         # to order the columns in the order they're expected, ignore extra
         # columns given if any, and put NaN for missing columns.
-        data = pd.DataFrame(inputs["data"], columns=self.columns)
-        res = self.model.predict(data).tolist()
+        with warnings.catch_warnings(record=True) as record:
+            data = pd.DataFrame(inputs["data"], columns=self.columns)
+            res = self.model.predict(data).tolist()
 
-        if getattr(self, "_load_warnings", None):
-            for w in self._load_warnings:
-                logger.warn(w.message)
+        for warning in record:
+            _warnings.append(f"{warning.category.__name__}({warning.message})")
+
+        for warning in self._load_warnings:
+            _warnings.append(f"{warning.category.__name__}({warning.message})")
+
+        # making sure warnings are recorded only once.
+        _warnings = set(_warnings)
+        if _warnings:
+            for warning in _warnings:
+                logger.warning(warning)
+
+            # we raise an error if there are any warnings, so that routes.py
+            # can catch and return a non 200 status code.
+            error = {
+                "error": "There were warnings while running the model.",
+                "output": res,
+            }
+            raise ValueError(json.dumps(error))
+
         return res
