@@ -91,10 +91,7 @@ class TabularClassificationTestCase(TestCase):
         content = json.loads(response.content)
         assert "error" in content
         assert "warnings" in content
-        wrong_versions = [
-            w for w in content["warnings"] if "Trying to unpickle estimator" in w
-        ]
-        assert len(wrong_versions)
+        assert any("Trying to unpickle estimator" in w for w in content["warnings"])
         error_message = json.loads(content["error"])
         assert error_message["output"] == self.expected_output
 
@@ -114,21 +111,28 @@ class TabularClassificationTestCase(TestCase):
 
     @parameterized.expand(
         [
-            ("add", "The following columns were given but not expected:"),
-            ("drop", "The following columns were expected but not given:"),
+            (["add"], ["The following columns were given but not expected:"]),
+            (["drop"], ["The following columns were expected but not given:"]),
+            (
+                ["add", "drop"],
+                [
+                    "The following columns were given but not expected:",
+                    "The following columns were expected but not given:",
+                ],
+            ),
         ]
     )
-    def test_extra_columns(self, column_operation, warn_message):
+    def test_extra_columns(self, column_operations, warn_messages):
         # Test that the right warning is raised when there are extra columns in
         # the input.
         self._check_requirement(self.case_data["has_config"] and self._can_load())
 
         data = self.data.copy()
-        if column_operation == "drop":
+        if "drop" in column_operations:
             # we remove the first column in the data. Note that `data` is a
             # dict of column names to values.
             data["data"].pop(next(iter(data["data"].keys())))
-        elif column_operation == "add":
+        if "add" in column_operations:
             # we add an extra column to the data, the same as the first column.
             # Note that `data` is a dict of column names to values.
             data["data"]["extra_column"] = next(iter(data["data"].values()))
@@ -141,14 +145,15 @@ class TabularClassificationTestCase(TestCase):
         assert "error" in content
         assert "warnings" in content
 
-        wrong_versions = [w for w in content["warnings"] if warn_message in w]
-        assert len(wrong_versions)
+        for warn_message in warn_messages:
+            assert any(warn_message in w for w in content["warnings"])
 
-        if self.case_data["accepts_nan"] or column_operation == "add":
+        if "drop" not in column_operations or self.case_data["accepts_nan"]:
+            # the predict does not raise an error
             error_message = json.loads(content["error"])
             assert error_message["output"] == self.expected_output
         else:
-            # otherwise some columns will be empty.
+            # otherwise some columns will be empty and predict errors.
             assert (
                 "does not accept missing values encoded as NaN natively"
                 in content["error"]

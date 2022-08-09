@@ -12,13 +12,14 @@ from huggingface_hub import snapshot_download
 
 DEFAULT_FILENAME = "sklearn_model.joblib"
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class TabularClassificationPipeline(Pipeline):
     def __init__(self, model_id: str):
         cached_folder = snapshot_download(repo_id=model_id)
         self._load_warnings = []
+        self._load_exception = None
         try:
             with open(Path(cached_folder) / "config.json") as f:
                 # this is the default path for configuration of a scikit-learn
@@ -64,7 +65,7 @@ class TabularClassificationPipeline(Pipeline):
             A :obj:`list` of floats or strings: The classification output for
             each row.
         """
-        if getattr(self, "_load_exception", None):
+        if self._load_exception:
             # there has been an error while loading the model. We need to raise
             # that, and can't call predict on the model.
             raise ValueError(
@@ -107,8 +108,6 @@ class TabularClassificationPipeline(Pipeline):
         for warning in self._load_warnings:
             _warnings.append(f"{warning.category.__name__}({warning.message})")
 
-        # making sure warnings are recorded only once.
-        _warnings = set(_warnings)
         if _warnings:
             for warning in _warnings:
                 logger.warning(warning)

@@ -43,10 +43,16 @@ def push_repo(repo_name, local_repo):
 
 
 def get_estimators(X, y):
-    # returns a list of estimators and their names to train and push to hub.
+    # yield estimator names and estimators to train and push to hub.
+
+    # this is a pipeline with simple estimators which can be loaded across
+    # different sklearn versions.
     yield "logistic_regression", make_pipeline(
         StandardScaler(), LogisticRegression()
     ).fit(X, y)
+
+    # this estimator cannot be loaded on 1.1 if it's stored using 1.0, but it
+    # handles NaN input values which the previous pipeline cannot handle.
     yield "hist_gradient_boosting", HistGradientBoostingClassifier().fit(X, y)
 
 
