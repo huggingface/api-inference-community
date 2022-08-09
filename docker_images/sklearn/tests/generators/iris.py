@@ -10,6 +10,7 @@ from tempfile import mkdtemp, mkstemp
 import sklearn
 from huggingface_hub import HfApi
 from sklearn.datasets import load_iris
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
@@ -22,13 +23,11 @@ def push_repo(repo_name, local_repo):
     token = os.environ["SKOPS_TESTS_TOKEN"]
     repo_id = f"skops-tests/{repo_name}"
 
-    answer = input(f"Do you want to publish this model under {repo_id}? [y/N] ")
-    if answer != "y":
-        return
+    print(f"Pushing {repo_id}")
 
     client = HfApi()
-
-    client.create_repo(repo_id=repo_id, token=token, repo_type="model", exist_ok=True)
+    client.delete_repo(repo_id, token=token)
+    client.create_repo(repo_id=repo_id, token=token, repo_type="model")
 
     client.upload_folder(
         repo_id=repo_id,
@@ -43,13 +42,18 @@ def push_repo(repo_name, local_repo):
     )
 
 
-if __name__ == "__main__":
-    version = sys.argv[1]
+def get_estimators(X, y):
+    # returns a list of estimators and their names to train and push to hub.
+    yield "logistic_regression", make_pipeline(
+        StandardScaler(), LogisticRegression()
+    ).fit(X, y)
+    yield "hist_gradient_boosting", HistGradientBoostingClassifier().fit(X, y)
 
-    X, y = load_iris(return_X_y=True, as_frame=True)
-    X_train, X_test, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    est = make_pipeline(StandardScaler(), LogisticRegression()).fit(X_train, y_train)
+def create_repos(est_name, est_instance, version):
+    # given an estimator instance, it's name, and the version tag, train a
+    # model and push to hub. Both with and w/o a config file.
+    est = est_instance
 
     _, pkl_name = mkstemp(prefix="skops-", suffix=".pkl")
     with open(pkl_name, mode="bw") as f:
@@ -65,7 +69,7 @@ if __name__ == "__main__":
     )
 
     push_repo(
-        repo_name=f"iris-sklearn-{version}-with-config",
+        repo_name=f"iris-sklearn-{version}-{est_name}-with-config",
         local_repo=local_repo,
     )
 
@@ -77,9 +81,26 @@ if __name__ == "__main__":
     os.rename(Path(local_repo) / pkl_name, Path(local_repo) / "sklearn_model.joblib")
 
     push_repo(
-        repo_name=f"iris-sklearn-{version}-without-config",
+        repo_name=f"iris-sklearn-{version}-{est_name}-without-config",
         local_repo=local_repo,
     )
+
+    with open(
+        Path(__file__).parent / "samples" / f"iris-{est_name}-{version}-output.json",
+        "w",
+    ) as f:
+        output = [int(x) for x in est.predict(X_test.iloc[:10, :])]
+        json.dump(output, f, indent=2)
+
+
+if __name__ == "__main__":
+    version = sys.argv[1]
+
+    X, y = load_iris(return_X_y=True, as_frame=True)
+    X_train, X_test, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    for est_name, est_instance in get_estimators(X_train, y_train):
+        create_repos(est_name, est_instance, version)
 
     # take the first 10 rows as a sample input to the model.
     sample = X_test.head(10).to_dict(orient="list")
@@ -89,9 +110,3 @@ if __name__ == "__main__":
         Path(__file__).parent / "samples" / f"iris-{version}-input.json", "w"
     ) as f:
         json.dump(payload, f, indent=2)
-
-    with open(
-        Path(__file__).parent / "samples" / f"iris-{version}-output.json", "w"
-    ) as f:
-        output = [int(x) for x in est.predict(X_test.iloc[:10, :])]
-        json.dump(output, f, indent=2)

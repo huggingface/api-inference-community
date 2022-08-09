@@ -1,4 +1,3 @@
-import functools
 import logging
 import os
 from typing import Dict, Type
@@ -38,7 +37,6 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
 }
 
 
-@functools.lru_cache()
 def get_pipeline(task=None, model_id=None) -> Pipeline:
     task = task or os.environ["TASK"]
     model_id = model_id or os.environ["MODEL_ID"]
