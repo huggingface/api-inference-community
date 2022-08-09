@@ -23,10 +23,9 @@ class TabularClassificationTestCase(TestCase):
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.test_case
+        os.environ["TASK"] = "tabular-classification"
 
         self.case_data = TEST_CASES["tabular-classification"][self.test_case]
-
-        os.environ["TASK"] = "tabular-classification"
 
         sample_folder = Path(__file__).parent / "generators" / "samples"
         self.data = json.load(open(sample_folder / self.case_data["input"], "r"))

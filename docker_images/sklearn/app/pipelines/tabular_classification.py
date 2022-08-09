@@ -44,6 +44,8 @@ class TabularClassificationPipeline(Pipeline):
                     # that it can be raised to the user when __call__ is called.
                     self._load_warnings += record
         except Exception as e:
+            # if there is an exception while loading the model, we save it to
+            # raise the write error when __call__ is called.
             self._load_exception = e
         # use column names from the config file if available, to give the data
         # to the model in the right order.
