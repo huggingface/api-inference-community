@@ -7,10 +7,14 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Must contain at least one example of each implemented pipeline
 TESTABLE_MODELS = {
     "tabular-classification": [
-        "skops-tests/iris-sklearn-latest-without-config",
-        "skops-tests/iris-sklearn-latest-with-config",
-        "skops-tests/iris-sklearn-1.0-without-config",
-        "skops-tests/iris-sklearn-1.0-with-config",
+        "skops-tests/iris-sklearn-1.0-logistic_regression-with-config",
+        "skops-tests/iris-sklearn-1.0-logistic_regression-without-config",
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-with-config",
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-without-config",
+        "skops-tests/iris-sklearn-latest-logistic_regression-with-config",
+        "skops-tests/iris-sklearn-latest-logistic_regression-without-config",
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-with-config",
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-without-config",
     ]
 }
 
@@ -18,29 +22,69 @@ TESTABLE_MODELS = {
 # define which tests to run for which examples.
 TEST_CASES = {
     "tabular-classification": {
-        "skops-tests/iris-sklearn-latest-without-config": {
+        "skops-tests/iris-sklearn-latest-logistic_regression-without-config": {
             "input": "iris-latest-input.json",
-            "output": "iris-latest-output.json",
+            "output": "iris-logistic_regression-latest-output.json",
             "has_config": False,
             "old_sklearn": False,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
         },
-        "skops-tests/iris-sklearn-latest-with-config": {
+        "skops-tests/iris-sklearn-latest-logistic_regression-with-config": {
             "input": "iris-latest-input.json",
-            "output": "iris-latest-output.json",
+            "output": "iris-logistic_regression-latest-output.json",
             "has_config": True,
             "old_sklearn": False,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
         },
-        "skops-tests/iris-sklearn-1.0-without-config": {
+        "skops-tests/iris-sklearn-1.0-logistic_regression-without-config": {
             "input": "iris-1.0-input.json",
-            "output": "iris-1.0-output.json",
+            "output": "iris-logistic_regression-1.0-output.json",
             "has_config": False,
             "old_sklearn": True,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
         },
-        "skops-tests/iris-sklearn-1.0-with-config": {
+        "skops-tests/iris-sklearn-1.0-logistic_regression-with-config": {
             "input": "iris-1.0-input.json",
-            "output": "iris-1.0-output.json",
+            "output": "iris-logistic_regression-1.0-output.json",
             "has_config": True,
             "old_sklearn": True,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-without-config": {
+            "input": "iris-latest-input.json",
+            "output": "iris-hist_gradient_boosting-latest-output.json",
+            "has_config": False,
+            "old_sklearn": False,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-with-config": {
+            "input": "iris-latest-input.json",
+            "output": "iris-hist_gradient_boosting-latest-output.json",
+            "has_config": True,
+            "old_sklearn": False,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-without-config": {
+            "input": "iris-1.0-input.json",
+            "output": "iris-hist_gradient_boosting-1.0-output.json",
+            "has_config": False,
+            "old_sklearn": True,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": False,
+        },
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-with-config": {
+            "input": "iris-1.0-input.json",
+            "output": "iris-hist_gradient_boosting-1.0-output.json",
+            "has_config": True,
+            "old_sklearn": True,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": False,
         },
     }
 }
