@@ -18,8 +18,10 @@ mamba env update --file sklearn-latest.yml
 # python
 mamba activate api-inference-community-test-generator-sklearn-1-0
 python iris.py 1.0
+python tabularregression.py 1.0
 mamba deactivate
 
 mamba activate api-inference-community-test-generator-sklearn-latest
 python iris.py latest
+python tabularregression.py latest
 mamba deactivate

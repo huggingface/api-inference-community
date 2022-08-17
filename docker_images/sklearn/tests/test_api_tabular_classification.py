@@ -56,6 +56,7 @@ class TabularClassificationTestCase(TestCase):
         )
 
     def _check_requirement(self, requirement):
+        # This test is not supposed to run and is thus skipped.
         if not requirement:
             pytest.skip("Skipping test because requirements are not met.")
 
@@ -151,7 +152,10 @@ class TabularClassificationTestCase(TestCase):
         if "drop" not in column_operations or self.case_data["accepts_nan"]:
             # the predict does not raise an error
             error_message = json.loads(content["error"])
-            assert error_message["output"] == self.expected_output
+            assert len(error_message["output"]) == len(self.expected_output)
+            if "drop" not in column_operations:
+                # if no column was dropped, the predictions should be the same
+                assert error_message["output"] == self.expected_output
         else:
             # otherwise some columns will be empty and predict errors.
             assert (
