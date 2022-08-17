@@ -17,7 +17,6 @@ setup(
         "test": [
             "httpx>=0.18",
             "Pillow>=8.2",
-            "httpx>=0.18",
             "torch>=1.9.0",
             "pytest>=6.2",
         ]
