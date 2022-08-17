@@ -43,7 +43,7 @@ micromamba create -c conda-forge -y -q --name=api-inference-model-env $requireme
 
 micromamba activate api-inference-model-env
 
-# api-inference-community is not available on coda-forge, therefore we install
+# api-inference-community is not available on conda-forge, therefore we install
 # it from pypi.
 pip install api-inference-community
 
