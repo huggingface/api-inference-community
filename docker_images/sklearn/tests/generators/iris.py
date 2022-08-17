@@ -10,7 +10,7 @@ from tempfile import mkdtemp, mkstemp
 
 import sklearn
 from huggingface_hub import HfApi
-from huggingface_hub.utils._errors import RepositoryNotFoundError
+from huggingface_hub.utils import RepositoryNotFoundError
 from sklearn.datasets import load_iris
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression

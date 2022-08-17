@@ -14,7 +14,7 @@ from tempfile import mkdtemp, mkstemp
 import pandas as pd
 import sklearn
 from huggingface_hub import HfApi
-from huggingface_hub.utils._errors import RepositoryNotFoundError
+from huggingface_hub.utils import RepositoryNotFoundError
 from sklearn.datasets import make_regression
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
