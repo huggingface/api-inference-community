@@ -11,16 +11,13 @@ from pathlib import Path
 from unittest import TestCase, skipIf
 
 import pytest
+from app.main import ALLOWED_TASKS
 from parameterized import parameterized, parameterized_class
 from starlette.testclient import TestClient
-
-from app.main import ALLOWED_TASKS
 from tests.test_api import TEST_CASES, TESTABLE_MODELS
 
 
-@parameterized_class(
-    [{"test_case": x} for x in TESTABLE_MODELS["tabular-regression"]]
-)
+@parameterized_class([{"test_case": x} for x in TESTABLE_MODELS["tabular-regression"]])
 @skipIf(
     "tabular-regression" not in ALLOWED_TASKS,
     "tabular-regression not implemented",
@@ -104,7 +101,9 @@ class TabularRegressionTestCase(TestCase):
 
         error_message = json.loads(content["error"])
         assert len(error_message["output"]) == len(self.expected_output)
-        for val_output, val_expected in zip(error_message["output"], self.expected_output):
+        for val_output, val_expected in zip(
+            error_message["output"], self.expected_output
+        ):
             self.assertAlmostEqual(val_output, val_expected)
 
     def test_cannot_load_model(self):
@@ -166,7 +165,9 @@ class TabularRegressionTestCase(TestCase):
             assert len(error_message["output"]) == len(self.expected_output)
             if "drop" not in column_operations:
                 # if no column was dropped, the predictions should be the same
-                for val_output, val_expected in zip(error_message["output"], self.expected_output):
+                for val_output, val_expected in zip(
+                    error_message["output"], self.expected_output
+                ):
                     self.assertAlmostEqual(val_output, val_expected)
         else:
             # otherwise some columns will be empty and predict errors.

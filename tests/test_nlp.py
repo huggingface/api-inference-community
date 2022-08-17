@@ -162,9 +162,7 @@ class TabularDataValidationTestCase(TestCase):
         inputs = {"data": data}
         bpayload = json.dumps({"inputs": inputs}).encode("utf-8")
         for task in ["tabular-classification", "tabular-regression"]:
-            normalized_inputs, processed_params = normalize_payload_nlp(
-                bpayload, task
-            )
+            normalized_inputs, processed_params = normalize_payload_nlp(bpayload, task)
             self.assertEqual(processed_params, {})
             self.assertEqual(inputs, normalized_inputs)
 

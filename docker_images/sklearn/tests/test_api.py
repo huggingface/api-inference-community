@@ -97,7 +97,6 @@ TEST_CASES = {
             "loads_on_new_sklearn": False,
         },
     },
-
     "tabular-regression": {
         "skops-tests/tabularregression-sklearn-latest-linear_regression-without-config": {
             "input": "tabularregression-latest-input.json",
@@ -163,7 +162,7 @@ TEST_CASES = {
             "accepts_nan": True,
             "loads_on_new_sklearn": False,
         },
-    }
+    },
 }
 
 ALL_TASKS = {

@@ -67,9 +67,9 @@ def get_estimators(X, y):
 
     # this is a pipeline with simple estimators which can be loaded across
     # different sklearn versions.
-    yield "linear_regression", make_pipeline(
-        StandardScaler(), LinearRegression()
-    ).fit(X, y)
+    yield "linear_regression", make_pipeline(StandardScaler(), LinearRegression()).fit(
+        X, y
+    )
 
     # this estimator cannot be loaded on 1.1 if it's stored using 1.0, but it
     # handles NaN input values which the previous pipeline cannot handle.
@@ -113,7 +113,9 @@ def create_repos(est_name, est_instance, version):
 
     # save model predictions, which are later used for tests
     with open(
-        Path(__file__).parent / "samples" / f"tabularregression-{est_name}-{version}-output.json",
+        Path(__file__).parent
+        / "samples"
+        / f"tabularregression-{est_name}-{version}-output.json",
         "w",
     ) as f:
         output = [float(x) for x in est.predict(X_test.iloc[:10, :])]
@@ -135,6 +137,7 @@ if __name__ == "__main__":
     # save model input, which are later used for tests
     payload = {"data": sample}
     with open(
-        Path(__file__).parent / "samples" / f"tabularregression-{version}-input.json", "w"
+        Path(__file__).parent / "samples" / f"tabularregression-{version}-input.json",
+        "w",
     ) as f:
         json.dump(payload, f, indent=2)
