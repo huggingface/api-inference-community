@@ -152,6 +152,7 @@ class DockerImageTests(unittest.TestCase):
             "tabular-classification",
             "julien-c/wine-quality",
         )
+        # TODO: regression
 
     def test_k2_sherpa(self):
         self.framework_docker_test(

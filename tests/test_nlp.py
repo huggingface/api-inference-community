@@ -161,11 +161,12 @@ class TabularDataValidationTestCase(TestCase):
 
         inputs = {"data": data}
         bpayload = json.dumps({"inputs": inputs}).encode("utf-8")
-        normalized_inputs, processed_params = normalize_payload_nlp(
-            bpayload, "tabular-classification"
-        )
-        self.assertEqual(processed_params, {})
-        self.assertEqual(inputs, normalized_inputs)
+        for task in ["tabular-classification", "tabular-regression"]:
+            normalized_inputs, processed_params = normalize_payload_nlp(
+                bpayload, task
+            )
+            self.assertEqual(processed_params, {})
+            self.assertEqual(inputs, normalized_inputs)
 
     def test_invalid_data_lengths(self):
         data = {
@@ -175,14 +176,16 @@ class TabularDataValidationTestCase(TestCase):
 
         inputs = {"data": data}
         bpayload = json.dumps({"inputs": inputs}).encode("utf-8")
-        with self.assertRaises(ValidationError):
-            normalize_payload_nlp(bpayload, "tabular-classification")
+        for task in ["tabular-classification", "tabular-regression"]:
+            with self.assertRaises(ValidationError):
+                normalize_payload_nlp(bpayload, task)
 
     def test_invalid_data_type(self):
         inputs = {"data": "Invalid data"}
         bpayload = json.dumps({"inputs": inputs}).encode("utf-8")
-        with self.assertRaises(ValidationError):
-            normalize_payload_nlp(bpayload, "tabular-classification")
+        for task in ["tabular-classification", "tabular-regression"]:
+            with self.assertRaises(ValidationError):
+                normalize_payload_nlp(bpayload, task)
 
 
 class SummarizationValidationTestCase(TestCase):
