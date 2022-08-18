@@ -46,3 +46,13 @@ You will see many tests being skipped. If the message is "Skipping test because
 requirements are not met.", it means that the test was intended to be skipped,
 so you don't need to do anything about it. When adding a new test, make sure
 that at least one of the parametrized settings is not skipped for that test.
+
+### Adding a new task
+
+When adding tests for a new task, certain artifacts like HF Hub repositories,
+model inputs, and model outputs need to be generated first using the `run.sh`
+script, as explained above. For the new task, those have to be implemented
+first. For this, visit `docker_images/sklearn/tests/generators/generate.py` and
+extend the script to include the new task. Most notably, visit the "CONSTANTS"
+section and extend the constants defined there to include your task. This will
+make it obvious which extra functions you need to write.
