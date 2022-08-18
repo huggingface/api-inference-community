@@ -20,11 +20,10 @@ import time
 from pathlib import Path
 from tempfile import mkdtemp, mkstemp
 
-import pandas as pd
 import sklearn
 from huggingface_hub import HfApi
 from huggingface_hub.utils import RepositoryNotFoundError
-from sklearn.datasets import load_iris, make_regression
+from sklearn.datasets import load_diabetes, load_iris
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
     HistGradientBoostingRegressor,
@@ -67,14 +66,6 @@ def push_repo(repo_name, local_repo):
     )
     # prevent AWS "503 Server Error: Slow Down for url" error
     time.sleep(SLEEP_BETWEEN_PUSHES)
-
-
-def get_tabularregression_data():
-    # Create an artificial regression dataset similar in structure to Iris data
-    n_features = 4
-    X, y = make_regression(150, n_features=n_features, n_informative=2, random_state=42)
-    columns = [f"col{i}" for i in range(n_features)]
-    return pd.DataFrame(X, columns=columns), pd.Series(y)
 
 
 def get_tabular_classifiers():
@@ -171,7 +162,7 @@ TASKS = [
 ]
 DATA = {
     "tabular-classification": load_iris(return_X_y=True, as_frame=True),
-    "tabular-regression": get_tabularregression_data(),
+    "tabular-regression": load_diabetes(return_X_y=True, as_frame=True),
 }
 MODELS = {
     "tabular-classification": get_tabular_classifiers(),
