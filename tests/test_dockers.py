@@ -146,14 +146,13 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("flair")
 
-    def test_sklearn_tabular_classification(self):
+    def test_sklearn(self):
         self.framework_docker_test(
             "sklearn",
             "tabular-classification",
             "julien-c/wine-quality",
         )
 
-    def test_sklearn_tabular_regression(self):
         self.framework_docker_test(
             "sklearn",
             "tabular-regression",
