@@ -180,7 +180,7 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "sklearn",
             "tabular-regression",
-            "skops-tests/tabularregression-sklearn-latest-linear_regression-with-config"
+            "skops-tests/tabularregression-sklearn-latest-linear_regression-with-config",
             custom_input=regr_data,
         )
 
