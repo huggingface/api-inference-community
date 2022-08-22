@@ -19,6 +19,9 @@ SKOPS_TESTS_TOKEN=your_secret_token docker_images/sklearn/tests/generators/run.s
 This script needs to be run _only once_ when you first start developing, or each
 time a new scikit-learn version is released.
 
+The created model repositories are also used for common tests of this package,
+see `tests/test_dockers.py` > `test_sklearn`.
+
 Note that a working [mamba
 installation](https://mamba.readthedocs.io/en/latest/installation.html) is
 required for this step
