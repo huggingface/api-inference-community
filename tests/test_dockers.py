@@ -153,6 +153,13 @@ class DockerImageTests(unittest.TestCase):
             "julien-c/wine-quality",
         )
 
+        self.framework_docker_test(
+            "sklearn",
+            "tabular-regression",
+            # dataset is for classification but regression should also work
+            "julien-c/wine-quality",
+        )
+
     def test_k2_sherpa(self):
         self.framework_docker_test(
             "k2_sherpa",

@@ -17,9 +17,9 @@ mamba env update --file sklearn-latest.yml
 # not doing mamba run ... since it just wouldn't work and would use system's
 # python
 mamba activate api-inference-community-test-generator-sklearn-1-0
-python iris.py 1.0
+python generate.py 1.0
 mamba deactivate
 
 mamba activate api-inference-community-test-generator-sklearn-latest
-python iris.py latest
+python generate.py latest
 mamba deactivate
