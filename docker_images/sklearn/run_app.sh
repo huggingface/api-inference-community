@@ -6,7 +6,7 @@
 set -xe
 
 get_requirements() {
-    requirements="pandas uvicorn gunicorn"
+    requirements="pandas uvicorn gunicorn api-inference-community"
     # this next command is needed to run the while loop in the same process and
     # therefore modify the same $requirements variable. Otherwise the loop would be
     # a separate process and the variable wouldn't be accessible from this parent
@@ -36,16 +36,12 @@ else
     # dependencies, and use the latest scikit-learn version. This is to allow
     # users for a basic usage if they haven't put the config.json file in their
     # repository.
-    requirements="pandas uvicorn gunicorn scikit-learn"
+    requirements="pandas uvicorn gunicorn api-inference-community scikit-learn"
 fi
 
 micromamba create -c conda-forge -y -q --name=api-inference-model-env $requirements
 
 micromamba activate api-inference-model-env
-
-# api-inference-community is not available on conda-forge, therefore we install
-# it from pypi.
-pip install api-inference-community
 
 # start.sh file is not in our repo, rather taken from the
 # `uvicorn-gunicorn-docker` repo. You can check the Dockerfile to see where
