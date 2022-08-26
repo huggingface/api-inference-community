@@ -14,7 +14,7 @@ class SpeechToSpeechPipeline(Pipeline):
 
         logger.info("Start to load model")
 
-        self.model = torch.hub.load("pytorch/fairseq:main", model_id)
+        self.model = torch.hub.load("pytorch/fairseq:main", model_id, generation_args={'beam': 1, 'max_len_a': 0.003125})
         self.sampling_rate = 16000
 
         logger.info("Load model successfully")
