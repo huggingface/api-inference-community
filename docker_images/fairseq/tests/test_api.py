@@ -9,7 +9,8 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    "text-to-speech": "facebook/fastspeech2-en-ljspeech",
+    "text-to-speech": "fastspeech2-en-ljspeech",
+    "audio-to-audio": "xm_transformer_s2ut_800m-es-en-st-asr-bt_h1_2022",
 }
 
 
