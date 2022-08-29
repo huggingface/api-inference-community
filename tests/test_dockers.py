@@ -426,7 +426,7 @@ class DockerImageTests(unittest.TestCase):
         model_id: str,
         custom_input: Optional[
             Any
-        ],  # if given, check inference with this specific input
+        ] = None,  # if given, check inference with this specific input
     ):
         tag = self.create_docker(framework)
         run_docker_command = [
