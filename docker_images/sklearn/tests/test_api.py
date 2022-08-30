@@ -163,6 +163,9 @@ TEST_CASES = {
             "loads_on_new_sklearn": False,
         },
     },
+    "text-classification": {
+
+    },
 }
 
 ALL_TASKS = {
