@@ -5,9 +5,10 @@ from unittest import TestCase, skipIf
 
 import pytest
 from app.main import ALLOWED_TASKS
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized_class
 from starlette.testclient import TestClient
 from tests.test_api import TEST_CASES, TESTABLE_MODELS
+
 
 @parameterized_class(
     [{"test_case": x} for x in TESTABLE_MODELS["tabular-classification"]]
@@ -33,7 +34,6 @@ class TextClassificationTestCase(TestCase):
 
         self.app = app
 
-
     def tearDown(self):
         if self.old_model_id is not None:
             os.environ["MODEL_ID"] = self.old_model_id
@@ -43,7 +43,6 @@ class TextClassificationTestCase(TestCase):
             os.environ["TASK"] = self.old_task
         else:
             del os.environ["TASK"]
-
 
     def _can_load(self):
         # to load a model, it has to either support being loaded on new sklearn
@@ -57,7 +56,6 @@ class TextClassificationTestCase(TestCase):
         # This test is not supposed to run and is thus skipped.
         if not requirement:
             pytest.skip("Skipping test because requirements are not met.")
-
 
     def test_success_code(self):
         # This test does a sanity check on the output and checks the response
@@ -82,7 +80,7 @@ class TextClassificationTestCase(TestCase):
             set(k for el in content[0] for k in el.keys()),
             {"label", "score"},
         )
-
+        self.assertEqual(len(content), expected_output_len)
 
     def test_wrong_sklearn_version_warning(self):
         # if the wrong sklearn version is used the model will be loaded and
@@ -103,7 +101,6 @@ class TextClassificationTestCase(TestCase):
         error_message = json.loads(content["error"])
         assert error_message["output"] == self.expected_output
 
-
     def test_cannot_load_model(self):
         # test the error message when the model cannot be loaded on a wrong
         # sklearn version
@@ -117,8 +114,6 @@ class TextClassificationTestCase(TestCase):
         content = json.loads(response.content)
         assert "error" in content
         assert "An error occurred while loading the model:" in content["error"]
-
-
 
     def test_malformed_question(self):
         with TestClient(self.app) as client:

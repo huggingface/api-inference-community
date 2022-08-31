@@ -80,6 +80,7 @@ def get_tabular_classifiers():
     # handles NaN input values which the previous pipeline cannot handle.
     yield "hist_gradient_boosting", HistGradientBoostingClassifier()
 
+
 def get_text_classifiers():
     # yield classifier names and estimators to train and push to hub.
 
@@ -89,7 +90,10 @@ def get_text_classifiers():
 
     # this estimator cannot be loaded on 1.1 if it's stored using 1.0, but it
     # handles NaN input values which the previous pipeline cannot handle.
-    yield "hist_gradient_boosting", make_pipeline(CountVectorizer(), HistGradientBoostingClassifier())
+    yield "hist_gradient_boosting", make_pipeline(
+        CountVectorizer(), HistGradientBoostingClassifier()
+    )
+
 
 def get_tabular_regressors():
     # yield regressor names and estimators to train and push to hub.
@@ -162,6 +166,7 @@ def predict_tabular_regressor(est, sample, filename):
     with open(Path(__file__).parent / "samples" / filename, "w") as f:
         json.dump(output, f, indent=2)
 
+
 def predict_text_classifier(est, sample, filename):
     output = [int(x) for x in est.predict(sample)]
     with open(Path(__file__).parent / "samples" / filename, "w") as f:
@@ -172,15 +177,11 @@ def predict_text_classifier(est, sample, filename):
 # CONSTANTS #
 #############
 
-TASKS = [
-    "tabular-classification",
-    "tabular-regression",
-    "text-classification"
-]
+TASKS = ["tabular-classification", "tabular-regression", "text-classification"]
 DATA = {
     "tabular-classification": load_iris(return_X_y=True, as_frame=True),
     "tabular-regression": load_diabetes(return_X_y=True, as_frame=True),
-    "text-classification": fetch_20newsgroups(subset="test")
+    "text-classification": fetch_20newsgroups(subset="test"),
 }
 MODELS = {
     "tabular-classification": get_tabular_classifiers(),

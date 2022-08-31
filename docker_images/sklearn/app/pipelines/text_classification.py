@@ -8,6 +8,7 @@ import joblib
 from app.pipelines import Pipeline
 from huggingface_hub import snapshot_download
 
+
 DEFAULT_FILENAME = "sklearn_model.joblib"
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,6 @@ class TextClassificationPipeline(Pipeline):
         if not self.labels:
             self.labels = self.model.classes_
 
-
     def __call__(self, inputs: str) -> List[Dict[str, float]]:
         """
         Args:
@@ -77,7 +77,7 @@ class TextClassificationPipeline(Pipeline):
         exception = None
         try:
             with warnings.catch_warnings(record=True) as record:
-                # We will predict probabilities for each class and return them as 
+                # We will predict probabilities for each class and return them as
                 # list of list of dictionaries
                 # below is a numpy array of probabilities of each class
                 prob = self.model.predict_proba([inputs["data"]]).tolist()
