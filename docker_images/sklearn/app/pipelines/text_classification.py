@@ -75,7 +75,6 @@ class TextClassificationPipeline(Pipeline):
 
         _warnings = []
         exception = None
-        breakpoint()
         try:
             with warnings.catch_warnings(record=True) as record:
                 # We will predict probabilities for each class and return them as
