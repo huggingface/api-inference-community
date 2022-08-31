@@ -81,7 +81,7 @@ class TextClassificationPipeline(Pipeline):
                 # We will predict probabilities for each class and return them as
                 # list of list of dictionaries
                 # below is a numpy array of probabilities of each class
-                prob = self.model.predict_proba([inputs]).tolist()
+                prob = self.model.predict_proba([inputs["data"]]).tolist()
                 res = []
                 for i, c in enumerate(prob[0]):
                     res.append({"label": str(self.labels[i]), "score": c})

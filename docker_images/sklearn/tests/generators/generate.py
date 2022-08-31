@@ -23,6 +23,7 @@ from tempfile import mkdtemp, mkstemp
 import sklearn
 from huggingface_hub import HfApi
 from huggingface_hub.utils import RepositoryNotFoundError
+from sklearn.base import TransformerMixin
 from sklearn.datasets import fetch_20newsgroups, load_diabetes, load_iris
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
@@ -86,12 +87,20 @@ def get_text_classifiers():
 
     # this is a pipeline with simple estimators which can be loaded across
     # different sklearn versions.
+    # HistGradientBoostingClassifier requires dense matrix
+    class DenseTransformer(TransformerMixin):
+        def fit(self, X, y=None, **fit_params):
+            return self
+
+        def transform(self, X, y=None, **fit_params):
+            return X.todense()
+
     yield "logistic_regression", make_pipeline(CountVectorizer(), LogisticRegression())
 
     # this estimator cannot be loaded on 1.1 if it's stored using 1.0, but it
     # handles NaN input values which the previous pipeline cannot handle.
     yield "hist_gradient_boosting", make_pipeline(
-        CountVectorizer(), HistGradientBoostingClassifier()
+        CountVectorizer(), DenseTransformer(), HistGradientBoostingClassifier()
     )
 
 
@@ -149,8 +158,11 @@ def create_repos(est_name, task_name, est, sample, version):
     )
 
 
-def save_sample(sample, filename):
-    payload = {"data": sample.to_dict(orient="list")}
+def save_sample(sample, filename, task):
+    if task != "text-classification":
+        payload = {"data": sample.to_dict(orient="list")}
+    else:
+        payload = {"data": sample}
     with open(Path(__file__).parent / "samples" / filename, "w") as f:
         json.dump(payload, f, indent=2)
 
@@ -177,11 +189,11 @@ def predict_text_classifier(est, sample, filename):
 # CONSTANTS #
 #############
 
-TASKS = ["tabular-classification", "tabular-regression", "text-classification"]
+TASKS = ["text-classification", "tabular-classification", "tabular-regression"]
 DATA = {
     "tabular-classification": load_iris(return_X_y=True, as_frame=True),
     "tabular-regression": load_diabetes(return_X_y=True, as_frame=True),
-    "text-classification": fetch_20newsgroups(subset="test"),
+    "text-classification": fetch_20newsgroups(subset="test", return_X_y=True),
 }
 MODELS = {
     "tabular-classification": get_tabular_classifiers(),
@@ -196,7 +208,7 @@ INPUT_NAMES = {
 OUTPUT_NAMES = {
     "tabular-classification": "iris-{est_name}-{version}-output.json",
     "tabular-regression": "tabularregression-{est_name}-{version}-output.json",
-    "text-classification": "textclassification-{version}-output.json",
+    "text-classification": "textclassification-{est_name}-{version}-output.json",
 }
 REPO_NAMES = {
     "tabular-classification": "iris-sklearn-{version}-{est_name}-{w_or_wo}-config",
@@ -217,11 +229,14 @@ def main(version):
         X_train, X_test, y_train, _ = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
-        sample = X_test.head(10)
+        if task != "text-classification":
+            sample = X_test.head(10)
+        else:
+            sample = X_test[0:10]
 
         # save model input, which are later used for tests
         input_name = INPUT_NAMES[task].format(version=version)
-        save_sample(sample, input_name)
+        save_sample(sample, input_name, task)
 
         for est_name, model in MODELS[task]:
             model.fit(X_train, y_train)
