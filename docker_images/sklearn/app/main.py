@@ -7,6 +7,7 @@ from app.pipelines import (
     Pipeline,
     TabularClassificationPipeline,
     TabularRegressionPipeline,
+    TextClassificationPipeline,
 )
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
@@ -39,6 +40,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     # IMPLEMENT_THIS: Add your implemented tasks here!
     "tabular-classification": TabularClassificationPipeline,
     "tabular-regression": TabularRegressionPipeline,
+    "text-classification": TextClassificationPipeline,
 }
 
 

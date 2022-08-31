@@ -75,15 +75,17 @@ class TextClassificationPipeline(Pipeline):
 
         _warnings = []
         exception = None
+        breakpoint()
         try:
             with warnings.catch_warnings(record=True) as record:
                 # We will predict probabilities for each class and return them as
                 # list of list of dictionaries
                 # below is a numpy array of probabilities of each class
-                prob = self.model.predict_proba([inputs["data"]]).tolist()
-                res = {}
-                for i, c in enumerate(prob.tolist()[0]):
-                    res[self.labels[i]] = c
+                prob = self.model.predict_proba([inputs]).tolist()
+                res = []
+                for i, c in enumerate(prob[0]):
+                    res.append({"label": str(self.labels[i]), "score": c})
+                res = [res]
         except Exception as e:
             exception = e
 
