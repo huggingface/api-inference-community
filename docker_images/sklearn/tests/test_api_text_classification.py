@@ -10,9 +10,7 @@ from starlette.testclient import TestClient
 from tests.test_api import TEST_CASES, TESTABLE_MODELS
 
 
-@parameterized_class(
-    [{"test_case": x} for x in TESTABLE_MODELS["tabular-classification"]]
-)
+@parameterized_class([{"test_case": x} for x in TESTABLE_MODELS["text-classification"]])
 @skipIf(
     "text-classification" not in ALLOWED_TASKS,
     "text-classification not implemented",
@@ -61,6 +59,7 @@ class TextClassificationTestCase(TestCase):
         # This test does a sanity check on the output and checks the response
         # code which should be 200. This requires the model to be from the
         # latest sklearn which is the one installed locally.
+        breakpoint()
         self._check_requirement(not self.case_data["old_sklearn"])
 
         data = self.data

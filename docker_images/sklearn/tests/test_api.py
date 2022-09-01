@@ -26,6 +26,16 @@ TESTABLE_MODELS = {
         "skops-tests/tabularregression-sklearn-latest-hist_gradient_boosting_regressor-with-config",
         "skops-tests/tabularregression-sklearn-latest-hist_gradient_boosting_regressor-without-config",
     ],
+    "text-classification": [
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-latest-without-config",
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-latest-with-config",
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-1.0-without-config",
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-1.0-with-config",
+        "skops-tests/textclassification-sklearn-logistic_regression-latest-without-config",
+        "skops-tests/textclassification-logistic_regression-latest-with-config",
+        "skops-tests/textclassification-logistic_regression-1.0-without-config",
+        "skops-tests/textclassification-logistic_regression-1.0-with-config",
+    ],
 }
 
 # This contains information about the test cases above, used in the tests to
@@ -164,56 +174,56 @@ TEST_CASES = {
         },
     },
     "text-classification": {
-        "skops-tests/textclassification-sklearn-latest-hist_gradient_boosting_classifier-without-config": {
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-latest-without-config": {
             "input": "textclassification-latest-input.json",
             "output": "textclassification-hist_gradient_boosting_classifier-latest-output.json",
             "has_config": False,
             "old_sklearn": False,
             "loads_on_new_sklearn": True,
         },
-        "skops-tests/textclassification-sklearn-latest-hist_gradient_boosting_classifier-with-config": {
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-latest-with-config": {
             "input": "textclassification-latest-input.json",
             "output": "textclassification-hist_gradient_boosting_classifier-latest-output.json",
             "has_config": True,
             "old_sklearn": False,
             "loads_on_new_sklearn": True,
         },
-        "skops-tests/textclassification-sklearn-1.0-hist_gradient_boosting_classifier-without-config": {
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-1.0-without-config": {
             "input": "textclassification-1.0-input.json",
             "output": "textclassification-hist_gradient_boosting_classifier-1.0-output.json",
             "has_config": False,
             "old_sklearn": True,
             "loads_on_new_sklearn": False,
         },
-        "skops-tests/textclassification-sklearn-1.0-hist_gradient_boosting_classifier-with-config": {
+        "skops-tests/textclassification-hist_gradient_boosting_classifier-1.0-with-config": {
             "input": "textclassification-1.0-input.json",
             "output": "textclassification-hist_gradient_boosting_classifier-1.0-output.json",
             "has_config": True,
             "old_sklearn": True,
             "loads_on_new_sklearn": False,
         },
-        "skops-tests/textclassification-sklearn-latest-logistic_regression-without-config": {
+        "skops-tests/textclassification-sklearn-logistic_regression-latest-without-config": {
             "input": "textclassification-latest-input.json",
             "output": "textclassification-logistic_regression-latest-output.json",
             "has_config": False,
             "old_sklearn": False,
             "loads_on_new_sklearn": True,
         },
-        "skops-tests/textclassification-sklearn-latest-logistic_regression-with-config": {
+        "skops-tests/textclassification-logistic_regression-latest-with-config": {
             "input": "textclassification-latest-input.json",
             "output": "textclassification-logistic_regression-latest-output.json",
             "has_config": True,
             "old_sklearn": False,
             "loads_on_new_sklearn": True,
         },
-        "skops-tests/textclassification-sklearn-1.0-logistic_regression-without-config": {
+        "skops-tests/textclassification-logistic_regression-1.0-without-config": {
             "input": "textclassification-1.0-input.json",
             "output": "textclassification-logistic_regression-1.0-output.json",
             "has_config": False,
             "old_sklearn": True,
             "loads_on_new_sklearn": False,
         },
-        "skops-tests/textclassification-sklearn-1.0-logistic_regression-with-config": {
+        "skops-tests/textclassification-logistic_regression-1.0-with-config": {
             "input": "textclassification-1.0-input.json",
             "output": "textclassification-logistic_regression-1.0-output.json",
             "has_config": True,
