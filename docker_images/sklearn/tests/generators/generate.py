@@ -17,13 +17,13 @@ import os
 import pickle
 import sys
 import time
+from operator import methodcaller
 from pathlib import Path
 from tempfile import mkdtemp, mkstemp
 
 import sklearn
 from huggingface_hub import HfApi
 from huggingface_hub.utils import RepositoryNotFoundError
-from sklearn.base import TransformerMixin
 from sklearn.datasets import fetch_20newsgroups, load_diabetes, load_iris
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
@@ -33,11 +33,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from skops import hub_utils
 
 
-SLEEP_BETWEEN_PUSHES = 10
+SLEEP_BETWEEN_PUSHES = 100
 
 
 def push_repo(repo_name, local_repo):
@@ -84,23 +84,17 @@ def get_tabular_classifiers():
 
 def get_text_classifiers():
     # yield classifier names and estimators to train and push to hub.
-
     # this is a pipeline with simple estimators which can be loaded across
     # different sklearn versions.
-    # HistGradientBoostingClassifier requires dense matrix
-    class DenseTransformer(TransformerMixin):
-        def fit(self, X, y=None, **fit_params):
-            return self
-
-        def transform(self, X, y=None, **fit_params):
-            return X.todense()
 
     yield "logistic_regression", make_pipeline(CountVectorizer(), LogisticRegression())
 
     # this estimator cannot be loaded on 1.1 if it's stored using 1.0, but it
     # handles NaN input values which the previous pipeline cannot handle.
     yield "hist_gradient_boosting", make_pipeline(
-        CountVectorizer(), DenseTransformer(), HistGradientBoostingClassifier()
+        CountVectorizer(max_features=100),
+        FunctionTransformer(methodcaller("toarray")),
+        HistGradientBoostingClassifier(max_iter=20),
     )
 
 
