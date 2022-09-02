@@ -59,7 +59,6 @@ class TextClassificationTestCase(TestCase):
         # This test does a sanity check on the output and checks the response
         # code which should be 200. This requires the model to be from the
         # latest sklearn which is the one installed locally.
-        breakpoint()
         self._check_requirement(not self.case_data["old_sklearn"])
 
         data = self.data
