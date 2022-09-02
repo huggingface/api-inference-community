@@ -154,10 +154,10 @@ def create_repos(est_name, task_name, est, sample, version):
 
 def save_sample(sample, filename, task):
     if task != "text-classification":
-        payload = {"data": sample.to_dict(orient="list")}
+        payload = {"data": sample}
     else:
         payload = {"data": sample}
-    with open(Path(__file__).parent / "samples" / filename, "w") as f:
+    with open(Path(__file__).parent / "samples" / filename, "w+") as f:
         json.dump(payload, f, indent=2)
 
 
@@ -174,9 +174,11 @@ def predict_tabular_regressor(est, sample, filename):
 
 
 def predict_text_classifier(est, sample, filename):
-    output = [int(x) for x in est.predict(sample)]
+    output = []
+    for i, c in enumerate(est.predict_proba(sample).tolist()[0]):
+        output.append({"label": str(est.classes_[i]), "score": c})
     with open(Path(__file__).parent / "samples" / filename, "w") as f:
-        json.dump(output, f, indent=2)
+        json.dump([output], f, indent=2)
 
 
 #############
@@ -218,6 +220,7 @@ PREDICT_FUNCTIONS = {
 
 def main(version):
     for task in TASKS:
+        breakpoint()
         print(f"Creating data for task '{task}' and version '{version}'")
         X, y = DATA[task]
         X_train, X_test, y_train, _ = train_test_split(

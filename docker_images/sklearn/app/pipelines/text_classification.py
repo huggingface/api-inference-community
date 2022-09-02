@@ -50,10 +50,6 @@ class TextClassificationPipeline(Pipeline):
             # if there is an exception while loading the model, we save it to
             # raise the write error when __call__ is called.
             self._load_exception = e
-        # use labels from config file if available
-        self.labels = config.get("sklearn", {}).get("labels", None)
-        if not self.labels:
-            self.labels = self.model.classes_
 
     def __call__(self, inputs: str) -> List[Dict[str, float]]:
         """
@@ -80,10 +76,11 @@ class TextClassificationPipeline(Pipeline):
                 # We will predict probabilities for each class and return them as
                 # list of list of dictionaries
                 # below is a numpy array of probabilities of each class
-                prob = self.model.predict_proba([inputs["data"]]).tolist()
                 res = []
-                for i, c in enumerate(prob[0]):
-                    res.append({"label": str(self.labels[i]), "score": c})
+                for i, c in enumerate(
+                    self.model.predict_proba([inputs["data"]]).tolist()[0]
+                ):
+                    res.append({"label": str(self.model.classes_[i]), "score": c})
                 res = [res]
         except Exception as e:
             exception = e
