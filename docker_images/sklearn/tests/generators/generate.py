@@ -37,7 +37,7 @@ from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from skops import hub_utils
 
 
-SLEEP_BETWEEN_PUSHES = 100
+SLEEP_BETWEEN_PUSHES = 300
 
 
 def push_repo(repo_name, local_repo):
@@ -220,7 +220,6 @@ PREDICT_FUNCTIONS = {
 
 def main(version):
     for task in TASKS:
-        breakpoint()
         print(f"Creating data for task '{task}' and version '{version}'")
         X, y = DATA[task]
         X_train, X_test, y_train, _ = train_test_split(
