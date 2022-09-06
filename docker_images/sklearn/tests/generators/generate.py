@@ -225,7 +225,10 @@ def main(version):
         X_train, X_test, y_train, _ = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
-        if task != "text-classification":
+        # check if it is a dataframe
+        is_frame = getattr(X_test, "head", None)
+
+        if callable(is_frame):
             sample = X_test.head(10)
         else:
             sample = X_test[:10]
