@@ -153,10 +153,7 @@ def create_repos(est_name, task_name, est, sample, version):
 
 
 def save_sample(sample, filename, task):
-    if task != "text-classification":
-        payload = {"data": sample}
-    else:
-        payload = {"data": sample}
+    payload = {"data": sample}
     with open(Path(__file__).parent / "samples" / filename, "w+") as f:
         json.dump(payload, f, indent=2)
 
