@@ -1,3 +1,4 @@
+import json
 import os
 
 from pathlib import Path
@@ -5,10 +6,14 @@ from typing import List, Tuple
 
 import numpy as np
 import torch
+from fairseq import hub_utils
 from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
 from fairseq.models.speech_to_text.hub_interface import S2THubInterface
 from fairseq.models.text_to_speech import CodeHiFiGANVocoder
-from fairseq.models.text_to_speech.hub_interface import TTSHubInterface
+from fairseq.models.text_to_speech.hub_interface import (
+    TTSHubInterface,
+    VocoderHubInterface,
+)
 
 from app.pipelines import Pipeline
 
@@ -51,7 +56,26 @@ class SpeechToSpeechPipeline(Pipeline):
                 cache_dir = snapshot_download(
                     f"facebook/{_id}", cache_dir=cache_dir, library_name=library_name
                 )
-                self.tts_model = CodeHiFiGANVocoder.from_pretrained(cache_dir)
+
+                x = hub_utils.from_pretrained(
+                    cache_dir,
+                    "model.pt",
+                    ".",
+                    archive_map=CodeHiFiGANVocoder.hub_models(),
+                    config_yaml="config.json",
+                    fp16=False,
+                    is_vocoder=True,
+                )
+
+                with open(f"{x['args']['data']}/config.json") as f:
+                    vocoder_cfg = json.load(f)
+                assert (
+                    len(x["args"]["model_path"]) == 1
+                ), "Too many vocoder models in the input"
+
+                vocoder = CodeHiFiGANVocoder(x["args"]["model_path"][0], vocoder_cfg)
+                self.tts_model = VocoderHubInterface(vocoder_cfg, vocoder)
+
             else:
                 (
                     tts_models,
@@ -95,7 +119,8 @@ class SpeechToSpeechPipeline(Pipeline):
 
         wav, sr = np.zeros((0,)), self.sampling_rate
         if self.unit_vocoder is not None:
-            wav, sr = self.tts_model.predict(text)
+            tts_sample = self.tts_model.get_model_input(text)
+            wav, sr = self.tts_model.get_prediction(tts_sample)
         else:
             tts_sample = TTSHubInterface.get_model_input(self.tts_task, text)
             wav, sr = TTSHubInterface.get_prediction(
