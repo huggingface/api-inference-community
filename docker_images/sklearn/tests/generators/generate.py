@@ -231,7 +231,7 @@ def main(version):
         if callable(is_frame):
             sample = X_test.head(10)
         else:
-            sample = X_test[:10]
+            sample = X_test[0:10]
 
         # save model input, which are later used for tests
         input_name = INPUT_NAMES[task].format(version=version)
