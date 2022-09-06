@@ -65,7 +65,7 @@ class TextClassificationTestCase(TestCase):
         expected_output_len = len(self.expected_output)
 
         with TestClient(self.app) as client:
-            response = client.post("/", json={"inputs": data})
+            response = client.post("/", json={"inputs": data["data"][0]})
         self.assertEqual(
             response.status_code,
             200,
@@ -89,7 +89,7 @@ class TextClassificationTestCase(TestCase):
 
         data = self.data
         with TestClient(self.app) as client:
-            response = client.post("/", json={"inputs": data})
+            response = client.post("/", json={"inputs": data["data"][0]})
 
         assert response.status_code == 400
         content = json.loads(response.content)
@@ -106,7 +106,7 @@ class TextClassificationTestCase(TestCase):
 
         data = self.data
         with TestClient(self.app) as client:
-            response = client.post("/", json={"inputs": data})
+            response = client.post("/", json={"inputs": data["data"][0]})
 
         assert response.status_code == 400
         content = json.loads(response.content)
