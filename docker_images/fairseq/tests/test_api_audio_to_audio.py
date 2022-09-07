@@ -49,9 +49,7 @@ class AudioToAudioTestCase(TestCase):
         return bpayload
 
     def test_simple(self):
-        bpayload = self.read(
-            "sample2.flac"
-        )
+        bpayload = self.read("sample2.flac")
 
         with TestClient(self.app) as client:
             response = client.post("/", data=bpayload)
