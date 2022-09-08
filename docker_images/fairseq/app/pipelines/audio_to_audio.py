@@ -5,8 +5,6 @@ from typing import List, Tuple
 
 import numpy as np
 import torch
-from huggingface_hub import snapshot_download
-
 from app.pipelines import Pipeline
 from fairseq import hub_utils
 from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
@@ -16,6 +14,7 @@ from fairseq.models.text_to_speech.hub_interface import (
     TTSHubInterface,
     VocoderHubInterface,
 )
+from huggingface_hub import snapshot_download
 
 
 class SpeechToSpeechPipeline(Pipeline):
