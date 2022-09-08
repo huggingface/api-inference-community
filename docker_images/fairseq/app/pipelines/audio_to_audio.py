@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 import numpy as np
 import torch
+from huggingface_hub import snapshot_download
 
 from app.pipelines import Pipeline
 from fairseq import hub_utils
@@ -41,13 +42,6 @@ class SpeechToSpeechPipeline(Pipeline):
             _repo, _id = tts_model_id.split(":")
             cache_dir = os.getenv("HUGGINGFACE_HUB_CACHE")
             if self.unit_vocoder is not None:
-                try:
-                    from huggingface_hub import snapshot_download
-                except ImportError:
-                    raise ImportError(
-                        "You need to install huggingface_hub to use `load_from_hf_hub`. "
-                        "See https://pypi.org/project/huggingface-hub/ for installation."
-                    )
                 library_name = "fairseq"
                 cache_dir = (
                     cache_dir or (Path.home() / ".cache" / library_name).as_posix()
