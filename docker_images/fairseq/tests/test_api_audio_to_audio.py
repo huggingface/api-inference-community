@@ -1,12 +1,12 @@
 import base64
 import json
 import os
-from unittest import skipIf, TestCase
+from unittest import TestCase, skipIf
+
+from starlette.testclient import TestClient
 
 from api_inference_community.validation import ffmpeg_read
 from app.main import ALLOWED_TASKS
-from starlette.testclient import TestClient
-
 from tests.test_api import TESTABLE_MODELS
 
 

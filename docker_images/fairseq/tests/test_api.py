@@ -1,6 +1,6 @@
 import os
 from typing import Dict
-from unittest import skipIf, TestCase
+from unittest import TestCase, skipIf
 
 from app.main import ALLOWED_TASKS, get_pipeline
 
