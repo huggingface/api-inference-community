@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Tuple
 
@@ -6,9 +5,6 @@ import numpy as np
 from app.pipelines import Pipeline
 from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
 from fairseq.models.text_to_speech.hub_interface import TTSHubInterface
-
-
-logger = logging.getLogger(__name__)
 
 
 class TextToSpeechPipeline(Pipeline):
