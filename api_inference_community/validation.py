@@ -189,6 +189,7 @@ INPUTS_MAPPING = {
     "zero-shot-classification": StringInput,
     "text-to-speech": StringInput,
     "text-to-image": StringInput,
+    "grapheme-to-phoneme": StringInput
 }
 
 BATCH_ENABLED_PIPELINES = ["feature-extraction"]
@@ -236,6 +237,7 @@ TEXT_INPUTS = {
     "text-classification",
     "text-to-image",
     "text-to-speech",
+    "grapheme-to-phoneme",
     "token-classification",
     "zero-shot-classification",
 }
