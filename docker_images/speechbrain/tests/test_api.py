@@ -32,6 +32,10 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
     "text-to-speech": [
         "speechbrain/tts-tacotron2-ljspeech",
     ],
+    "grapheme-to-phoneme": [
+        # SoundChoice G2P
+        "speechbrain/soundchoice-g2p"
+    ]
 }
 
 
