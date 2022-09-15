@@ -42,7 +42,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "audio-to-audio": AudioToAudioPipeline,
     "automatic-speech-recognition": AutomaticSpeechRecognitionPipeline,
     "text-to-speech": TextToSpeechPipeline,
-    "text-to-text": TextToTextPipeline
+    "text2text-generation": TextToTextPipeline
 }
 
 

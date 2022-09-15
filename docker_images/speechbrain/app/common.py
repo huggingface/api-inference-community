@@ -15,7 +15,7 @@ class ModelType(Enum):
     # text-to-speech
     TACOTRON2 = "TACOTRON2"
     HIFIGAN = "HIFIGAN"
-    # text-to-text
+    # text2text-generation
     GRAPHEMETOPHONEME = "GRAPHEMETOPHONEME"
 
 

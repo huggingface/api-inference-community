@@ -6,4 +6,4 @@ from app.pipelines.automatic_speech_recognition import (
     AutomaticSpeechRecognitionPipeline,
 )
 from app.pipelines.text_to_speech import TextToSpeechPipeline
-from app.pipelines.text_to_text import TextToTextPipeline
+from app.pipelines.text2text_generation import TextToTextPipeline

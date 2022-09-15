@@ -10,18 +10,18 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "text-to-text" not in ALLOWED_TASKS,
-    "text-to-text not implemented",
+    "text2text-generation" not in ALLOWED_TASKS,
+    "text2text-generation not implemented",
 )
 @parameterized_class(
-    [{"model_id": model_id} for model_id in TESTABLE_MODELS["text-to-text"]]
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["text2text-generation"]]
 )
 class TextToSpeechTestCase(TestCase):
     def setUp(self):
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.model_id
-        os.environ["TASK"] = "text-to-text"
+        os.environ["TASK"] = "text2text-generation"
         from app.main import app
 
         self.app = app
