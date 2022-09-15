@@ -35,7 +35,7 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
     "text2text-generation": [
         # SoundChoice G2P
         "speechbrain/soundchoice-g2p"
-    ]
+    ],
 }
 
 

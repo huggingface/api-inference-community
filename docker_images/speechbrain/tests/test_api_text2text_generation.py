@@ -1,8 +1,7 @@
-import os
 import json
+import os
 from unittest import TestCase, skipIf
 
-from api_inference_community.validation import ffmpeg_read
 from app.main import ALLOWED_TASKS
 from parameterized import parameterized_class
 from starlette.testclient import TestClient
@@ -48,15 +47,17 @@ class TextToSpeechTestCase(TestCase):
                 "/",
                 json={
                     "inputs": "English is tough. It can be understood "
-                    "through thorough thought though."})
+                    "through thorough thought though."
+                },
+            )
         self.assertEqual(
             response.status_code,
             200,
         )
         result = json.loads(response.content)
-    
+
         self.assertEqual(
             "IH-NG-G-L-IH-SH- -IH-Z- -T-AH-F- -IH-T- -K-AE-N- -B-IY- -"
             "AH-N-D-ER-S-T-UH-D- -TH-R-UW- -TH-ER-OW- -TH-AO-T- -DH-OW",
-            result["text"]
+            result["text"],
         )
