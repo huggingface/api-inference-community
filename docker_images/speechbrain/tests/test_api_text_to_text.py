@@ -10,18 +10,18 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "grapheme-to-phoneme" not in ALLOWED_TASKS,
-    "grapheme-to-phoneme not implemented",
+    "text-to-text" not in ALLOWED_TASKS,
+    "text-to-text not implemented",
 )
 @parameterized_class(
-    [{"model_id": model_id} for model_id in TESTABLE_MODELS["grapheme-to-phoneme"]]
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["text-to-text"]]
 )
 class TextToSpeechTestCase(TestCase):
     def setUp(self):
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.model_id
-        os.environ["TASK"] = "grapheme-to-phoneme"
+        os.environ["TASK"] = "text-to-text"
         from app.main import app
 
         self.app = app
@@ -56,7 +56,7 @@ class TextToSpeechTestCase(TestCase):
         result = json.loads(response.content)
     
         self.assertEqual(
-            "IH NG G L IH SH   IH Z   T AH F   IH T   K AE N   B IY   "
-            "AH N D ER S T UH D   TH R UW   TH ER OW   TH AO T   DH OW",
-            result["phn"]
+            "IH-NG-G-L-IH-SH- -IH-Z- -T-AH-F- -IH-T- -K-AE-N- -B-IY- -"
+            "AH-N-D-ER-S-T-UH-D- -TH-R-UW- -TH-ER-OW- -TH-AO-T- -DH-OW",
+            result["text"]
         )

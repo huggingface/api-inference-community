@@ -10,7 +10,7 @@ from app.pipelines import (
     AutomaticSpeechRecognitionPipeline,
     Pipeline,
     TextToSpeechPipeline,
-    GraphemeToPhonemePipeline
+    TextToTextPipeline
 )
 from starlette.applications import Starlette
 from starlette.routing import Route
@@ -42,7 +42,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "audio-to-audio": AudioToAudioPipeline,
     "automatic-speech-recognition": AutomaticSpeechRecognitionPipeline,
     "text-to-speech": TextToSpeechPipeline,
-    "grapheme-to-phoneme": GraphemeToPhonemePipeline
+    "text-to-text": TextToTextPipeline
 }
 
 
