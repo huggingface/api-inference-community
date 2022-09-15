@@ -252,7 +252,7 @@ class DockerImageTests(unittest.TestCase):
 
         self.framework_docker_test(
             "speechbrain",
-            "grapheme-to-phoneme",
+            "text-to-text",
             "speechbrain/soundchoice-g2p",
         )
 
