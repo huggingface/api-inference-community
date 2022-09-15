@@ -15,7 +15,7 @@ class TextToTextPipeline(Pipeline):
             raise ValueError(f"{model_type.value} is invalid for text-to-text")
         self.post_process = POSTPROCESSING.get(model_type, lambda output: output)
 
-    def __call__(self, inputs: str) -> str:
+    def __call__(self, inputs: str) -> dict:
         """
         Args:
             inputs (:obj:`str`):
