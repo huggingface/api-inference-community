@@ -114,6 +114,7 @@ class TextClassificationTestCase(TestCase):
         assert "An error occurred while loading the model:" in content["error"]
 
     def test_malformed_question(self):
+        # testing wrong input for inference API
         with TestClient(self.app) as client:
             response = client.post("/", data=b"\xc3\x28")
 
