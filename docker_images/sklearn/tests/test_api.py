@@ -138,7 +138,7 @@ TEST_CASES = {
             "has_config": True,
             "old_sklearn": True,
             "accepts_nan": False,
-            "loads_on_new_sklearn": False,
+            "loads_on_new_sklearn": True,
         },
         "skops-tests/tabularregression-sklearn-latest-hist_gradient_boosting_regressor-without-config": {
             "input": "tabularregression-latest-input.json",

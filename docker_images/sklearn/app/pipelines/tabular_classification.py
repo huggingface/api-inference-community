@@ -11,9 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class TabularClassificationPipeline(SklearnBasePipeline):
-    def __init__(self, model_id: str):
-        super().__init__(model_id)
-
     def __call__(
         self, inputs: Dict[str, Dict[str, List[Union[str, float]]]]
     ) -> List[Union[str, float]]:

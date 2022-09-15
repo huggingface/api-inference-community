@@ -37,7 +37,7 @@ from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from skops import hub_utils
 
 
-SLEEP_BETWEEN_PUSHES = 100
+SLEEP_BETWEEN_PUSHES = 1
 
 
 def push_repo(repo_name, local_repo):
@@ -153,7 +153,7 @@ def create_repos(est_name, task_name, est, sample, version):
 
 
 def save_sample(sample, filename, task):
-    if task == "text-classification":
+    if "text" in task:
         payload = {"data": sample}
     else:
         payload = {"data": sample.to_dict(orient="list")}
@@ -185,7 +185,7 @@ def predict_text_classifier(est, sample, filename):
 # CONSTANTS #
 #############
 
-TASKS = ["tabular-classification"]
+TASKS = ["tabular-classification", "tabular-regression", "text-classification"]
 DATA = {
     "tabular-classification": load_iris(return_X_y=True, as_frame=True),
     "tabular-regression": load_diabetes(return_X_y=True, as_frame=True),
