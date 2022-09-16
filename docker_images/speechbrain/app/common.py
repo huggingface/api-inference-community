@@ -15,6 +15,8 @@ class ModelType(Enum):
     # text-to-speech
     TACOTRON2 = "TACOTRON2"
     HIFIGAN = "HIFIGAN"
+    # text2text-generation
+    GRAPHEMETOPHONEME = "GRAPHEMETOPHONEME"
 
 
 def get_type(model_id, interface_type="interface"):
