@@ -1,3 +1,4 @@
+import os
 from typing import TYPE_CHECKING
 
 from app.pipelines import Pipeline
@@ -10,7 +11,9 @@ if TYPE_CHECKING:
 
 class TextToImagePipeline(Pipeline):
     def __init__(self, model_id: str):
-        self.ldm = DiffusionPipeline.from_pretrained(model_id)
+        self.ldm = DiffusionPipeline.from_pretrained(
+            model_id, use_auth_token=os.getenv("HF_API_TOKEN")
+        )
 
     def __call__(self, inputs: str) -> "Image.Image":
         """
@@ -20,7 +23,5 @@ class TextToImagePipeline(Pipeline):
         Return:
             A :obj:`PIL.Image` with the raw image representation as PIL.
         """
-        images = self.ldm([inputs], num_inference_steps=50, eta=0.3, guidance_scale=6)[
-            "sample"
-        ]
+        images = self.ldm([inputs])["images"]
         return images[0]
