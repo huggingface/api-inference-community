@@ -25,4 +25,4 @@ class TextToTextPipeline(Pipeline):
         """
         output = self.model(inputs)
         output = self.post_process(output)
-        return {"text": output}
+        return {"generated_text": output}

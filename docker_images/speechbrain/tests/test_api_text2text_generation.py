@@ -59,5 +59,5 @@ class TextToSpeechTestCase(TestCase):
         self.assertEqual(
             "IH-NG-G-L-IH-SH- -IH-Z- -T-AH-F- -IH-T- -K-AE-N- -B-IY- -"
             "AH-N-D-ER-S-T-UH-D- -TH-R-UW- -TH-ER-OW- -TH-AO-T- -DH-OW",
-            result["text"],
+            result["generated_text"],
         )
