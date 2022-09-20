@@ -3,7 +3,6 @@ import os
 from unittest import TestCase, skipIf
 
 from app.main import ALLOWED_TASKS
-from parameterized import parameterized_class
 from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
 
@@ -12,14 +11,12 @@ from tests.test_api import TESTABLE_MODELS
     "text2text-generation" not in ALLOWED_TASKS,
     "text2text-generation not implemented",
 )
-@parameterized_class(
-    [{"model_id": model_id} for model_id in TESTABLE_MODELS["text2text-generation"]]
-)
-class TextToSpeechTestCase(TestCase):
+class QuestionAnsweringTestCase(TestCase):
     def setUp(self):
+        model_id = TESTABLE_MODELS["text2text-generation"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
-        os.environ["MODEL_ID"] = self.model_id
+        os.environ["MODEL_ID"] = model_id
         os.environ["TASK"] = "text2text-generation"
         from app.main import app
 
@@ -56,8 +53,5 @@ class TextToSpeechTestCase(TestCase):
         )
         result = json.loads(response.content)
         self.assertEqual(type(result), list)
-        self.assertEqual(
-            "IH-NG-G-L-IH-SH- -IH-Z- -T-AH-F- -IH-T- -K-AE-N- -B-IY- -"
-            "AH-N-D-ER-S-T-UH-D- -TH-R-UW- -TH-ER-OW- -TH-AO-T- -DH-OW",
-            result[0]["generated_text"],
-        )
+
+        # Add more tests here

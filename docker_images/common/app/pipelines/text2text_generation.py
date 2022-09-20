@@ -10,12 +10,13 @@ POSTPROCESSING = {ModelType.GRAPHEMETOPHONEME: lambda output: "-".join(output)}
 
 class TextToTextPipeline(Pipeline):
     def __init__(self, model_id: str):
-        model_type = get_type(model_id)
-        if model_type == ModelType.GRAPHEMETOPHONEME:
-            self.model = GraphemeToPhoneme.from_hparams(source=model_id)
-        else:
-            raise ValueError(f"{model_type.value} is invalid for text-to-text")
-        self.post_process = POSTPROCESSING.get(model_type, lambda output: output)
+        # IMPLEMENT_THIS
+        # Preload all the elements you are going to need at inference.
+        # For instance your model, processors, tokenizer that might be needed.
+        # This function is only called once, so do all the heavy processing I/O here
+        raise NotImplementedError(
+            "Please implement TextToTextPipeline __init__ function"
+        )
 
     def __call__(self, inputs: str) -> List[Dict[str, str]]:
         """
@@ -25,6 +26,7 @@ class TextToTextPipeline(Pipeline):
         Return:
             A :obj:`list`:. The list contains a single item that is a dict {"text": the model output}
         """
-        output = self.model(inputs)
-        output = self.post_process(output)
-        return [{"generated_text": output}]
+        # IMPLEMENT_THIS
+        raise NotImplementedError(
+            "Please implement TextToTextPipeline __call__ function"
+        )
