@@ -2,6 +2,8 @@ __pycache__/
 *.py[cod]
 
 # Speechbrain artefact.
+model_checkpoints
+pretrained_models
 pretrained_checkpoints
 
 *.egg-info/

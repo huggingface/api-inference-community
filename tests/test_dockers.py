@@ -274,13 +274,13 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test("timm", "image-classification", "sgugger/resnet50d")
         self.framework_invalid_test("timm")
 
-    def test_pyannote(self):
+    def test_pyannote_audio(self):
         self.framework_docker_test(
-            "pyannote",
+            "pyannote_audio",
             "automatic-speech-recognition",
             "pyannote/voice-activity-detection",
         )
-        self.framework_invalid_test("pyannote")
+        self.framework_invalid_test("pyannote_audio")
 
     def test_keras(self):
         # Single Output Unit, RGB
@@ -434,8 +434,7 @@ class DockerImageTests(unittest.TestCase):
         model_id: str,
         custom_input: Optional[
             Any
-        ],  # if given, check inference with this specific input
-        timeout=60,
+        ] = None,  # if given, check inference with this specific input
     ):
         tag = self.create_docker(framework)
         run_docker_command = [
