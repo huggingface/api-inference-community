@@ -161,6 +161,7 @@ class DockerImageTests(unittest.TestCase):
             "tabular-classification",
             "skops-tests/iris-sklearn-latest-logistic_regression-with-config",
             custom_input=clf_data,
+            timeout=600,
         )
 
         regr_data = {
@@ -182,6 +183,13 @@ class DockerImageTests(unittest.TestCase):
             "tabular-regression",
             "skops-tests/tabularregression-sklearn-latest-linear_regression-with-config",
             custom_input=regr_data,
+            timeout=600,
+        )
+        self.framework_docker_test(
+            "sklearn",
+            "text-classification",
+            "merve/20newsgroups",
+            timeout=600,
         )
 
     def test_k2_sherpa(self):
@@ -427,6 +435,7 @@ class DockerImageTests(unittest.TestCase):
         custom_input: Optional[
             Any
         ] = None,  # if given, check inference with this specific input
+        timeout=60,
     ):
         tag = self.create_docker(framework)
         run_docker_command = [
@@ -445,7 +454,6 @@ class DockerImageTests(unittest.TestCase):
         ]
 
         url = "http://localhost:8000"
-        timeout = 60
         counter = Counter()
         with DockerPopen(run_docker_command) as proc:
             for i in range(400):
