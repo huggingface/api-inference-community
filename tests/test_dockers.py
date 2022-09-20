@@ -183,6 +183,11 @@ class DockerImageTests(unittest.TestCase):
             "skops-tests/tabularregression-sklearn-latest-linear_regression-with-config",
             custom_input=regr_data,
         )
+        self.framework_docker_test(
+            "sklearn",
+            "text-classification",
+            "merve/20newsgroups",
+        )
 
     def test_k2_sherpa(self):
         self.framework_docker_test(
