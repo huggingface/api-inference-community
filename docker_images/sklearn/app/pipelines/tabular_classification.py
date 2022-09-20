@@ -84,4 +84,7 @@ class TabularClassificationPipeline(SklearnBasePipeline):
                 # catch and return a non 200 status code.
                 raise exception
 
+        if exception:
+            raise exception
+
         return res
