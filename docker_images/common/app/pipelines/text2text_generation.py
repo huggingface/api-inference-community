@@ -1,12 +1,6 @@
 from typing import Dict, List
 
-from app.common import ModelType, get_type
 from app.pipelines import Pipeline
-from speechbrain.pretrained import GraphemeToPhoneme
-
-
-POSTPROCESSING = {ModelType.GRAPHEMETOPHONEME: lambda output: "-".join(output)}
-
 
 class TextToTextPipeline(Pipeline):
     def __init__(self, model_id: str):
