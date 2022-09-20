@@ -435,6 +435,7 @@ class DockerImageTests(unittest.TestCase):
         custom_input: Optional[
             Any
         ] = None,  # if given, check inference with this specific input
+        timeout=60,
     ):
         tag = self.create_docker(framework)
         run_docker_command = [
