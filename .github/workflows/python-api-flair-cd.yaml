@@ -43,6 +43,6 @@ jobs:
           # Load the tags into the env
           cat out.txt
           export $(xargs < out.txt)
-          echo ${{ env.FLAIR_CPU_TAG }}
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"adding_action_for_community","inputs":{"framework":"FLAIR","tag": "${{ env.FLAIR_CPU_TAG }}"}}'
+          echo ${FLAIR_CPU_TAG}
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"adding_action_for_community","inputs":{"framework":"FLAIR","tag": "${FLAIR_CPU_TAG}"}}'
 
