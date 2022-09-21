@@ -41,8 +41,10 @@ jobs:
       - name: Deploy on API
         run: |
           # Load the tags into the env
-          cat out.txt
+          cat out.txt >> $GITHUB_ENV
           export $(xargs < out.txt)
           echo ${FLAIR_CPU_TAG}
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"adding_action_for_community","inputs":{"framework":"FLAIR","tag": "${FLAIR_CPU_TAG}"}}'
+          # Weird single quote escape mechanism because string interpolation does
+          # not work on single quote in bash
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"adding_action_for_community","inputs":{"framework":"FLAIR","tag": "'"${FLAIR_CPU_TAG}"'"}}'
 
