@@ -3,8 +3,8 @@ on:
   push:
     # branches:
     #   - main
-    paths:
-      - "docker_images/flair/**"
+    # paths:
+    #   - "docker_images/flair/**"
 jobs:
   build:
     runs-on: ubuntu-latest
