@@ -52,22 +52,23 @@ def main():
         help="Which framework image to build.",
     )
     parser.add_argument(
-        "--deploy",
-        action="store_true",
-        help="Should we try and update the production",
+        "--out",
+        type=str,
+        help="Where to store the new tags",
     )
     args = parser.parse_args()
 
-    branch = (
-        subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-        .decode("utf-8")
-        .strip()
-    )
-    if branch != "main":
-        raise Exception(f"Go to branch `main` ({branch})")
+    # branch = (
+    #     subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+    #     .decode("utf-8")
+    #     .strip()
+    # )
+    # TODO put back the sanity checks in place !
+    # if branch != "main":
+    #     raise Exception(f"Go to branch `main` ({branch})")
 
-    print("Pulling")
-    subprocess.run(["git", "pull"])
+    # print("Pulling")
+    # subprocess.run(["git", "pull"])
 
     if args.framework == "all":
         outputs = []
@@ -75,28 +76,16 @@ def main():
             tag = build(framework)
             outputs.append((framework, tag))
 
-        for (framework, tag) in outputs:
-            print(f"{framework.upper()}_CPU_TAG", tag)
-
     else:
         tag = build(args.framework)
         outputs = [(args.framework, tag)]
 
-    if args.deploy:
-        values = [
-            f"models_tag.{framework.upper()}_CPU_TAG={tag}"
-            for framework, tag in outputs
-        ]
-        cmd = [
-            "helm",
-            "upgrade",
-            "prod",
-            "chart/",
-            "--reuse-values",
-            "--set",
-            ",".join(values),
-        ]
-        run(cmd)
+    for (framework, tag) in outputs:
+        name = f"{framework.upper()}_CPU_TAG"
+        print(name, tag)
+        if args.out:
+            with open(args.out, "w") as f:
+                f.write(f"{name}={tag}\n")
 
 
 if __name__ == "__main__":
