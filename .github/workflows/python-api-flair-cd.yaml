@@ -40,5 +40,5 @@ jobs:
             #     python build_docker.py flair --deploy
       - name: Deploy on API
         run: |
-          curl  -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"adding_action_for_community","inputs":{"framework":"FLAIR","tag": "flair-xxx"}}'
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"adding_action_for_community","inputs":{"framework":"FLAIR","tag": "flair-xxx"}}'
 
