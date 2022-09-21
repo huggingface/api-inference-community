@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from app.pipelines import Pipeline
 
+
 class TextToTextPipeline(Pipeline):
     def __init__(self, model_id: str):
         # IMPLEMENT_THIS
