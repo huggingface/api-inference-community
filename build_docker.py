@@ -58,17 +58,16 @@ def main():
     )
     args = parser.parse_args()
 
-    # branch = (
-    #     subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-    #     .decode("utf-8")
-    #     .strip()
-    # )
-    # TODO put back the sanity checks in place !
-    # if branch != "main":
-    #     raise Exception(f"Go to branch `main` ({branch})")
+    branch = (
+        subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+        .decode("utf-8")
+        .strip()
+    )
+    if branch != "main":
+        raise Exception(f"Go to branch `main` ({branch})")
 
-    # print("Pulling")
-    # subprocess.run(["git", "pull"])
+    print("Pulling")
+    subprocess.run(["git", "pull"])
 
     if args.framework == "all":
         outputs = []

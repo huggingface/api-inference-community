@@ -1,10 +1,10 @@
 name: flair-docker-cd
 on:
   push:
-    # branches:
-    #   - main
-    # paths:
-    #   - "docker_images/flair/**"
+    branches:
+      - main
+    paths:
+      - "docker_images/flair/**"
 jobs:
   build:
     runs-on: ubuntu-latest
