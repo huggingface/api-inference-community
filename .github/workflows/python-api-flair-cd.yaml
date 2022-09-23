@@ -22,14 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install kubernetes httpx uvicorn awscli
-          sudo snap install kubectl --classic
-          helm plugin install https://github.com/databus23/helm-diff
-      - name: Setup K8S
-        run: |
-          mkdir -p ~/.kube && echo "$PROD_K8S_CONFIG" > ~/.kube/config
-        env:
-          PROD_K8S_CONFIG: "${{ secrets.PROD_K8S_CONFIG }}"
+          pip install awscli
       - name: Update upstream
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
