@@ -5,5 +5,5 @@ phonemizer==2.2.1
 librosa==0.8.1
 hanziconv==0.3.2
 sentencepiece==0.1.96
-git+https://github.com/pytorch/fairseq.git@37c1573bc3f0e206d2b0909d82c22b6bccb7fa4a#egg=fairseq
+git+https://github.com/pytorch/fairseq.git@655f619667f4c8cf5c5f75c659edfb595e766524#egg=fairseq
 huggingface_hub==0.5.1
