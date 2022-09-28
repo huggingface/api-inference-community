@@ -10,8 +10,8 @@ class TextClassificationPipeline(SklearnBasePipeline):
             res.append({"label": str(self.model.classes_[i]), "score": c})
         return [res]
 
-    # even though we only call super, we implement this method to update the
-    # docstring and the type annotation
+    # even though we only delegate the call, we implement this method have the
+    # correct docstring and type annotations
     def __call__(self, inputs: str) -> List[Dict[str, float]]:
         """
         Args:
@@ -22,4 +22,4 @@ class TextClassificationPipeline(SklearnBasePipeline):
                 - "label": A string representing what the label/class is. There can be multiple labels.
                 - "score": A score between 0 and 1 describing how confident the model is for this label/class.
         """
-        return super().handle_call(inputs)
+        return self.handle_call(inputs)

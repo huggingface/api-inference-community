@@ -15,8 +15,8 @@ class TabularClassificationPipeline(SklearnBasePipeline):
         res = self.model.predict(data).tolist()
         return res
 
-    # even though we only call super, we implement this method to update the
-    # docstring and the type annotation
+    # even though we only delegate the call, we implement this method have the
+    # correct docstring and type annotations
     def __call__(
         self, inputs: Dict[str, Dict[str, List[Union[str, float]]]]
     ) -> List[Union[str, float]]:
@@ -30,4 +30,4 @@ class TabularClassificationPipeline(SklearnBasePipeline):
             A :obj:`list` of floats or strings: The classification output for
             each row.
         """
-        return super().handle_call(inputs)
+        return self.handle_call(inputs)
