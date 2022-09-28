@@ -1,12 +1,6 @@
-import json
-import logging
-import warnings
 from typing import Dict, List
 
 from app.pipelines.common import SklearnBasePipeline
-
-
-logger = logging.getLogger(__name__)
 
 
 class TextClassificationPipeline(SklearnBasePipeline):

@@ -5,9 +5,8 @@ from pathlib import Path
 from typing import Any
 
 import joblib
-from huggingface_hub import snapshot_download
-
 from app.pipelines import Pipeline
+from huggingface_hub import snapshot_download
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +23,7 @@ class SklearnBasePipeline(Pipeline):
       annotations.
 
     """
+
     def __init__(self, model_id: str):
         cached_folder = snapshot_download(repo_id=model_id)
         self._load_warnings = []
