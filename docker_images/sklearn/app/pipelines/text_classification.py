@@ -10,8 +10,8 @@ class TextClassificationPipeline(SklearnBasePipeline):
             res.append({"label": str(self.model.classes_[i]), "score": c})
         return [res]
 
-    # even though we only delegate the call, we implement this method have the
-    # correct docstring and type annotations
+    # even though we only delegate the call, we implement this method to have
+    # the correct docstring and type annotations
     def __call__(self, inputs: str) -> List[Dict[str, float]]:
         """
         Args:

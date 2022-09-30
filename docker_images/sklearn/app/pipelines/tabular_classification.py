@@ -15,8 +15,8 @@ class TabularClassificationPipeline(SklearnBasePipeline):
         res = self.model.predict(data).tolist()
         return res
 
-    # even though we only delegate the call, we implement this method have the
-    # correct docstring and type annotations
+    # even though we only delegate the call, we implement this method to have
+    # the correct docstring and type annotations
     def __call__(
         self, inputs: Dict[str, Dict[str, List[Union[str, float]]]]
     ) -> List[Union[str, float]]:
