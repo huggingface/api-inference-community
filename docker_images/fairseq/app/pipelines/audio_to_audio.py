@@ -33,14 +33,10 @@ class SpeechToSpeechPipeline(Pipeline):
         tgt_lang = self.task.data_cfg.hub.get("tgt_lang", None)
         pfx = f"{tgt_lang}_" if self.task.data_cfg.prepend_tgt_lang_tag else ""
 
-        generation_beam = self.task.data_cfg.hub.get(f"{pfx}generation_beam", None)
-        if generation_beam is not None:
-            cfg["generation"].beam = generation_beam
-        generation_max_len_a = self.task.data_cfg.hub.get(
-            f"{pfx}generation_max_len_a", None
-        )
-        if generation_max_len_a is not None:
-            cfg["generation"].max_len_a = generation_max_len_a
+        generation_args = self.task.data_cfg.hub.get(f"{pfx}generation_args", None)
+        if generation_args is not None:
+            for key in generation_args:
+                setattr(cfg.generation, key, generation_args[key])
         self.generator = task.build_generator([self.model], cfg.generation)
 
         tts_model_id = self.task.data_cfg.hub.get(f"{pfx}tts_model_id", None)
