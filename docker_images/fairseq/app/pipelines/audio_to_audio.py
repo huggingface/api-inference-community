@@ -26,14 +26,19 @@ class SpeechToSpeechPipeline(Pipeline):
         )
         self.model = models[0].cpu()
         self.model.eval()
-        cfg["task"].cpu = True
         self.task = task
-        self.generator = task.build_generator([self.model], cfg)
 
         self.sampling_rate = getattr(self.task, "sr", None) or 16_000
 
         tgt_lang = self.task.data_cfg.hub.get("tgt_lang", None)
         pfx = f"{tgt_lang}_" if self.task.data_cfg.prepend_tgt_lang_tag else ""
+
+        generation_args = self.task.data_cfg.hub.get(f"{pfx}generation_args", None)
+        if generation_args is not None:
+            for key in generation_args:
+                setattr(cfg.generation, key, generation_args[key])
+        self.generator = task.build_generator([self.model], cfg.generation)
+
         tts_model_id = self.task.data_cfg.hub.get(f"{pfx}tts_model_id", None)
         self.unit_vocoder = self.task.data_cfg.hub.get(f"{pfx}unit_vocoder", None)
         self.tts_model, self.tts_task, self.tts_generator = None, None, None
@@ -113,6 +118,7 @@ class SpeechToSpeechPipeline(Pipeline):
         if self.unit_vocoder is not None:
             tts_sample = self.tts_model.get_model_input(text)
             wav, sr = self.tts_model.get_prediction(tts_sample)
+            text = ""
         else:
             tts_sample = TTSHubInterface.get_model_input(self.tts_task, text)
             wav, sr = TTSHubInterface.get_prediction(
