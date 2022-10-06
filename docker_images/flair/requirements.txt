@@ -1,5 +1,4 @@
 starlette==0.14.2
 pydantic==1.8.1
 flair @ git+https://github.com/flairNLP/flair@d4ed67bf663e4066517f00397412510d90043653
-api-inference-community==0.0.23
-huggingface_hub==0.5.1
+api-inference-community==0.0.25
