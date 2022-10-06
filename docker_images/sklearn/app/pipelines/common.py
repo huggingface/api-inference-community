@@ -1,6 +1,7 @@
 import json
 import logging
 import warnings
+from abc import abstractmethod
 from pathlib import Path
 from typing import Any
 
@@ -60,17 +61,21 @@ class SklearnBasePipeline(Pipeline):
         # to the model in the right order.
         self.columns = config.get("sklearn", {}).get("columns", None)
 
+    @abstractmethod
     def _get_output(self, inputs: Any) -> Any:
         raise NotImplementedError(
             "Implement this method to get the model output (prediction)"
         )
 
-    def handle_call(self, inputs: Any) -> Any:
+    def __call__(self, inputs: Any) -> Any:
         """Handle call for getting the model prediction
 
         This method is responsible for handling all possible errors and
         warnings. To get the actual prediction, implement the `_get_output`
         method.
+
+        The types of the inputs and output depend on the specific task being
+        implemented.
 
         """
         if self._load_exception:
