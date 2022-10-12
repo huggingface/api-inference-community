@@ -43,7 +43,7 @@ class SpeechToSpeechPipeline(Pipeline):
         self.unit_vocoder = self.task.data_cfg.hub.get(f"{pfx}unit_vocoder", None)
         self.tts_model, self.tts_task, self.tts_generator = None, None, None
         if tts_model_id is not None:
-            _repo, _id = tts_model_id.split(":")
+            _id = tts_model_id.split(":")[-1]
             cache_dir = os.getenv("HUGGINGFACE_HUB_CACHE")
             if self.unit_vocoder is not None:
                 library_name = "fairseq"
