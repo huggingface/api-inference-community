@@ -6,5 +6,5 @@ librosa==0.8.1
 hanziconv==0.3.2
 sentencepiece==0.1.96
 # Dummy comment to trigger automatic deploy.
-git+https://github.com/pytorch/fairseq.git@655f619667f4c8cf5c5f75c659edfb595e766524#egg=fairseq
+git+https://github.com/facebookresearch/fairseq.git@35a6451121d0335f46ab09a06bce1fea8412f97a#egg=fairseq
 huggingface_hub==0.5.1
