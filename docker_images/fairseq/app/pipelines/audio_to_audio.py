@@ -6,8 +6,10 @@ from typing import List, Tuple
 import numpy as np
 import torch
 from app.pipelines import Pipeline
+from app.pipelines.utils import ARG_OVERRIDES_MAP
 from fairseq import hub_utils
 from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
+from fairseq.models.speech_to_speech.hub_interface import S2SHubInterface
 from fairseq.models.speech_to_text.hub_interface import S2THubInterface
 from fairseq.models.text_to_speech import CodeHiFiGANVocoder
 from fairseq.models.text_to_speech.hub_interface import (
@@ -15,14 +17,17 @@ from fairseq.models.text_to_speech.hub_interface import (
     VocoderHubInterface,
 )
 from huggingface_hub import snapshot_download
-from app.pipelines.utils import ARG_OVERRIDES_MAP
 
 
 class SpeechToSpeechPipeline(Pipeline):
     def __init__(self, model_id: str):
+        arg_overrides = ARG_OVERRIDES_MAP.get(
+            model_id, {}
+        )  # Model specific override. TODO: Update on checkpoint side in the future
+        arg_overrides["config_yaml"] = "config.yaml"  # common override
         models, cfg, task = load_model_ensemble_and_task_from_hf_hub(
             model_id,
-            arg_overrides=ARG_OVERRIDES_MAP.get(model_id, None),
+            arg_overrides=arg_overrides,
             cache_dir=os.getenv("HUGGINGFACE_HUB_CACHE"),
         )
         self.cfg = cfg
@@ -118,7 +123,7 @@ class SpeechToSpeechPipeline(Pipeline):
                 self.task, self.model, self.generator, sample
             )
         elif self.cfg.task._name in ["speech_to_speech"]:
-            s2shubinerface = S2SHubInterface(self.cfg, self.task, model)
+            s2shubinerface = S2SHubInterface(self.cfg, self.task, self.model)
             sample = s2shubinerface.get_model_input(self.task, _inputs)
             text = S2SHubInterface.get_prediction(
                 self.task, self.model, self.generator, sample
