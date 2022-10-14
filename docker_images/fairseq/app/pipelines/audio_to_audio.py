@@ -17,6 +17,7 @@ from fairseq.models.text_to_speech.hub_interface import (
 from huggingface_hub import snapshot_download
 from app.pipelines.utils import ARG_OVERRIDES_MAP
 
+
 class SpeechToSpeechPipeline(Pipeline):
     def __init__(self, model_id: str):
         models, cfg, task = load_model_ensemble_and_task_from_hf_hub(
@@ -111,18 +112,17 @@ class SpeechToSpeechPipeline(Pipeline):
         """
         _inputs = torch.from_numpy(inputs).unsqueeze(0)
         sample, text = None, None
-        if self.cfg.task._name in ['speech_to_text', 'speech_to_text_sharded']:
+        if self.cfg.task._name in ["speech_to_text", "speech_to_text_sharded"]:
             sample = S2THubInterface.get_model_input(self.task, _inputs)
             text = S2THubInterface.get_prediction(
                 self.task, self.model, self.generator, sample
             )
-        elif self.cfg.task._name in ['speech_to_speech']:
+        elif self.cfg.task._name in ["speech_to_speech"]:
             s2shubinerface = S2SHubInterface(self.cfg, self.task, model)
             sample = s2shubinerface.get_model_input(self.task, _inputs)
             text = S2SHubInterface.get_prediction(
                 self.task, self.model, self.generator, sample
             )
-            
 
         wav, sr = np.zeros((0,)), self.sampling_rate
         if self.unit_vocoder is not None:
