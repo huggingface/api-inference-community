@@ -1,4 +1,5 @@
 starlette==0.14.2
 api-inference-community==0.0.23
+#Dummy update to retrieve latest version
 nemo_toolkit[all]
 huggingface_hub==0.5.1
