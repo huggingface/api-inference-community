@@ -5,6 +5,5 @@ phonemizer==2.2.1
 librosa==0.8.1
 hanziconv==0.3.2
 sentencepiece==0.1.96
-# Dummy comment to trigger automatic deploy.
-git+https://github.com/pytorch/fairseq.git@679321804cd9de41eeb76668e28d24c8470fda14#egg=fairseq
+git+https://github.com/pytorch/fairseq.git@0c5731f92194a204427515e70854813b14701ed2#egg=fairseq
 huggingface_hub==0.5.1
