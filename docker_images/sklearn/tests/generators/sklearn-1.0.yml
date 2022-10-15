@@ -1,0 +1,13 @@
+name: api-inference-community-test-generator-sklearn-1-0
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - scikit-learn=1.0.2
+  - pandas
+  - huggingface_hub
+  - pip
+  - pip:
+    # if you're testing skops, you should install from github, and probably
+    # a specific hash if your PR on the skops side is not merged.
+    - git+https://github.com/skops-dev/skops.git

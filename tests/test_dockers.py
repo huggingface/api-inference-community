@@ -5,6 +5,7 @@ import time
 import unittest
 import uuid
 from collections import Counter
+from typing import Any, Optional
 
 import httpx
 
@@ -147,10 +148,48 @@ class DockerImageTests(unittest.TestCase):
         self.framework_invalid_test("flair")
 
     def test_sklearn(self):
+        clf_data = {
+            "data": {
+                "sepal length (cm)": [6.1, 5.7, 7.7],
+                "sepal width (cm)": [2.8, 3.8, 2.6],
+                "petal length (cm)": [4.7, 1.7, 6.9],
+                "petal width (cm)": [1.2, 0.3, 2.3],
+            }
+        }
         self.framework_docker_test(
             "sklearn",
             "tabular-classification",
-            "julien-c/wine-quality",
+            "skops-tests/iris-sklearn-latest-logistic_regression-with-config",
+            custom_input=clf_data,
+            timeout=600,
+        )
+
+        regr_data = {
+            "data": {
+                "age": [0.045, 0.092, 0.063],
+                "sex": [-0.044, -0.044, 0.050],
+                "bmi": [-0.006, 0.036, -0.004],
+                "bp": [-0.015, 0.021, -0.012],
+                "s1": [0.125, -0.024, 0.103],
+                "s2": [0.125, -0.016, 0.048],
+                "s3": [0.019, 0.000, 0.056],
+                "s4": [0.034, -0.039, -0.002],
+                "s5": [0.032, -0.022, 0.084],
+                "s6": [-0.005, -0.021, -0.017],
+            }
+        }
+        self.framework_docker_test(
+            "sklearn",
+            "tabular-regression",
+            "skops-tests/tabularregression-sklearn-latest-linear_regression-with-config",
+            custom_input=regr_data,
+            timeout=600,
+        )
+        self.framework_docker_test(
+            "sklearn",
+            "text-classification",
+            "merve/20newsgroups",
+            timeout=600,
         )
 
     def test_k2_sherpa(self):
@@ -235,13 +274,13 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test("timm", "image-classification", "sgugger/resnet50d")
         self.framework_invalid_test("timm")
 
-    def test_pyannote(self):
+    def test_pyannote_audio(self):
         self.framework_docker_test(
-            "pyannote",
+            "pyannote_audio",
             "automatic-speech-recognition",
             "pyannote/voice-activity-detection",
         )
-        self.framework_invalid_test("pyannote")
+        self.framework_invalid_test("pyannote_audio")
 
     def test_keras(self):
         # Single Output Unit, RGB
@@ -388,7 +427,16 @@ class DockerImageTests(unittest.TestCase):
             proc.wait()
         self.assertTrue(True)
 
-    def framework_docker_test(self, framework: str, task: str, model_id: str):
+    def framework_docker_test(
+        self,
+        framework: str,
+        task: str,
+        model_id: str,
+        custom_input: Optional[
+            Any
+        ] = None,  # if given, check inference with this specific input
+        timeout=60,
+    ):
         tag = self.create_docker(framework)
         run_docker_command = [
             "docker",
@@ -406,7 +454,6 @@ class DockerImageTests(unittest.TestCase):
         ]
 
         url = "http://localhost:8000"
-        timeout = 60
         counter = Counter()
         with DockerPopen(run_docker_command) as proc:
             for i in range(400):
@@ -475,6 +522,15 @@ class DockerImageTests(unittest.TestCase):
             )
             self.assertIn(response.status_code, {200, 400})
             counter[response.status_code] += 1
+
+            if custom_input is not None:
+                response = httpx.post(
+                    url,
+                    json=custom_input,
+                    timeout=timeout,
+                )
+                self.assertIn(response.status_code, {200, 400})
+                counter[response.status_code] += 1
 
             with open(
                 os.path.join(os.path.dirname(__file__), "samples", "sample1.flac"), "rb"

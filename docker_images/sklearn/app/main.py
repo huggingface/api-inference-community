@@ -1,10 +1,14 @@
-import functools
 import logging
 import os
 from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
-from app.pipelines import Pipeline, TabularClassificationPipeline
+from app.pipelines import (
+    Pipeline,
+    TabularClassificationPipeline,
+    TabularRegressionPipeline,
+    TextClassificationPipeline,
+)
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.gzip import GZipMiddleware
@@ -34,11 +38,12 @@ logger = logging.getLogger(__name__)
 # directories. Implement directly within the directories.
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     # IMPLEMENT_THIS: Add your implemented tasks here!
-    "tabular-classification": TabularClassificationPipeline
+    "tabular-classification": TabularClassificationPipeline,
+    "tabular-regression": TabularRegressionPipeline,
+    "text-classification": TextClassificationPipeline,
 }
 
 
-@functools.lru_cache()
 def get_pipeline(task=None, model_id=None) -> Pipeline:
     task = task or os.environ["TASK"]
     model_id = model_id or os.environ["MODEL_ID"]

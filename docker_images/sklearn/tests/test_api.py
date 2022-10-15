@@ -1,22 +1,237 @@
 import os
-from typing import Dict
 from unittest import TestCase, skipIf
 
 from app.main import ALLOWED_TASKS, get_pipeline
 
 
-# Must contain at least one example of each implemented pipeline Tests do not
-# check the actual values of the model output, so small dummy models are
-# recommended for faster tests. Note: make sure all models require
-# scikit-learn=1.0.2, and if you change that, make sure README.md of sklearn
-# folder is also updated.
-TESTABLE_MODELS: Dict[str, str] = {
-    "tabular-classification": {
-        "repo_id": "scikit-learn/iris-demo",
-        "input": "iris.json",
-    }
+# Must contain at least one example of each implemented pipeline
+TESTABLE_MODELS = {
+    "tabular-classification": [
+        "skops-tests/iris-sklearn-1.0-logistic_regression-with-config",
+        "skops-tests/iris-sklearn-1.0-logistic_regression-without-config",
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-with-config",
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-without-config",
+        "skops-tests/iris-sklearn-latest-logistic_regression-with-config",
+        "skops-tests/iris-sklearn-latest-logistic_regression-without-config",
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-with-config",
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-without-config",
+    ],
+    "tabular-regression": [
+        "skops-tests/tabularregression-sklearn-1.0-linear_regression-with-config",
+        "skops-tests/tabularregression-sklearn-1.0-linear_regression-without-config",
+        "skops-tests/tabularregression-sklearn-1.0-hist_gradient_boosting_regressor-with-config",
+        "skops-tests/tabularregression-sklearn-1.0-hist_gradient_boosting_regressor-without-config",
+        "skops-tests/tabularregression-sklearn-latest-linear_regression-with-config",
+        "skops-tests/tabularregression-sklearn-latest-linear_regression-without-config",
+        "skops-tests/tabularregression-sklearn-latest-hist_gradient_boosting_regressor-with-config",
+        "skops-tests/tabularregression-sklearn-latest-hist_gradient_boosting_regressor-without-config",
+    ],
+    "text-classification": [
+        "skops-tests/textclassification-sklearn-latest-hist_gradient_boosting-without-config",
+        "skops-tests/textclassification-sklearn-latest-hist_gradient_boosting-with-config",
+        "skops-tests/textclassification-sklearn-1.0-hist_gradient_boosting-without-config",
+        "skops-tests/textclassification-sklearn-1.0-hist_gradient_boosting-with-config",
+        "skops-tests/textclassification-sklearn-latest-logistic_regression-without-config",
+        "skops-tests/textclassification-sklearn-latest-logistic_regression-with-config",
+        "skops-tests/textclassification-sklearn-1.0-logistic_regression-without-config",
+        "skops-tests/textclassification-sklearn-1.0-logistic_regression-with-config",
+    ],
 }
 
+# This contains information about the test cases above, used in the tests to
+# define which tests to run for which examples.
+TEST_CASES = {
+    "tabular-classification": {
+        "skops-tests/iris-sklearn-latest-logistic_regression-without-config": {
+            "input": "iris-latest-input.json",
+            "output": "iris-logistic_regression-latest-output.json",
+            "has_config": False,
+            "old_sklearn": False,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-latest-logistic_regression-with-config": {
+            "input": "iris-latest-input.json",
+            "output": "iris-logistic_regression-latest-output.json",
+            "has_config": True,
+            "old_sklearn": False,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-1.0-logistic_regression-without-config": {
+            "input": "iris-1.0-input.json",
+            "output": "iris-logistic_regression-1.0-output.json",
+            "has_config": False,
+            "old_sklearn": True,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-1.0-logistic_regression-with-config": {
+            "input": "iris-1.0-input.json",
+            "output": "iris-logistic_regression-1.0-output.json",
+            "has_config": True,
+            "old_sklearn": True,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-without-config": {
+            "input": "iris-latest-input.json",
+            "output": "iris-hist_gradient_boosting-latest-output.json",
+            "has_config": False,
+            "old_sklearn": False,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-latest-hist_gradient_boosting-with-config": {
+            "input": "iris-latest-input.json",
+            "output": "iris-hist_gradient_boosting-latest-output.json",
+            "has_config": True,
+            "old_sklearn": False,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-without-config": {
+            "input": "iris-1.0-input.json",
+            "output": "iris-hist_gradient_boosting-1.0-output.json",
+            "has_config": False,
+            "old_sklearn": True,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": False,
+        },
+        "skops-tests/iris-sklearn-1.0-hist_gradient_boosting-with-config": {
+            "input": "iris-1.0-input.json",
+            "output": "iris-hist_gradient_boosting-1.0-output.json",
+            "has_config": True,
+            "old_sklearn": True,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": False,
+        },
+    },
+    "tabular-regression": {
+        "skops-tests/tabularregression-sklearn-latest-linear_regression-without-config": {
+            "input": "tabularregression-latest-input.json",
+            "output": "tabularregression-linear_regression-latest-output.json",
+            "has_config": False,
+            "old_sklearn": False,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/tabularregression-sklearn-latest-linear_regression-with-config": {
+            "input": "tabularregression-latest-input.json",
+            "output": "tabularregression-linear_regression-latest-output.json",
+            "has_config": True,
+            "old_sklearn": False,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/tabularregression-sklearn-1.0-linear_regression-without-config": {
+            "input": "tabularregression-1.0-input.json",
+            "output": "tabularregression-linear_regression-1.0-output.json",
+            "has_config": False,
+            "old_sklearn": True,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/tabularregression-sklearn-1.0-linear_regression-with-config": {
+            "input": "tabularregression-1.0-input.json",
+            "output": "tabularregression-linear_regression-1.0-output.json",
+            "has_config": True,
+            "old_sklearn": True,
+            "accepts_nan": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/tabularregression-sklearn-latest-hist_gradient_boosting_regressor-without-config": {
+            "input": "tabularregression-latest-input.json",
+            "output": "tabularregression-hist_gradient_boosting_regressor-latest-output.json",
+            "has_config": False,
+            "old_sklearn": False,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/tabularregression-sklearn-latest-hist_gradient_boosting_regressor-with-config": {
+            "input": "tabularregression-latest-input.json",
+            "output": "tabularregression-hist_gradient_boosting_regressor-latest-output.json",
+            "has_config": True,
+            "old_sklearn": False,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/tabularregression-sklearn-1.0-hist_gradient_boosting_regressor-without-config": {
+            "input": "tabularregression-1.0-input.json",
+            "output": "tabularregression-hist_gradient_boosting_regressor-1.0-output.json",
+            "has_config": False,
+            "old_sklearn": True,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": False,
+        },
+        "skops-tests/tabularregression-sklearn-1.0-hist_gradient_boosting_regressor-with-config": {
+            "input": "tabularregression-1.0-input.json",
+            "output": "tabularregression-hist_gradient_boosting_regressor-1.0-output.json",
+            "has_config": True,
+            "old_sklearn": True,
+            "accepts_nan": True,
+            "loads_on_new_sklearn": False,
+        },
+    },
+    "text-classification": {
+        "skops-tests/textclassification-sklearn-latest-hist_gradient_boosting-without-config": {
+            "input": "textclassification-latest-input.json",
+            "output": "textclassification-hist_gradient_boosting-latest-output.json",
+            "has_config": False,
+            "old_sklearn": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/textclassification-sklearn-latest-hist_gradient_boosting-with-config": {
+            "input": "textclassification-latest-input.json",
+            "output": "textclassification-hist_gradient_boosting-latest-output.json",
+            "has_config": True,
+            "old_sklearn": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/textclassification-sklearn-1.0-hist_gradient_boosting-without-config": {
+            "input": "textclassification-1.0-input.json",
+            "output": "textclassification-hist_gradient_boosting-1.0-output.json",
+            "has_config": False,
+            "old_sklearn": True,
+            "loads_on_new_sklearn": False,
+        },
+        "skops-tests/textclassification-sklearn-1.0-hist_gradient_boosting-with-config": {
+            "input": "textclassification-1.0-input.json",
+            "output": "textclassification-hist_gradient_boosting-1.0-output.json",
+            "has_config": True,
+            "old_sklearn": True,
+            "loads_on_new_sklearn": False,
+        },
+        "skops-tests/textclassification-sklearn-latest-logistic_regression-without-config": {
+            "input": "textclassification-latest-input.json",
+            "output": "textclassification-logistic_regression-latest-output.json",
+            "has_config": False,
+            "old_sklearn": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/textclassification-sklearn-latest-logistic_regression-with-config": {
+            "input": "textclassification-latest-input.json",
+            "output": "textclassification-logistic_regression-latest-output.json",
+            "has_config": True,
+            "old_sklearn": False,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/textclassification-sklearn-1.0-logistic_regression-without-config": {
+            "input": "textclassification-1.0-input.json",
+            "output": "textclassification-logistic_regression-1.0-output.json",
+            "has_config": False,
+            "old_sklearn": True,
+            "loads_on_new_sklearn": True,
+        },
+        "skops-tests/textclassification-sklearn-1.0-logistic_regression-with-config": {
+            "input": "textclassification-1.0-input.json",
+            "output": "textclassification-logistic_regression-1.0-output.json",
+            "has_config": True,
+            "old_sklearn": True,
+            "loads_on_new_sklearn": True,
+        },
+    },
+}
 
 ALL_TASKS = {
     "automatic-speech-recognition",

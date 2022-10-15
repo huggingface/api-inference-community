@@ -40,8 +40,15 @@ class AudioToAudioTestCase(TestCase):
         else:
             del os.environ["TASK"]
 
+    def read(self, filename: str) -> bytes:
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(dirname, "samples", filename)
+        with open(filename, "rb") as f:
+            bpayload = f.read()
+        return bpayload
+
     def test_simple(self):
-        bpayload = self.read("sample1.flac")
+        bpayload = self.read("sample2.flac")
 
         with TestClient(self.app) as client:
             response = client.post("/", data=bpayload)
