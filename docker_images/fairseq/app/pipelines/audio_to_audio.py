@@ -6,8 +6,10 @@ from typing import List, Tuple
 import numpy as np
 import torch
 from app.pipelines import Pipeline
+from app.pipelines.utils import ARG_OVERRIDES_MAP
 from fairseq import hub_utils
 from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
+from fairseq.models.speech_to_speech.hub_interface import S2SHubInterface
 from fairseq.models.speech_to_text.hub_interface import S2THubInterface
 from fairseq.models.text_to_speech import CodeHiFiGANVocoder
 from fairseq.models.text_to_speech.hub_interface import (
@@ -19,11 +21,16 @@ from huggingface_hub import snapshot_download
 
 class SpeechToSpeechPipeline(Pipeline):
     def __init__(self, model_id: str):
+        arg_overrides = ARG_OVERRIDES_MAP.get(
+            model_id, {}
+        )  # Model specific override. TODO: Update on checkpoint side in the future
+        arg_overrides["config_yaml"] = "config.yaml"  # common override
         models, cfg, task = load_model_ensemble_and_task_from_hf_hub(
             model_id,
-            arg_overrides={"config_yaml": "config.yaml", "task": "speech_to_text"},
+            arg_overrides=arg_overrides,
             cache_dir=os.getenv("HUGGINGFACE_HUB_CACHE"),
         )
+        self.cfg = cfg
         self.model = models[0].cpu()
         self.model.eval()
         self.task = task
@@ -109,10 +116,18 @@ class SpeechToSpeechPipeline(Pipeline):
                     or some annotation for speech enhancement. The length must be `C'`.
         """
         _inputs = torch.from_numpy(inputs).unsqueeze(0)
-        sample = S2THubInterface.get_model_input(self.task, _inputs)
-        text = S2THubInterface.get_prediction(
-            self.task, self.model, self.generator, sample
-        )
+        sample, text = None, None
+        if self.cfg.task._name in ["speech_to_text", "speech_to_text_sharded"]:
+            sample = S2THubInterface.get_model_input(self.task, _inputs)
+            text = S2THubInterface.get_prediction(
+                self.task, self.model, self.generator, sample
+            )
+        elif self.cfg.task._name in ["speech_to_speech"]:
+            s2shubinerface = S2SHubInterface(self.cfg, self.task, self.model)
+            sample = s2shubinerface.get_model_input(self.task, _inputs)
+            text = S2SHubInterface.get_prediction(
+                self.task, self.model, self.generator, sample
+            )
 
         wav, sr = np.zeros((0,)), self.sampling_rate
         if self.unit_vocoder is not None:
