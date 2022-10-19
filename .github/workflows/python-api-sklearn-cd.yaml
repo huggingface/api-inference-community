@@ -1,10 +1,10 @@
-name: skelarn-docker-cd
+name: sklearn-docker-cd
 on:
   push:
     branches:
       - main
     paths:
-      - "docker_images/skelarn/**"
+      - "docker_images/sklearn/**"
 jobs:
   build:
     runs-on: ubuntu-latest
