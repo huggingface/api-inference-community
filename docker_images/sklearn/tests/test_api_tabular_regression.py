@@ -93,12 +93,18 @@ class TabularRegressionTestCase(TestCase):
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": data})
 
+        # check response
         assert response.status_code == 400
         content = json.loads(response.content)
         assert "error" in content
         assert "warnings" in content
-        assert any("Trying to unpickle estimator" in w for w in content["warnings"])
 
+        # check warnings
+        assert any("Trying to unpickle estimator" in w for w in content["warnings"])
+        warnings = json.loads(content["error"])["warnings"]
+        assert any("Trying to unpickle estimator" in w for w in warnings)
+
+        # check error
         error_message = json.loads(content["error"])
         assert len(error_message["output"]) == len(self.expected_output)
         for val_output, val_expected in zip(
