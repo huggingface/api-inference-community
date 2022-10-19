@@ -30,7 +30,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           DEFAULT_HOSTNAME: ${{ secrets.DEFAULT_HOSTNAME }}
         run: |
-          python build_docker.py skelarn --out out.txt
+          python build_docker.py sklearn --out out.txt
       - name: Deploy on API
         run: |
           # Load the tags into the env
