@@ -278,7 +278,7 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "diffusers",
             "text-to-image",
-            "CompVis/ldm-text2im-large-256",
+            "hf-internal-testing/tiny-stable-diffusion-pipe",
         )
         self.framework_invalid_test("diffusers")
 

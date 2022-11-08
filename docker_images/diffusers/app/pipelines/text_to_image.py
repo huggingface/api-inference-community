@@ -11,8 +11,14 @@ if TYPE_CHECKING:
 
 class TextToImagePipeline(Pipeline):
     def __init__(self, model_id: str):
+
+        kwargs = (
+            {"safety_checker": None}
+            if model_id.startswith("hf-internal-testing")
+            else {}
+        )
         self.ldm = DiffusionPipeline.from_pretrained(
-            model_id, use_auth_token=os.getenv("HF_API_TOKEN")
+            model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
         )
 
     def __call__(self, inputs: str) -> "Image.Image":
