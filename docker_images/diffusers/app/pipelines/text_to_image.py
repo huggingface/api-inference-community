@@ -1,6 +1,7 @@
 import os
 from typing import TYPE_CHECKING
 
+import torch
 from app.pipelines import Pipeline
 from diffusers import DiffusionPipeline
 
@@ -20,6 +21,8 @@ class TextToImagePipeline(Pipeline):
         self.ldm = DiffusionPipeline.from_pretrained(
             model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
         )
+        if torch.cuda.is_available():
+            self.ldm.to("cuda")
 
     def __call__(self, inputs: str) -> "Image.Image":
         """
