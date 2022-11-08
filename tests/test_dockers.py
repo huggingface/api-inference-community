@@ -274,6 +274,14 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test("timm", "image-classification", "sgugger/resnet50d")
         self.framework_invalid_test("timm")
 
+    def test_diffusers(self):
+        self.framework_docker_test(
+            "diffusers",
+            "text-to-image",
+            "hf-internal-testing/tiny-stable-diffusion-pipe",
+        )
+        self.framework_invalid_test("diffusers")
+
     def test_pyannote_audio(self):
         self.framework_docker_test(
             "pyannote_audio",
