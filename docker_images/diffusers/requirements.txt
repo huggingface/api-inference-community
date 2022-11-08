@@ -4,3 +4,4 @@ huggingface_hub==0.10.1
 diffusers==0.7.2
 transformers==4.22
 accelerate==0.13.2
+pydantic==1.8.1

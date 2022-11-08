@@ -14,7 +14,7 @@ class TextToImagePipeline(Pipeline):
 
         kwargs = (
             {"safety_checker": None}
-            if model_id.startswith("hf-internal-testing")
+            if model_id.startswith("hf-internal-testing/")
             else {}
         )
         self.ldm = DiffusionPipeline.from_pretrained(
