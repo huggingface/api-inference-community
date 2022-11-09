@@ -13,7 +13,7 @@ def run(command):
         sys.exit(p.returncode)
 
 
-def build(framework: str):
+def build(framework: str, is_gpu: bool):
     DEFAULT_HOSTNAME = os.getenv("DEFAULT_HOSTNAME")
     hostname = DEFAULT_HOSTNAME
     tag_id = str(uuid.uuid4())[:5]
@@ -21,6 +21,8 @@ def build(framework: str):
     container_tag = f"{hostname}/api-inference-prod-community:{tag}"
 
     command = ["docker", "build", f"docker_images/{framework}", "-t", container_tag]
+    if is_gpu:
+        command.extend(["-f", f"docker_images/{framework}/GpuDockerfile"])
     run(command)
 
     command = ["aws", "ecr", "get-login-password"]
@@ -56,6 +58,11 @@ def main():
         type=str,
         help="Where to store the new tags",
     )
+    parser.add_argument(
+        "--gpu",
+        action="store_true",
+        help="Build the GPU version of the model",
+    )
     args = parser.parse_args()
 
     branch = (
@@ -72,15 +79,16 @@ def main():
     if args.framework == "all":
         outputs = []
         for framework in frameworks:
-            tag = build(framework)
+            tag = build(framework, args.gpu)
             outputs.append((framework, tag))
 
     else:
-        tag = build(args.framework)
+        tag = build(args.framework, args.gpu)
         outputs = [(args.framework, tag)]
 
     for (framework, tag) in outputs:
-        name = f"{framework.upper()}_CPU_TAG"
+        compute = "GPU" if args.gpu else "CPU"
+        name = f"{framework.upper()}_{compute}_TAG"
         print(name, tag)
         if args.out:
             with open(args.out, "w") as f:
