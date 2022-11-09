@@ -18,8 +18,12 @@ class TextToImagePipeline(Pipeline):
             if model_id.startswith("hf-internal-testing/")
             else {}
         )
+
         self.ldm = DiffusionPipeline.from_pretrained(
-            model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
+            model_id,
+            use_auth_token=os.getenv("HF_API_TOKEN"),
+            torch_dtype=torch.float16,
+            **kwargs
         )
         if torch.cuda.is_available():
             self.ldm.to("cuda")
