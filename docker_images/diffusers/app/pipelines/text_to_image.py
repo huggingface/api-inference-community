@@ -19,11 +19,11 @@ class TextToImagePipeline(Pipeline):
             else {}
         )
 
+        if torch.cuda.is_available():
+            kwargs["torch_dtype"] = torch.float16
+
         self.ldm = DiffusionPipeline.from_pretrained(
-            model_id,
-            use_auth_token=os.getenv("HF_API_TOKEN"),
-            torch_dtype=torch.float16,
-            **kwargs
+            model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
         )
         if torch.cuda.is_available():
             self.ldm.to("cuda")
