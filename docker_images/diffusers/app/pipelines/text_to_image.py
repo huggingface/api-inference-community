@@ -35,7 +35,7 @@ class TextToImagePipeline(Pipeline):
                 use_auth_token=os.getenv("HF_API_TOKEN"),
             )
             self.ldm.scheduler = scheduler
-            self.ldm.enable_xformers_memory_efficient_attention()
+            # self.ldm.enable_xformers_memory_efficient_attention()
 
     def __call__(self, inputs: str, inference_steps=25) -> "Image.Image":
         """

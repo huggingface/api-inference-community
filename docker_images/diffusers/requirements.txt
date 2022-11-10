@@ -6,5 +6,5 @@ transformers==4.22
 accelerate==0.13.2
 pydantic==1.8.1
 ftfy==6.1.1
-triton==1.1.1
--e git+https://github.com/facebookresearch/xformers@7e4c02c#egg=xformers
+# triton==1.1.1
+# -e git+https://github.com/facebookresearch/xformers@7e4c02c#egg=xformers
