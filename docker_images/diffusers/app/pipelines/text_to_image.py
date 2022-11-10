@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING
 
 import torch
 from app.pipelines import Pipeline
-from diffusers import DiffusionPipeline
+from diffusers import DiffusionPipeline, StableDiffusionPipeline, EulerDiscreteScheduler
+
 
 
 if TYPE_CHECKING:
@@ -27,8 +28,12 @@ class TextToImagePipeline(Pipeline):
         )
         if torch.cuda.is_available():
             self.ldm.to("cuda")
+        
+        if isinstance(self.ldm, StableDiffusionPipeline):
+            scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler", use_auth_token=os.getenv("HF_API_TOKEN")
+            self.ldm.scheduler = scheduler
 
-    def __call__(self, inputs: str) -> "Image.Image":
+    def __call__(self, inputs: str, inference_steps=25) -> "Image.Image":
         """
         Args:
             inputs (:obj:`str`):
@@ -36,5 +41,8 @@ class TextToImagePipeline(Pipeline):
         Return:
             A :obj:`PIL.Image` with the raw image representation as PIL.
         """
-        images = self.ldm([inputs])["images"]
+        if isinstance(self.ldm, StableDiffusionPipeline):
+            images = self.ldm([inputs], num_inference_steps=inference_steps)["images"]
+        else:
+            images = self.ldm([inputs])["images"]
         return images[0]
