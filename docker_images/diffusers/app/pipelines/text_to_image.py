@@ -29,7 +29,7 @@ class TextToImagePipeline(Pipeline):
             self.ldm.to("cuda")
 
         if isinstance(self.ldm, StableDiffusionPipeline):
-            scheduler = EulerDiscreteScheduler.from_pretrained(
+            scheduler = EulerDiscreteScheduler.from_config(
                 model_id,
                 subfolder="scheduler",
                 use_auth_token=os.getenv("HF_API_TOKEN"),
