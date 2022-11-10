@@ -17,6 +17,7 @@ COPY ./prestart.sh /app/
 ARG max_workers=1
 ENV MAX_WORKERS=$max_workers
 ENV HUGGINGFACE_HUB_CACHE=/data
+ENV DIFFUSERS_CACHE=/data
 ENV HF_HOME=/data
 
 # Necessary on GPU environment docker.

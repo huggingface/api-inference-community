@@ -31,6 +31,7 @@ jobs:
           DEFAULT_HOSTNAME: ${{ secrets.DEFAULT_HOSTNAME }}
         run: |
           python build_docker.py diffusers --out out.txt
+          python build_docker.py diffusers --gpu --out out-gpu.txt
       - name: Deploy on API
         run: |
           # Load the tags into the env
@@ -40,3 +41,21 @@ jobs:
           # Weird single quote escape mechanism because string interpolation does
           # not work on single quote in bash
           curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"DIFFUSERS","tag": "'"${DIFFUSERS_CPU_TAG}"'"}}'
+
+      - name: Update upstream (GPU)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          DEFAULT_HOSTNAME: ${{ secrets.DEFAULT_HOSTNAME }}
+        run: |
+          python build_docker.py diffusers --gpu --out out-gpu.txt
+
+      - name: Deploy on API (GPU)
+        run: |
+          cat out-gpu.txt >> $GITHUB_ENV
+          export $(xargs < out-gpu.txt)
+          echo ${DIFFUSERS_GPU_TAG}
+          # Weird single quote escape mechanism because string interpolation does
+          # not work on single quote in bash
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"compute": "GPU", "framework":"DIFFUSERS","tag": "'"${DIFFUSERS_GPU_TAG}"'"}}'
