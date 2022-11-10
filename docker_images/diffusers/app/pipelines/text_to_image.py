@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING
 
 import torch
 from app.pipelines import Pipeline
-from diffusers import DiffusionPipeline, StableDiffusionPipeline, EulerDiscreteScheduler
-
+from diffusers import DiffusionPipeline, EulerDiscreteScheduler, StableDiffusionPipeline
 
 
 if TYPE_CHECKING:
@@ -28,10 +27,15 @@ class TextToImagePipeline(Pipeline):
         )
         if torch.cuda.is_available():
             self.ldm.to("cuda")
-        
+
         if isinstance(self.ldm, StableDiffusionPipeline):
-            scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler", use_auth_token=os.getenv("HF_API_TOKEN")
+            scheduler = EulerDiscreteScheduler.from_pretrained(
+                model_id,
+                subfolder="scheduler",
+                use_auth_token=os.getenv("HF_API_TOKEN"),
+            )
             self.ldm.scheduler = scheduler
+            self.ldm.enable_xformers_memory_efficient_attention()
 
     def __call__(self, inputs: str, inference_steps=25) -> "Image.Image":
         """
