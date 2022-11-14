@@ -4,7 +4,7 @@ LABEL maintainer="Nicolas Patry <nicolas@huggingface.co>"
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y
 
-RUN pip install --no-cache-dir torch==1.12.0+cpu torchvision==0.13.0+cpu torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir torch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/

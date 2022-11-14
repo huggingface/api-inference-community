@@ -37,8 +37,7 @@ def create_docker(name: str, is_gpu: bool) -> str:
     with cd(
         os.path.join(os.path.dirname(os.path.dirname(__file__)), "docker_images", name)
     ):
-        gpu = ["-f", "GpuDockerfile"] if is_gpu else []
-        subprocess.run(["docker", "build", ".", "-t", tag, *gpu])
+        subprocess.run(["docker", "build", ".", "-t", tag])
     return tag
 
 
