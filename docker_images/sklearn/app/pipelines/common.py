@@ -34,14 +34,10 @@ class SklearnBasePipeline(Pipeline):
                 # this is the default path for configuration of a scikit-learn
                 # project. If the project is created using `skops`, it should have
                 # this file.
-                try:
-                    config = json.load(f)
-                except Exception:
-                    raise ValueError("`config.json` is invalid.")
+                config = json.load(f)
         except Exception:
-            # If for whatever reason we fail to detect requirements of the
-            # project, we install the latest scikit-learn.
             config = dict()
+            raise Warning("`config.json` is invalid.")
 
         self.model_file = (
             config.get("sklearn", {}).get("model", {}).get("file", DEFAULT_FILENAME)
