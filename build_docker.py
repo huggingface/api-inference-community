@@ -21,8 +21,6 @@ def build(framework: str, is_gpu: bool):
     container_tag = f"{hostname}/api-inference-prod-community:{tag}"
 
     command = ["docker", "build", f"docker_images/{framework}", "-t", container_tag]
-    if is_gpu:
-        command.extend(["-f", f"docker_images/{framework}/GpuDockerfile"])
     run(command)
 
     command = ["aws", "ecr", "get-login-password"]
