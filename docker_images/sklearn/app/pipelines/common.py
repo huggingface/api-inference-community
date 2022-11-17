@@ -34,7 +34,10 @@ class SklearnBasePipeline(Pipeline):
                 # this is the default path for configuration of a scikit-learn
                 # project. If the project is created using `skops`, it should have
                 # this file.
-                config = json.load(f)
+                try:
+                    config = json.load(f)
+                except Exception:
+                    raise ValueError("`config.json` is invalid.")
         except Exception:
             # If for whatever reason we fail to detect requirements of the
             # project, we install the latest scikit-learn.
@@ -78,6 +81,7 @@ class SklearnBasePipeline(Pipeline):
         implemented.
 
         """
+        
         if self._load_exception:
             # there has been an error while loading the model. We need to raise
             # that, and can't call predict on the model.
