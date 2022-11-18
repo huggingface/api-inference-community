@@ -6,6 +6,4 @@ huggingface_hub==0.10.1
 accelerate==0.13.2
 pydantic==1.8.1
 ftfy==6.1.1
-# triton==1.1.1
-# -e git+https://github.com/facebookresearch/xformers@7e4c02c#egg=xformers
-# Dumb change.
+scipy==1.9.3
