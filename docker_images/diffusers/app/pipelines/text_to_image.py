@@ -27,6 +27,8 @@ class TextToImagePipeline(Pipeline):
         )
         if torch.cuda.is_available():
             self.ldm.to("cuda")
+            self.ldm.enable_xformers_memory_efficient_attention()
+            self.ldm.unet.to(memory_format=torch.channels_last)
 
         if isinstance(self.ldm, StableDiffusionPipeline):
             scheduler = EulerDiscreteScheduler.from_config(
@@ -35,7 +37,6 @@ class TextToImagePipeline(Pipeline):
                 use_auth_token=os.getenv("HF_API_TOKEN"),
             )
             self.ldm.scheduler = scheduler
-            # self.ldm.enable_xformers_memory_efficient_attention()
 
     def __call__(self, inputs: str, inference_steps=25) -> "Image.Image":
         """
