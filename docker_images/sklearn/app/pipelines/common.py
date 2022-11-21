@@ -77,7 +77,7 @@ class SklearnBasePipeline(Pipeline):
         implemented.
 
         """
-        
+
         if self._load_exception:
             # there has been an error while loading the model. We need to raise
             # that, and can't call predict on the model.
