@@ -36,9 +36,8 @@ class SklearnBasePipeline(Pipeline):
                 # this file.
                 config = json.load(f)
         except Exception:
-            # If for whatever reason we fail to detect requirements of the
-            # project, we install the latest scikit-learn.
             config = dict()
+            raise UserWarning("`config.json` does not exist or is invalid.")
 
         self.model_file = (
             config.get("sklearn", {}).get("model", {}).get("file", DEFAULT_FILENAME)
@@ -78,6 +77,7 @@ class SklearnBasePipeline(Pipeline):
         implemented.
 
         """
+
         if self._load_exception:
             # there has been an error while loading the model. We need to raise
             # that, and can't call predict on the model.
