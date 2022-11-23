@@ -1,4 +1,3 @@
-from http.client import responses
 from typing import Any, Dict, List, Union
 
 from app.pipelines import Pipeline
@@ -14,8 +13,7 @@ class ConversationalPipeline(Pipeline):
         Args:
             inputs (:obj:`dict`): a dictionary containing the following key values:
                 text (`str`, *optional*):
-                    The initial user input to start the conversation. If not provided, a user input needs to be provided
-                    manually using the [`~Conversation.add_user_input`] method before the conversation can begin.
+                    The initial user input to start the conversation
                 past_user_inputs (`List[str]`, *optional*):
                     Eventual past history of the conversation of the user. You don't need to pass it manually if you use the
                     pipeline interactively but if you want to recreate history you need to set both `past_user_inputs` and

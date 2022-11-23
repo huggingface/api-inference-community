@@ -1,5 +1,4 @@
-from http.client import responses
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from app.pipelines import Pipeline
 from paddlenlp.taskflow import Taskflow
