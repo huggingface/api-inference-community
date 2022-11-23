@@ -5,9 +5,7 @@ LABEL maintainer="Sijun He <sijun.he@hotmail.com>"
 # RUN apt-get update -y && apt-get install libXXX -y
 
 COPY ./requirements.txt /app
-RUN ls
-RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-# RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/
 
 

@@ -9,10 +9,8 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    "fill-mask": "ernie-1.0-base-zh"
-    # IMPLEMENT_THIS
-    # "automatic-speech-recognition": "mysample-ASR",
-    # "text-generation": "mysample-gpt2",
+    "conversational": "PaddlePaddle/plato-mini",
+    "fill-mask": "PaddlePaddle/ci-test-bert-model",
 }
 
 

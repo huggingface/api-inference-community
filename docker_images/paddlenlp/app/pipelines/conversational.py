@@ -7,14 +7,12 @@ from paddlenlp.taskflow import Taskflow
 
 class ConversationalPipeline(Pipeline):
     def __init__(self, model_id: str):
-        # TODO: how to setup params
         self.pipeline = Taskflow("dialogue", task_path=model_id, from_hf_hub=True)
-        
 
     def __call__(self, inputs: Dict[str, Union[str, List[str]]]) -> Dict[str, Any]:
         """
         Args:
-            inputs (:obj:`dict`): a dictionnary containing the following key values:
+            inputs (:obj:`dict`): a dictionary containing the following key values:
                 text (`str`, *optional*):
                     The initial user input to start the conversation. If not provided, a user input needs to be provided
                     manually using the [`~Conversation.add_user_input`] method before the conversation can begin.
@@ -27,19 +25,31 @@ class ConversationalPipeline(Pipeline):
                     pipeline interactively but if you want to recreate history you need to set both `past_user_inputs` and
                     `generated_responses` with equal length lists of strings
         Return:
-            A :obj:`dict`:. ???
+            A :obj:`dict`: a dictionary containing the following key values:
+                generated_text (`str`):
+                    The answer of the bot
+                conversation   (`Dict[str, List[str]]`):
+                    A facility dictionnary to send back for the next input (with the new user input addition).
+
+                        past_user_inputs (`List[str]`)
+                            List of strings. The last inputs from the user in the conversation, after the model has run.
+                        generated_responses	(`List[str]`)
+                            List of strings. The last outputs from the model in the conversation, after the model has run.
         """
         text = inputs["text"]
-        past_user_inputs = inputs["past_user_inputs"]
-        generated_responses = inputs["generated_responses"]
+        past_user_inputs = inputs.get("past_user_inputs", [])
+        generated_responses = inputs.get("generated_responses", [])
         complete_message_history = []
         for user_input, responses in zip(past_user_inputs, generated_responses):
             complete_message_history.extend([user_input, responses])
         complete_message_history.append(text)
-        response = self.pipeline(complete_message_history)
-
-        ## To be implemented once the API clears up
-
-
-
-        
+        cur_response = self.pipeline(complete_message_history)[0]
+        past_user_inputs.append(text)
+        generated_responses.append(cur_response)
+        return {
+            "generated_text": cur_response,
+            "conversation": {
+                "generated_responses": generated_responses,
+                "past_user_inputs": past_user_inputs,
+            },
+        }
