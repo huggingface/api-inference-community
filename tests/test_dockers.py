@@ -147,6 +147,15 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("flair")
 
+    def test_paddlenlp(self):
+        self.framework_docker_test(
+            "paddlenlp", "fill-mask", "PaddlePaddle/ci-test-bert-model"
+        )
+        self.framework_docker_test(
+            "paddlenlp", "conversational", "PaddlePaddle/plato-mini"
+        )
+        self.framework_invalid_test("paddlenlp")
+
     def test_sklearn(self):
         clf_data = {
             "data": {

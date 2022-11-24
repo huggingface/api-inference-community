@@ -1,5 +1,5 @@
 FROM tiangolo/uvicorn-gunicorn:python3.8
-LABEL maintainer="Sijun He <sijun.he@hotmail.com>"
+LABEL maintainer="PaddleNLP <paddlenlp@baidu.com>"
 
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y
