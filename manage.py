@@ -178,12 +178,15 @@ def docker(args):
         f"MODEL_ID={model_id}",
         "-e",
         f"COMPUTE_TYPE={'gpu' if args.gpu else 'cpu'}",
+        "-e",
+        f"DEBUG={os.getenv('DEBUG', '0')}",
         "-v",
         "/tmp:/data",
         "-t",
         tag,
     ]
 
+    print(" ".join(run_docker_command))
     with DockerPopen(run_docker_command) as proc:
         try:
             proc.wait()
