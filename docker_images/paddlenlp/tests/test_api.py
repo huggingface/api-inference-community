@@ -10,7 +10,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
     "conversational": "PaddlePaddle/plato-mini",
-    "fill-mask": "PaddlePaddle/ci-test-bert-model",
+    "fill-mask": "PaddlePaddle/ci-test-ernie-model",
 }
 
 
