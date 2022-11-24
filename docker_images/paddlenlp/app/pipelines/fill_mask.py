@@ -13,7 +13,7 @@ class FillMaskPipeline(Pipeline):
         Args:
             inputs (:obj:`str`): a string to be filled from, must contain the [MASK] token (check model card for exact name of the mask)
         Return:
-            A :obj:`list`:. The object returned should be like [{"entity_group": "XXX", "word": "some word", "start": 3, "end": 6, "score": 0.82}] containing :
+            A :obj:`list`:. a list of dicts containing the following:
                 - "sequence": The actual sequence of tokens that ran against the model (may contain special tokens)
                 - "score": The probability for this token.
                 - "token": The id of the token
