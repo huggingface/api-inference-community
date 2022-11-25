@@ -487,7 +487,23 @@ class DockerImageTests(unittest.TestCase):
 
             response = httpx.post(
                 url,
-                json={"inputs": "This is a test"},
+                # Include the mask for fill-mask tests.
+                json={"inputs": "This is a test [MASK]"},
+                timeout=timeout,
+            )
+            self.assertIn(response.status_code, {200, 400})
+            counter[response.status_code] += 1
+
+            response = httpx.post(
+                url,
+                # Conversational
+                json={
+                    "inputs": {
+                        "text": "My name [MASK].",
+                        "past_user_inputs": [],
+                        "generated_responses": [],
+                    }
+                },
                 timeout=timeout,
             )
             self.assertIn(response.status_code, {200, 400})
