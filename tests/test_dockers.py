@@ -147,6 +147,15 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("flair")
 
+    def test_paddlenlp(self):
+        self.framework_docker_test(
+            "paddlenlp", "fill-mask", "PaddlePaddle/ci-test-ernie-model"
+        )
+        self.framework_docker_test(
+            "paddlenlp", "conversational", "PaddlePaddle/plato-mini"
+        )
+        self.framework_invalid_test("paddlenlp")
+
     def test_sklearn(self):
         clf_data = {
             "data": {
@@ -478,7 +487,23 @@ class DockerImageTests(unittest.TestCase):
 
             response = httpx.post(
                 url,
-                json={"inputs": "This is a test"},
+                # Include the mask for fill-mask tests.
+                json={"inputs": "This is a test [MASK]"},
+                timeout=timeout,
+            )
+            self.assertIn(response.status_code, {200, 400})
+            counter[response.status_code] += 1
+
+            response = httpx.post(
+                url,
+                # Conversational
+                json={
+                    "inputs": {
+                        "text": "My name [MASK].",
+                        "past_user_inputs": [],
+                        "generated_responses": [],
+                    }
+                },
                 timeout=timeout,
             )
             self.assertIn(response.status_code, {200, 400})
