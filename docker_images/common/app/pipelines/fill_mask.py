@@ -1,12 +1,15 @@
 from typing import Any, Dict, List
 
 from app.pipelines import Pipeline
-from paddlenlp.taskflow import Taskflow
 
 
 class FillMaskPipeline(Pipeline):
     def __init__(self, model_id: str):
-        self.taskflow = Taskflow("fill_mask", task_path=model_id, from_hf_hub=True)
+        # IMPLEMENT_THIS
+        # Preload all the elements you are going to need at inference.
+        # For instance your model, processors, tokenizer that might be needed.
+        # This function is only called once, so do all the heavy processing I/O here
+        raise NotImplementedError("Please implement FillMaskPipeline __init__ function")
 
     def __call__(self, inputs: str) -> List[Dict[str, Any]]:
         """
@@ -19,6 +22,5 @@ class FillMaskPipeline(Pipeline):
                 - "token": The id of the token
                 - "token_str": The string representation of the token
         """
-        results = self.taskflow(inputs)
-        # since paddlenlp taskflow takes batch requests and returns batch results, we take the first element here
-        return results[0]
+        # IMPLEMENT_THIS
+        raise NotImplementedError("Please implement FillMaskPipeline __call__ function")

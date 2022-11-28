@@ -2,5 +2,4 @@ starlette==0.14.2
 api-inference-community==0.0.23
 huggingface_hub>=0.10.1
 paddlepaddle==2.3.2
-## TODO: switch to a release when it's out
-git+https://github.com/PaddlePaddle/PaddleNLP
+paddlenlp>=2.4.4
