@@ -9,9 +9,7 @@ class FillMaskPipeline(Pipeline):
         # Preload all the elements you are going to need at inference.
         # For instance your model, processors, tokenizer that might be needed.
         # This function is only called once, so do all the heavy processing I/O here
-        raise NotImplementedError(
-            "Please implement FillMaskPipeline __init__ function"
-        )
+        raise NotImplementedError("Please implement FillMaskPipeline __init__ function")
 
     def __call__(self, inputs: str) -> List[Dict[str, Any]]:
         """
@@ -25,6 +23,4 @@ class FillMaskPipeline(Pipeline):
                 - "token_str": The string representation of the token
         """
         # IMPLEMENT_THIS
-        raise NotImplementedError(
-            "Please implement FillMaskPipeline __call__ function"
-        )
+        raise NotImplementedError("Please implement FillMaskPipeline __call__ function")
