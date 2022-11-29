@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import torch
 from app.pipelines import Pipeline
-from diffusers import DiffusionPipeline, EulerDiscreteScheduler, StableDiffusionPipeline
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionPipeline, AltDiffusionPipeline
 
 
 if TYPE_CHECKING:
@@ -30,13 +30,8 @@ class TextToImagePipeline(Pipeline):
             self.ldm.enable_xformers_memory_efficient_attention()
             self.ldm.unet.to(memory_format=torch.channels_last)
 
-        if isinstance(self.ldm, StableDiffusionPipeline):
-            scheduler = EulerDiscreteScheduler.from_config(
-                model_id,
-                subfolder="scheduler",
-                use_auth_token=os.getenv("HF_API_TOKEN"),
-            )
-            self.ldm.scheduler = scheduler
+        if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
+            self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(self.ldm.scheduler.config)
 
     def __call__(self, inputs: str, inference_steps=25) -> "Image.Image":
         """
@@ -46,7 +41,7 @@ class TextToImagePipeline(Pipeline):
         Return:
             A :obj:`PIL.Image` with the raw image representation as PIL.
         """
-        if isinstance(self.ldm, StableDiffusionPipeline):
+        if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
             images = self.ldm([inputs], num_inference_steps=inference_steps)["images"]
         else:
             images = self.ldm([inputs])["images"]
