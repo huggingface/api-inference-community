@@ -3,7 +3,12 @@ from typing import TYPE_CHECKING
 
 import torch
 from app.pipelines import Pipeline
-from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionPipeline, AltDiffusionPipeline
+from diffusers import (
+    AltDiffusionPipeline,
+    DiffusionPipeline,
+    DPMSolverMultistepScheduler,
+    StableDiffusionPipeline,
+)
 
 
 if TYPE_CHECKING:
@@ -31,7 +36,9 @@ class TextToImagePipeline(Pipeline):
             self.ldm.unet.to(memory_format=torch.channels_last)
 
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
-            self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(self.ldm.scheduler.config)
+            self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
+                self.ldm.scheduler.config
+            )
 
     def __call__(self, inputs: str, inference_steps=25) -> "Image.Image":
         """
