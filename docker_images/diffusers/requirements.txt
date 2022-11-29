@@ -6,4 +6,5 @@ huggingface_hub==0.10.1
 accelerate==0.13.2
 pydantic==1.8.1
 ftfy==6.1.1
+sentencepiece==0.1.97
 scipy==1.9.3
