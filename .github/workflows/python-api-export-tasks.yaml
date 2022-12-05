@@ -1,0 +1,26 @@
+name: Export tasks
+on:
+  pull_request:
+    paths:
+      - "**"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8"]
+
+    steps:
+      - run: |
+          sudo apt-get update
+
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: python scripts/export_tasks.py
+        env: # Or as an environment variable
+          API_TOKEN: ${{ secrets.USER_API_TOKEN }}
