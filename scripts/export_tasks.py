@@ -6,7 +6,8 @@ This script
 - prints the library name as well as its tasks in JSON format.
 
 Note that the transformer library is not included in the output 
-as we can assume that it supports all tasks.
+as we can assume it supports all tasks. This is done as
+the transformers API codebase is not in this repository.
 """
 
 import ast
