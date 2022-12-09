@@ -1,10 +1,12 @@
 """Exports a library -> supported tasks mapping in JSON format. 
 
 This script
-- parse the source code of app/main.py and extract the AST
-- find the ALLOWED_TASKS variable and get all the keys.
+- parses the source code of a library's app/main.py and extracts the AST
+- finds the ALLOWED_TASKS variable and get all the keys.
+- prints the library name as well as its tasks in JSON format.
 
-Note that transformer library is not included in the output.
+Note that the transformer library is not included in the output 
+as we can assume that it supports all tasks.
 """
 
 import ast
@@ -32,8 +34,8 @@ def _extract_tasks(library_name, variable_name, value):
 
 
 def traverse_global_assignments(library_name, file_content, handler):
-    """Traverse all global assignment and apply handler on them.
-    
+    """Traverse all global assignments and apply handler on each of them.
+
     Args:
         library_name: The nmae of the library (e.g. paddlenlp)
         file_content: The content of app/main.py file in string.
