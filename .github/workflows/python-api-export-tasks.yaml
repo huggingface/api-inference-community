@@ -1,8 +1,8 @@
 name: Export tasks
 on:
   push:
-    paths:
-      - "**"
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
