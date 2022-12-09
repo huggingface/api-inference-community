@@ -1,6 +1,6 @@
 name: Export tasks
 on:
-  pull_request:
+  push:
     paths:
       - "**"
 jobs:
@@ -22,5 +22,3 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - run: python scripts/export_tasks.py
-        env: # Or as an environment variable
-          API_TOKEN: ${{ secrets.USER_API_TOKEN }}

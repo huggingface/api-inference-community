@@ -1,25 +1,51 @@
+"""Exports a library -> supported tasks mapping in JSON format. 
+
+This script
+- parse the source code of app/main.py and extract the AST
+- find the ALLOWED_TASKS variable and get all the keys.
+
+Note that transformer library is not included in the output.
+"""
+
 import ast
+import collections
 import os
 import pathlib
 import json
 
-lib_to_task_map = {}
+
+lib_to_task_map = collections.defaultdict(list)
 
 
-def extract_tasks(library_name, variable_name, value):
+def _extract_tasks(library_name, variable_name, value):
+    """Extract supported tasks of the library.
+
+    Args:
+        library_name: The name of the libarary (e.g. paddlenlp)
+        variable_name: The name of the Python variable (e.g. ALLOWED_TASKS)
+        value: The AST of the variable's Python value.
+    """
     if variable_name == "ALLOWED_TASKS":
         if isinstance(value, ast.Dict):
             for key in value.keys:
-                lib_to_task_map.setdefault(library_name, []).append(key.value)
+                lib_to_task_map[library_name].append(key.value)
 
 
 def traverse_global_assignments(library_name, file_content, handler):
+    """Traverse all global assignment and apply handler on them.
+    
+    Args:
+        library_name: The nmae of the library (e.g. paddlenlp)
+        file_content: The content of app/main.py file in string.
+        handler: A callback that processes the AST.
+    """
     for element in ast.parse(file_content).body:
-        # Typical case
+        # Typical case, e.g. TARGET_ID: Type = VALUE
         if isinstance(element, ast.AnnAssign):
             handler(library_name, element.target.id, element.value)
         # Just in case user omitted the type annotation
         # Unpacking and multi-variable assignment is rare so not handled
+        # e.g. TARGET_ID = VALUE
         elif isinstance(element, ast.Assign):
             target = element.targets[0]
             if isinstance(target, ast.Name):
@@ -34,7 +60,7 @@ if __name__ == "__main__":
     for lib in libs:
         with open(root / "docker_images" / lib / "app/main.py") as f:
             content = f.read()
-            traverse_global_assignments(lib, content, extract_tasks)
+            traverse_global_assignments(lib, content, _extract_tasks)
 
     output = json.dumps(lib_to_task_map, sort_keys=True, indent=4)
     print(output)
