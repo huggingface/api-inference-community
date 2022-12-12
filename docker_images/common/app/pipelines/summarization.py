@@ -1,7 +1,6 @@
 from typing import Dict, List, Union
 
 from app.pipelines import Pipeline
-from paddlenlp.taskflow import Taskflow
 
 
 class SummarizationPipeline(Pipeline):
