@@ -50,19 +50,3 @@ class SummarizationTestCase(TestCase):
         self.assertEqual(len(content), 1)
         for result in content:
             self.assertIn("summary_text", result)
-
-    def test_batch_input(self):
-        text = ["test", "test"]
-        with TestClient(self.app) as client:
-            response = client.post("/", json=text)
-
-        self.assertEqual(
-            response.status_code,
-            200,
-        )
-
-        content = json.loads(response.content)
-        self.assertEqual(type(content), list)
-        self.assertEqual(len(content), len(text))
-        for result in content:
-            self.assertIn("summary_text", result)

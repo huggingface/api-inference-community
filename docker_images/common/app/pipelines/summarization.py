@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from app.pipelines import Pipeline
 
@@ -13,12 +13,12 @@ class SummarizationPipeline(Pipeline):
             "Please implement SummarizationPipeline __init__ function"
         )
 
-    def __call__(self, inputs: Union[str, List[str]]) -> List[Dict[str, str]]:
+    def __call__(self, inputs: str) -> List[Dict[str, str]]:
         """
         Args:
             inputs (:obj:`str`): a string to be summarized
         Return:
-            A :obj:`dict`:. The object return should be like {"summary_text": "The string after summarization"}
+            A :obj:`list` of :obj:`dict` in the form of {"summary_text": "The string after summarization"}
         """
         # IMPLEMENT_THIS
         raise NotImplementedError(
