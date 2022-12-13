@@ -9,8 +9,9 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    "conversational": "PaddlePaddle/plato-mini",
-    "fill-mask": "PaddlePaddle/ci-test-ernie-model",
+    "conversational": "PaddleCI/tiny-random-plato-mini",
+    "fill-mask": "PaddleCI/tiny-random-bert",
+    "summarization": "PaddleCI/tiny-random-unimo-text-1.0",
 }
 
 
