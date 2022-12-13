@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from app.pipelines import Pipeline
 
@@ -13,7 +13,7 @@ class SummarizationPipeline(Pipeline):
             "Please implement SummarizationPipeline __init__ function"
         )
 
-    def __call__(self, inputs: Union[str, List[str]]) -> List[Dict[str, str]]:
+    def __call__(self, inputs: str) -> List[Dict[str, str]]:
         """
         Args:
             inputs (:obj:`str`): a string to be summarized
