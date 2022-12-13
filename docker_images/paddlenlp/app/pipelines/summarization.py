@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from app.pipelines import Pipeline
 from paddlenlp.taskflow import Taskflow
@@ -10,12 +10,12 @@ class SummarizationPipeline(Pipeline):
             "text_summarization", task_path=model_id, from_hf_hub=True
         )
 
-    def __call__(self, inputs: Union[str, List[str]]) -> List[Dict[str, str]]:
+    def __call__(self, inputs: str) -> List[Dict[str, str]]:
         """
         Args:
             inputs (:obj:`str`): a string to be summarized
         Return:
-            A :obj:`dict`:. The object return should be like {"summarization_text": "The string after summarization"}
+            A :obj:`list` of :obj:`dict` in the form of {"summary_text": "The string after summarization"}
         """
         results = self.taskflow(inputs)
-        return [{"summary_text": result} for result in results]
+        return [{"summary_text": results[0]}]
