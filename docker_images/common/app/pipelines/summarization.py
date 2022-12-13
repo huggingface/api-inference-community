@@ -18,7 +18,7 @@ class SummarizationPipeline(Pipeline):
         Args:
             inputs (:obj:`str`): a string to be summarized
         Return:
-            A :obj:`dict`:. The object return should be like {"summarization_text": "The string after summarization"}
+            A :obj:`dict`:. The object return should be like {"summary_text": "The string after summarization"}
         """
         # IMPLEMENT_THIS
         raise NotImplementedError(

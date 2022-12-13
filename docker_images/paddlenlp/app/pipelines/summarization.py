@@ -18,4 +18,4 @@ class SummarizationPipeline(Pipeline):
             A :obj:`dict`:. The object return should be like {"summarization_text": "The string after summarization"}
         """
         results = self.taskflow(inputs)
-        return [{"summarization_text": result} for result in results]
+        return [{"summary_text": result} for result in results]

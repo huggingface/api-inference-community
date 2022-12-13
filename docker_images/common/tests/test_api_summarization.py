@@ -49,7 +49,7 @@ class SummarizationTestCase(TestCase):
         self.assertEqual(type(content), list)
         self.assertEqual(len(content), 1)
         for result in content:
-            self.assertIn("generated_text", result)
+            self.assertIn("summary_text", result)
 
     def test_batch_input(self):
         text = ["test", "test"]
@@ -65,4 +65,4 @@ class SummarizationTestCase(TestCase):
         self.assertEqual(type(content), list)
         self.assertEqual(len(content), len(text))
         for result in content:
-            self.assertIn("generated_text", result)
+            self.assertIn("summary_text", result)
