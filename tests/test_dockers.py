@@ -201,9 +201,9 @@ class DockerImageTests(unittest.TestCase):
             timeout=600,
         )
 
-    def test_k2_sherpa(self):
+    def test_k2(self):
         self.framework_docker_test(
-            "k2_sherpa",
+            "k2",
             "automatic-speech-recognition",
             "csukuangfj/icefall-asr-librispeech-pruned-transducer-stateless3-2022-05-13",
         )
