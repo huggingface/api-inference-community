@@ -327,33 +327,6 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("doctr")
 
-    def test_superb(self):
-        # Very basic repo just using transformers.
-        self.framework_docker_test(
-            "superb",
-            "automatic-speech-recognition",
-            "osanseviero/asr-with-transformers-wav2vec2",
-        )
-        self.framework_docker_test(
-            "superb",
-            "speech-segmentation",
-            "osanseviero/hubert-sd",
-        )
-        # # Too slow, requires downloading the upstream model from PyTorch Hub which is quite heavy
-        # # self.framework_docker_test(
-        # #    "superb", "automatic-speech-recognition", "osanseviero/hubert_s3prl_req"
-        # # )
-        self.framework_invalid_test("superb")
-        self.framework_docker_batch(
-            "superb",
-            "automatic-speech-recognition",
-            "osanseviero/asr-with-transformers-wav2vec2",
-            dataset_name="Narsil/asr_dummy",
-            dataset_config="asr",
-            dataset_split="test",
-            dataset_column="file",
-        )
-
     def test_nemo(self):
         self.framework_docker_test(
             "nemo", "automatic-speech-recognition", "nvidia/stt_en_conformer_ctc_medium"
