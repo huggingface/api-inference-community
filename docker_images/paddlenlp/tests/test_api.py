@@ -12,6 +12,7 @@ TESTABLE_MODELS: Dict[str, str] = {
     "conversational": "PaddleCI/tiny-random-plato-mini",
     "fill-mask": "PaddleCI/tiny-random-bert",
     "summarization": "PaddleCI/tiny-random-unimo-text-1.0",
+    "zero-shot-classification": "PaddleCI/tiny-random-ernie",
 }
 
 

@@ -9,6 +9,7 @@ from app.pipelines import (
     FillMaskPipeline,
     Pipeline,
     SummarizationPipeline,
+    ZeroShotClassificationPipeline,
 )
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
@@ -41,6 +42,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "conversational": ConversationalPipeline,
     "fill-mask": FillMaskPipeline,
     "summarization": SummarizationPipeline,
+    "zero-shot-classification" : ZeroShotClassificationPipeline,
 }
 
 
