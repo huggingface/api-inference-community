@@ -71,9 +71,9 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
 
     status_code = 200
     if os.getenv("DEBUG", "0") in {"1", "true"}:
-        outputs = pipe(inputs)
+        outputs = pipe(inputs, **params)
     try:
-        outputs = pipe(inputs)
+        outputs = pipe(inputs, **params)
         task = os.getenv("TASK")
         metrics = get_metric(inputs, task, pipe)
     except (AssertionError, ValueError) as e:
