@@ -18,15 +18,17 @@ def build(framework: str, is_gpu: bool):
     hostname = DEFAULT_HOSTNAME
     tag_id = str(uuid.uuid4())[:5]
     tag = f"{framework}-{tag_id}"
-    container_tag = f"{hostname}/api-inference-prod-community:{tag}"
+    container_tag = f"{hostname}/api-inference/community:{tag}"
 
     command = ["docker", "build", f"docker_images/{framework}", "-t", container_tag]
     run(command)
 
-    command = ["aws", "ecr", "get-login-password"]
+    password = os.environ["REGISTRY_PASSWORD"]
+    username = os.environ["REGISTRY_USERNAME"]
+    command = ["echo", password]
     ecr_login = subprocess.Popen(command, stdout=subprocess.PIPE)
     docker_login = subprocess.Popen(
-        ["docker", "login", "-u", "AWS", "--password-stdin", hostname],
+        ["docker", "login", "-u", username, "--password-stdin", hostname],
         stdin=ecr_login.stdout,
         stdout=subprocess.PIPE,
     )
