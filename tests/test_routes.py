@@ -273,6 +273,57 @@ class ValidationTestCase(TestCase):
         )
         self.assertTrue(isinstance(image, Image.Image))
 
+    def test_pipeline_zero_shot(self):
+        os.environ["TASK"] = "text-classification"
+
+        class Pipeline:
+            def __init__(self):
+                pass
+
+            def __call__(self, input_: str, candidate_labels=None):
+                return {
+                    "some": "json serializable",
+                    "candidate_labels": candidate_labels,
+                }
+
+        def get_pipeline():
+            return Pipeline()
+
+        routes = [
+            Route("/{whatever:path}", status_ok),
+            Route("/{whatever:path}", pipeline_route, methods=["POST"]),
+        ]
+
+        app = Starlette(routes=routes)
+
+        @app.on_event("startup")
+        async def startup_event():
+            logger = logging.getLogger("uvicorn.access")
+            handler = logging.StreamHandler()
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            )
+            logger.handlers = [handler]
+
+            # Link between `api-inference-community` and framework code.
+            app.get_pipeline = get_pipeline
+
+        with TestClient(app) as client:
+            response = client.post(
+                "/",
+                json={"inputs": "Some", "parameters": {"candidate_labels": ["a", "b"]}},
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(response.headers["x-compute-characters"], "4")
+        self.assertEqual(
+            response.content,
+            b'{"some":"json serializable","candidate_labels":["a","b"]}',
+        )
+
     def test_image_classification_pipeline(self):
         os.environ["TASK"] = "image-classification"
 
