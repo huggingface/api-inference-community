@@ -42,7 +42,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "conversational": ConversationalPipeline,
     "fill-mask": FillMaskPipeline,
     "summarization": SummarizationPipeline,
-    "zero-shot-classification" : ZeroShotClassificationPipeline,
+    "zero-shot-classification": ZeroShotClassificationPipeline,
 }
 
 
