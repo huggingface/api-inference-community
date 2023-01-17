@@ -149,10 +149,10 @@ class DockerImageTests(unittest.TestCase):
 
     def test_paddlenlp(self):
         self.framework_docker_test(
-            "paddlenlp", "fill-mask", "PaddlePaddle/ci-test-ernie-model"
+            "paddlenlp", "fill-mask", "PaddleCI/tiny-random-bert"
         )
         self.framework_docker_test(
-            "paddlenlp", "conversational", "PaddlePaddle/plato-mini"
+            "paddlenlp", "conversational", "PaddleCI/tiny-random-plato-mini"
         )
         self.framework_invalid_test("paddlenlp")
 
