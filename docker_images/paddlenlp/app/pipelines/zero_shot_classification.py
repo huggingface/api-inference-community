@@ -13,11 +13,13 @@ class ZeroShotClassificationPipeline(Pipeline):
             pred_threshold=0.0,  # so that it returns all predictions
         )
 
-    def __call__(self, inputs: str, candidate_labels: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+    def __call__(
+        self, inputs: str, candidate_labels: Optional[List[str]] = None
+    ) -> List[Dict[str, Any]]:
         """
         Args:
             inputs (:obj:`str`): a string to be classified
-            candidate_labels (:obj:`List[str]`): a list of strings that are potential classes for inputs. 
+            candidate_labels (:obj:`List[str]`): a list of strings that are potential classes for inputs.
         Return:
             A :obj:`list`:. a list of dicts containing the following:
                 - "sequence": The string sent as an input
