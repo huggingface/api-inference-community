@@ -505,7 +505,7 @@ class DockerImageTests(unittest.TestCase):
                 },
                 timeout=timeout,
             )
-            self.assertIn(response.status_code, {200, 400})
+            self.assertIn(response.status_code, {200, 400}, response.content)
             counter[response.status_code] += 1
 
             response = httpx.post(
@@ -516,7 +516,7 @@ class DockerImageTests(unittest.TestCase):
                 },
                 timeout=timeout,
             )
-            self.assertIn(response.status_code, {200, 400})
+            self.assertIn(response.status_code, {200, 400}, response.content)
             counter[response.status_code] += 1
 
             response = httpx.post(
