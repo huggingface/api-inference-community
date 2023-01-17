@@ -152,11 +152,14 @@ class DockerImageTests(unittest.TestCase):
             "paddlenlp", "fill-mask", "PaddleCI/tiny-random-bert"
         )
         self.framework_docker_test(
-            "paddlenlp", "conversational", "PaddlePaddle/plato-mini"
+            "paddlenlp", "conversational", "PaddleCI/tiny-random-plato-mini"
         )
-        # self.framework_docker_test(
-        #     "paddlenlp", "zero-shot-classification", "PaddlePaddle/plato-mini"
-        # )
+        self.framework_docker_test(
+            "paddlenlp", "zero-shot-classification", "PaddlePaddle/tiny-random-bert"
+        )
+        self.framework_docker_test(
+            "paddlenlp", "summarization", "PaddleCI/tiny-random-unimo-text-1.0"
+        )
         self.framework_invalid_test("paddlenlp")
 
     def test_sklearn(self):
