@@ -149,11 +149,14 @@ class DockerImageTests(unittest.TestCase):
 
     def test_paddlenlp(self):
         self.framework_docker_test(
-            "paddlenlp", "fill-mask", "PaddlePaddle/ci-test-ernie-model"
+            "paddlenlp", "fill-mask", "PaddleCI/tiny-random-bert"
         )
         self.framework_docker_test(
             "paddlenlp", "conversational", "PaddlePaddle/plato-mini"
         )
+        # self.framework_docker_test(
+        #     "paddlenlp", "zero-shot-classification", "PaddlePaddle/plato-mini"
+        # )
         self.framework_invalid_test("paddlenlp")
 
     def test_sklearn(self):
@@ -502,7 +505,18 @@ class DockerImageTests(unittest.TestCase):
                 },
                 timeout=timeout,
             )
-            self.assertIn(response.status_code, {200, 400})
+            self.assertIn(response.status_code, {200, 400}, response.content)
+            counter[response.status_code] += 1
+
+            response = httpx.post(
+                url,
+                json={
+                    "inputs": "This is a test",
+                    "parameters": {"candidate_labels": ["a", "b"]},
+                },
+                timeout=timeout,
+            )
+            self.assertIn(response.status_code, {200, 400}, response.content)
             counter[response.status_code] += 1
 
             response = httpx.post(

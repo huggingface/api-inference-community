@@ -76,7 +76,7 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
         outputs = pipe(inputs, **params)
         task = os.getenv("TASK")
         metrics = get_metric(inputs, task, pipe)
-    except (AssertionError, ValueError) as e:
+    except (AssertionError, ValueError, TypeError) as e:
         outputs = {"error": str(e)}
         status_code = 400
     except Exception as e:
