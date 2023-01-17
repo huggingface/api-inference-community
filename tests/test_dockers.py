@@ -508,6 +508,17 @@ class DockerImageTests(unittest.TestCase):
             response = httpx.post(
                 url,
                 json={
+                    "inputs": "This is a test",
+                    "parameters": {"candidate_labels": ["a", "b"]},
+                },
+                timeout=timeout,
+            )
+            self.assertIn(response.status_code, {200, 400})
+            counter[response.status_code] += 1
+
+            response = httpx.post(
+                url,
+                json={
                     "inputs": {
                         "data": {
                             "1": [7.4],
