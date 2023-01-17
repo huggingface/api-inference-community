@@ -1,6 +1,5 @@
 starlette==0.14.2
-api-inference-community==0.0.23
+api-inference-community==0.0.26
 huggingface_hub>=0.10.1
-paddlepaddle==2.3.2
-# paddlenlp==2.4.5
-git+https://github.com/PaddlePaddle/PaddleNLP.git
+paddlepaddle==2.4.1
+paddlenlp>=2.5.0
