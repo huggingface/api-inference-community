@@ -152,8 +152,11 @@ class DockerImageTests(unittest.TestCase):
             "paddlenlp", "fill-mask", "PaddleCI/tiny-random-bert"
         )
         self.framework_docker_test(
-            "paddlenlp", "conversational", "PaddleCI/tiny-random-plato-mini"
+            "paddlenlp", "conversational", "PaddlePaddle/plato-mini"
         )
+        # self.framework_docker_test(
+        #     "paddlenlp", "zero-shot-classification", "PaddlePaddle/plato-mini"
+        # )
         self.framework_invalid_test("paddlenlp")
 
     def test_sklearn(self):

@@ -6,6 +6,7 @@ LABEL maintainer="PaddleNLP <paddlenlp@baidu.com>"
 
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -e git+https://github.com/sijunhe/api-inference-community@paddle-zero-shot#egg=api-inference-community
 COPY ./prestart.sh /app/
 
 
