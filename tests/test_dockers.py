@@ -155,7 +155,7 @@ class DockerImageTests(unittest.TestCase):
             "paddlenlp", "conversational", "PaddleCI/tiny-random-plato-mini"
         )
         self.framework_docker_test(
-            "paddlenlp", "zero-shot-classification", "PaddlePaddle/tiny-random-bert"
+            "paddlenlp", "zero-shot-classification", "PaddleCI/tiny-random-bert"
         )
         self.framework_docker_test(
             "paddlenlp", "summarization", "PaddleCI/tiny-random-unimo-text-1.0"
