@@ -10,7 +10,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
     "conversational": "PaddleCI/tiny-random-plato-mini",
-    "fill-mask": "PaddleCI/tiny-random-bert",
+    "fill-mask": "PaddleCI/tiny-random-ernie",
     "summarization": "PaddleCI/tiny-random-unimo-text-1.0",
     "zero-shot-classification": "PaddleCI/tiny-random-ernie",
 }
