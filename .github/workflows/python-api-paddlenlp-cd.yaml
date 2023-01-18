@@ -23,6 +23,9 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install awscli
+      - uses: tailscale/github-action@v1
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
       - name: Update upstream
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
