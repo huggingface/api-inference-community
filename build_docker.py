@@ -70,8 +70,8 @@ def main():
         .decode("utf-8")
         .strip()
     )
-    # if branch != "main":
-    #     raise Exception(f"Go to branch `main` ({branch})")
+    if branch != "main":
+        raise Exception(f"Go to branch `main` ({branch})")
 
     print("Pulling")
     subprocess.run(["git", "pull"])
