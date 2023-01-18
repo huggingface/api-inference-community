@@ -1,10 +1,10 @@
 name: paddlenlp-docker-cd
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "docker_images/paddlenlp/**"
+    # branches:
+    #   - main
+    # paths:
+    #   - "docker_images/paddlenlp/**"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,6 +32,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           DEFAULT_HOSTNAME: ${{ secrets.DEFAULT_HOSTNAME }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
           python build_docker.py paddlenlp --out out.txt
       - name: Deploy on API
