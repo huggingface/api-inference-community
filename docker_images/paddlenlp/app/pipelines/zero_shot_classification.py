@@ -14,7 +14,7 @@ class ZeroShotClassificationPipeline(Pipeline):
         )
 
     def __call__(
-        self, inputs: str, candidate_labels: Optional[List[str]] = None
+        self, inputs: str, candidate_labels: Optional[List[str]] = None, **kwargs
     ) -> List[Dict[str, Any]]:
         """
         Args:
