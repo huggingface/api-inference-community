@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import joblib
+import skops.io as sio
 from app.pipelines import Pipeline
 from huggingface_hub import snapshot_download
 
@@ -37,21 +38,28 @@ class SklearnBasePipeline(Pipeline):
                 config = json.load(f)
         except Exception:
             config = dict()
-            raise UserWarning("`config.json` does not exist or is invalid.")
+            warnings.warn("`config.json` does not exist or is invalid.")
 
         self.model_file = (
             config.get("sklearn", {}).get("model", {}).get("file", DEFAULT_FILENAME)
         )
+        self.model_format = (
+            config.get("sklearn", {}).get("model_format", "pickle")
+        )
 
         try:
             with warnings.catch_warnings(record=True) as record:
-                self.model = joblib.load(
-                    open(Path(cached_folder) / self.model_file, "rb")
-                )
-                if len(record) > 0:
-                    # if there's a warning while loading the model, we save it so
-                    # that it can be raised to the user when __call__ is called.
-                    self._load_warnings += record
+                if self.model_format == "pickle":
+
+                    self.model = joblib.load(open(Path(cached_folder) / self.model_file, "rb"))
+                    if len(record) > 0:
+                        # if there's a warning while loading the model, we save it so
+                        # that it can be raised to the user when __call__ is called.
+                        self._load_warnings += record
+                elif self.model_format == "skops":
+                    self.model = sio.load(file= Path(cached_folder) / self.model_file, trusted=True)
+
+
         except Exception as e:
             # if there is an exception while loading the model, we save it to
             # raise the write error when __call__ is called.
