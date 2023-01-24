@@ -37,7 +37,7 @@ class SklearnBasePipeline(Pipeline):
                 config = json.load(f)
         except Exception:
             config = dict()
-            raise UserWarning("`config.json` does not exist or is invalid.")
+            warnings.warn("`config.json` does not exist or is invalid.")
 
         self.model_file = (
             config.get("sklearn", {}).get("model", {}).get("file", DEFAULT_FILENAME)
