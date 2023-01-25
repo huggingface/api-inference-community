@@ -20,12 +20,11 @@ class TextToImagePipeline(Pipeline):
     def __init__(self, model_id: str):
 
         model_data = model_info(model_id, token=os.getenv("HF_API_TOKEN"))
-        is_lora = any(file.rfilename == 'pytorch_lora_weights.bin' for file in model_data.siblings)
-        
-        if(not is_lora):
-            model_to_load = model_id
-        else:
-            model_to_load = model_data.cardData['base_model']
+        is_lora = any(
+            file.rfilename == "pytorch_lora_weights.bin" for file in model_data.siblings
+        )
+
+        model_to_load = model_data.cardData["base_model"] if is_lora else model_id
 
         kwargs = (
             {"safety_checker": None}
