@@ -1,7 +1,7 @@
 starlette==0.14.2
 api-inference-community==0.0.25
 huggingface_hub==0.10.1
-diffusers==0.9.0
+diffusers==0.12.0
 -e git+https://github.com/huggingface/transformers@main#egg=transformers
 accelerate==0.13.2
 pydantic==1.8.1
