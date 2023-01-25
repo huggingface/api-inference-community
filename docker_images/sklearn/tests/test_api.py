@@ -19,7 +19,6 @@ TESTABLE_MODELS = {
         "skops-tests/iris-sklearn-latest-logistic_regression-without-config-pickle",
         "skops-tests/iris-sklearn-latest-hist_gradient_boosting-with-config-pickle",
         "skops-tests/iris-sklearn-latest-hist_gradient_boosting-without-config-pickle",
-        
     ],
     "tabular-regression": [
         "skops-tests/tabularregression-sklearn-1.0-linear_regression-with-config-skops",

@@ -115,7 +115,9 @@ def create_repos(est_name, task_name, est, sample, version, serialization_format
     # hub once with and once without a config file.
 
     # initialize repo
-    _, est_filename = mkstemp(prefix="skops-", suffix=SERIALIZATION_FORMATS[serialization_format])
+    _, est_filename = mkstemp(
+        prefix="skops-", suffix=SERIALIZATION_FORMATS[serialization_format]
+    )
 
     if serialization_format == "pickle":
         with open(est_filename, mode="bw") as f:
@@ -134,14 +136,20 @@ def create_repos(est_name, task_name, est, sample, version, serialization_format
 
     # push WITH config
     repo_name = REPO_NAMES[task_name].format(
-        version=version, est_name=est_name, w_or_wo="with", serialization_format=serialization_format
+        version=version,
+        est_name=est_name,
+        w_or_wo="with",
+        serialization_format=serialization_format,
     )
     push_repo(repo_name=repo_name, local_repo=local_repo)
 
     if serialization_format == "pickle":
         # push WIHTOUT CONFIG
         repo_name = REPO_NAMES[task_name].format(
-            version=version, est_name=est_name, w_or_wo="without", serialization_format=serialization_format
+            version=version,
+            est_name=est_name,
+            w_or_wo="without",
+            serialization_format=serialization_format,
         )
 
         # Now we remove the config file and push to a new repo
@@ -149,7 +157,9 @@ def create_repos(est_name, task_name, est, sample, version, serialization_format
         # The only valid file name for a model pickle file if no config.json is
         # available is `sklearn_model.joblib`, otherwise the backend will fail to
         # find the file.
-        os.rename(Path(local_repo) / est_filename, Path(local_repo) / "sklearn_model.joblib")
+        os.rename(
+            Path(local_repo) / est_filename, Path(local_repo) / "sklearn_model.joblib"
+        )
 
         push_repo(
             repo_name=repo_name,
@@ -222,8 +232,7 @@ PREDICT_FUNCTIONS = {
     "text-classification": predict_text_classifier,
 }
 
-SERIALIZATION_FORMATS = {"pickle":".pkl", 
-                        "skops":".skops"}
+SERIALIZATION_FORMATS = {"pickle": ".pkl", "skops": ".skops"}
 
 
 def main(version):
@@ -252,7 +261,7 @@ def main(version):
                     est=model,
                     sample=sample,
                     version=version,
-                    serialization_format=serialization_format
+                    serialization_format=serialization_format,
                 )
 
             # save model predictions, which are later used for tests
