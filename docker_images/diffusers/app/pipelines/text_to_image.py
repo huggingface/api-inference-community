@@ -9,6 +9,7 @@ from diffusers import (
     DPMSolverMultistepScheduler,
     StableDiffusionPipeline,
 )
+from huggingface_hub import model_info
 
 
 if TYPE_CHECKING:
@@ -17,6 +18,13 @@ if TYPE_CHECKING:
 
 class TextToImagePipeline(Pipeline):
     def __init__(self, model_id: str):
+
+        model_data = model_info(model_id, token=os.getenv("HF_API_TOKEN"))
+        is_lora = any(
+            file.rfilename == "pytorch_lora_weights.bin" for file in model_data.siblings
+        )
+
+        model_to_load = model_data.cardData["base_model"] if is_lora else model_id
 
         kwargs = (
             {"safety_checker": None}
@@ -28,12 +36,15 @@ class TextToImagePipeline(Pipeline):
             kwargs["torch_dtype"] = torch.float16
 
         self.ldm = DiffusionPipeline.from_pretrained(
-            model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
+            model_to_load, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
         )
         if torch.cuda.is_available():
             self.ldm.to("cuda")
             self.ldm.enable_xformers_memory_efficient_attention()
             self.ldm.unet.to(memory_format=torch.channels_last)
+
+        if is_lora:
+            self.ldm.unet.load_attn_procs(model_id)
 
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
             self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
