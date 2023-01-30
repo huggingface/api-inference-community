@@ -22,6 +22,7 @@ from pathlib import Path
 from tempfile import mkdtemp, mkstemp
 
 import sklearn
+import skops.io as sio
 from huggingface_hub import HfApi
 from huggingface_hub.utils import RepositoryNotFoundError
 from sklearn.datasets import fetch_20newsgroups, load_diabetes, load_iris
@@ -110,18 +111,24 @@ def get_tabular_regressors():
     yield "hist_gradient_boosting_regressor", HistGradientBoostingRegressor()
 
 
-def create_repos(est_name, task_name, est, sample, version):
+def create_repos(est_name, task_name, est, sample, version, serialization_format):
     # given trained estimator instance, it's name, and the version tag, push to
     # hub once with and once without a config file.
 
     # initialize repo
-    _, pkl_name = mkstemp(prefix="skops-", suffix=".pkl")
-    with open(pkl_name, mode="bw") as f:
-        pickle.dump(est, file=f)
+    _, est_filename = mkstemp(
+        prefix="skops-", suffix=SERIALIZATION_FORMATS[serialization_format]
+    )
+
+    if serialization_format == "pickle":
+        with open(est_filename, mode="bw") as f:
+            pickle.dump(est, file=f)
+    else:
+        sio.dump(est, est_filename)
 
     local_repo = mkdtemp(prefix="skops-")
     hub_utils.init(
-        model=pkl_name,
+        model=est_filename,
         requirements=[f"scikit-learn={sklearn.__version__}"],
         dst=local_repo,
         task=task_name,
@@ -130,26 +137,35 @@ def create_repos(est_name, task_name, est, sample, version):
 
     # push WITH config
     repo_name = REPO_NAMES[task_name].format(
-        version=version, est_name=est_name, w_or_wo="with"
+        version=version,
+        est_name=est_name,
+        w_or_wo="with",
+        serialization_format=serialization_format,
     )
     push_repo(repo_name=repo_name, local_repo=local_repo)
 
-    # push WIHTOUT CONFIG
-    repo_name = REPO_NAMES[task_name].format(
-        version=version, est_name=est_name, w_or_wo="without"
-    )
+    if serialization_format == "pickle":
+        # push WIHTOUT CONFIG
+        repo_name = REPO_NAMES[task_name].format(
+            version=version,
+            est_name=est_name,
+            w_or_wo="without",
+            serialization_format=serialization_format,
+        )
 
-    # Now we remove the config file and push to a new repo
-    os.remove(Path(local_repo) / "config.json")
-    # The only valid file name for a model pickle file if no config.json is
-    # available is `sklearn_model.joblib`, otherwise the backend will fail to
-    # find the file.
-    os.rename(Path(local_repo) / pkl_name, Path(local_repo) / "sklearn_model.joblib")
+        # Now we remove the config file and push to a new repo
+        os.remove(Path(local_repo) / "config.json")
+        # The only valid file name for a model pickle file if no config.json is
+        # available is `sklearn_model.joblib`, otherwise the backend will fail to
+        # find the file.
+        os.rename(
+            Path(local_repo) / est_filename, Path(local_repo) / "sklearn_model.joblib"
+        )
 
-    push_repo(
-        repo_name=repo_name,
-        local_repo=local_repo,
-    )
+        push_repo(
+            repo_name=repo_name,
+            local_repo=local_repo,
+        )
 
 
 def save_sample(sample, filename, task):
@@ -185,7 +201,9 @@ def predict_text_classifier(est, sample, filename):
 # CONSTANTS #
 #############
 
-TASKS = ["tabular-classification", "tabular-regression", "text-classification"]
+# TASKS = ["tabular-classification", "tabular-regression", "text-classification"]
+TASKS = ["text-classification"]
+
 DATA = {
     "tabular-classification": load_iris(return_X_y=True, as_frame=True),
     "tabular-regression": load_diabetes(return_X_y=True, as_frame=True),
@@ -207,15 +225,17 @@ OUTPUT_NAMES = {
     "text-classification": "textclassification-{est_name}-{version}-output.json",
 }
 REPO_NAMES = {
-    "tabular-classification": "iris-sklearn-{version}-{est_name}-{w_or_wo}-config",
-    "tabular-regression": "tabularregression-sklearn-{version}-{est_name}-{w_or_wo}-config",
-    "text-classification": "textclassification-sklearn-{version}-{est_name}-{w_or_wo}-config",
+    "tabular-classification": "iris-sklearn-{version}-{est_name}-{w_or_wo}-config-{serialization_format}",
+    "tabular-regression": "tabularregression-sklearn-{version}-{est_name}-{w_or_wo}-config-{serialization_format}",
+    "text-classification": "textclassification-sklearn-{version}-{est_name}-{w_or_wo}-config-{serialization_format}",
 }
 PREDICT_FUNCTIONS = {
     "tabular-classification": predict_tabular_classifier,
     "tabular-regression": predict_tabular_regressor,
     "text-classification": predict_text_classifier,
 }
+
+SERIALIZATION_FORMATS = {"pickle": ".pkl", "skops": ".skops"}
 
 
 def main(version):
@@ -236,14 +256,16 @@ def main(version):
         save_sample(sample, input_name, task)
 
         for est_name, model in MODELS[task]:
-            model.fit(X_train, y_train)
-            create_repos(
-                est_name=est_name,
-                task_name=task,
-                est=model,
-                sample=sample,
-                version=version,
-            )
+            for serialization_format in SERIALIZATION_FORMATS:
+                model.fit(X_train, y_train)
+                create_repos(
+                    est_name=est_name,
+                    task_name=task,
+                    est=model,
+                    sample=sample,
+                    version=version,
+                    serialization_format=serialization_format,
+                )
 
             # save model predictions, which are later used for tests
             output_name = OUTPUT_NAMES[task].format(est_name=est_name, version=version)
