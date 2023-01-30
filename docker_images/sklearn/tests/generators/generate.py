@@ -17,11 +17,11 @@ import os
 import pickle
 import sys
 import time
-from operator import methodcaller
 from pathlib import Path
 from tempfile import mkdtemp, mkstemp
 
 import sklearn
+import skops.io as sio
 from huggingface_hub import HfApi
 from huggingface_hub.utils import RepositoryNotFoundError
 from sklearn.datasets import fetch_20newsgroups, load_diabetes, load_iris
@@ -35,7 +35,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from skops import hub_utils
-import skops.io as sio
 
 
 SLEEP_BETWEEN_PUSHES = 1
@@ -83,6 +82,10 @@ def get_tabular_classifiers():
     yield "hist_gradient_boosting", HistGradientBoostingClassifier()
 
 
+def toarray(x):
+    return x.toarray()
+
+
 def get_text_classifiers():
     # yield classifier names and estimators to train and push to hub.
     # this is a pipeline with simple estimators which can be loaded across
@@ -94,7 +97,7 @@ def get_text_classifiers():
     # handles NaN input values which the previous pipeline cannot handle.
     yield "hist_gradient_boosting", make_pipeline(
         CountVectorizer(max_features=100),
-        FunctionTransformer(methodcaller("toarray")),
+        FunctionTransformer(toarray),
         HistGradientBoostingClassifier(max_iter=20),
     )
 
@@ -201,7 +204,9 @@ def predict_text_classifier(est, sample, filename):
 # CONSTANTS #
 #############
 
-TASKS = ["tabular-classification", "tabular-regression", "text-classification"]
+# TASKS = ["tabular-classification", "tabular-regression", "text-classification"]
+TASKS = ["text-classification"]
+
 DATA = {
     "tabular-classification": load_iris(return_X_y=True, as_frame=True),
     "tabular-regression": load_diabetes(return_X_y=True, as_frame=True),
