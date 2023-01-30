@@ -44,7 +44,9 @@ class TextToImagePipeline(Pipeline):
             self.ldm.unet.to(memory_format=torch.channels_last)
 
         if is_lora:
-            self.ldm.unet.load_attn_procs(model_id)
+            self.ldm.unet.load_attn_procs(
+                model_id, use_auth_token=os.getenv("HF_API_TOKEN")
+            )
 
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
             self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
