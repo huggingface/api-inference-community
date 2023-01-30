@@ -24,6 +24,7 @@ import sklearn
 import skops.io as sio
 from huggingface_hub import HfApi
 from huggingface_hub.utils import RepositoryNotFoundError
+from operator import methodcaller
 from sklearn.datasets import fetch_20newsgroups, load_diabetes, load_iris
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
@@ -82,9 +83,6 @@ def get_tabular_classifiers():
     yield "hist_gradient_boosting", HistGradientBoostingClassifier()
 
 
-def toarray(x):
-    return x.toarray()
-
 
 def get_text_classifiers():
     # yield classifier names and estimators to train and push to hub.
@@ -97,7 +95,7 @@ def get_text_classifiers():
     # handles NaN input values which the previous pipeline cannot handle.
     yield "hist_gradient_boosting", make_pipeline(
         CountVectorizer(max_features=100),
-        FunctionTransformer(toarray),
+        FunctionTransformer(methodcaller("toarray")),
         HistGradientBoostingClassifier(max_iter=20),
     )
 
