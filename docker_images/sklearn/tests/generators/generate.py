@@ -34,7 +34,8 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
-from skops import hub_utils, io
+from skops import hub_utils
+import skops.io as sio
 
 
 SLEEP_BETWEEN_PUSHES = 1
@@ -123,7 +124,7 @@ def create_repos(est_name, task_name, est, sample, version, serialization_format
         with open(est_filename, mode="bw") as f:
             pickle.dump(est, file=f)
     else:
-        io.dump(est, est_filename)
+        sio.dump(est, est_filename)
 
     local_repo = mkdtemp(prefix="skops-")
     hub_utils.init(
