@@ -17,6 +17,7 @@ import os
 import pickle
 import sys
 import time
+from operator import methodcaller
 from pathlib import Path
 from tempfile import mkdtemp, mkstemp
 
@@ -24,7 +25,6 @@ import sklearn
 import skops.io as sio
 from huggingface_hub import HfApi
 from huggingface_hub.utils import RepositoryNotFoundError
-from operator import methodcaller
 from sklearn.datasets import fetch_20newsgroups, load_diabetes, load_iris
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
@@ -81,7 +81,6 @@ def get_tabular_classifiers():
     # this estimator cannot be loaded on 1.1 if it's stored using 1.0, but it
     # handles NaN input values which the previous pipeline cannot handle.
     yield "hist_gradient_boosting", HistGradientBoostingClassifier()
-
 
 
 def get_text_classifiers():
