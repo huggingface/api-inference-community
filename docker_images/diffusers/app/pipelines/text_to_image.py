@@ -53,7 +53,9 @@ class TextToImagePipeline(Pipeline):
                 self.ldm.scheduler.config
             )
 
-    def __call__(self, inputs: str, inference_steps=25) -> "Image.Image":
+    def __call__(
+        self, inputs: str, inference_steps=25, negative_prompt=None, **kwargs
+    ) -> "Image.Image":
         """
         Args:
             inputs (:obj:`str`):
@@ -61,8 +63,15 @@ class TextToImagePipeline(Pipeline):
         Return:
             A :obj:`PIL.Image` with the raw image representation as PIL.
         """
+
+        if kwargs:
+            raise ValueError(f"Unexpected extra arguments {kwargs}")
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
-            images = self.ldm([inputs], num_inference_steps=inference_steps)["images"]
+            images = self.ldm(
+                [inputs],
+                num_inference_steps=inference_steps,
+                negative_prompt=negative_prompt,
+            )["images"]
         else:
             images = self.ldm([inputs])["images"]
         return images[0]
