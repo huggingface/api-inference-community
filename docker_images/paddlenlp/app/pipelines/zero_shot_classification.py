@@ -41,4 +41,4 @@ class ZeroShotClassificationPipeline(Pipeline):
         pipeline_results["labels"] = labels
         pipeline_results["scores"] = scores
         pipeline_results["sequence"] = taskflow_results[0]["text_a"]
-        return [pipeline_results]
+        return pipeline_results
