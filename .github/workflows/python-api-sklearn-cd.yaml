@@ -1,6 +1,7 @@
 name: sklearn-docker-cd
 on:
   push:
+  workflow_dispatch:
     branches:
       - main
     paths:
