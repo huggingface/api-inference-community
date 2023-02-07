@@ -20,6 +20,7 @@ setup(
             "httpx>=0.18",
             "torch>=1.9.0",
             "pytest>=6.2",
-        ]
+        ],
+        "quality": ["black==22.3.0", "isort", "flake8", "mypy"],
     },
 )

@@ -28,6 +28,8 @@ class ZeroShotClassificationPipeline(Pipeline):
         """
         if candidate_labels is None:
             raise ValueError("'candidate_labels' is a required field")
+        if isinstance(candidate_labels, str):
+            candidate_labels = candidate_labels.split(",")
         self.taskflow.set_schema(candidate_labels)
         taskflow_results = self.taskflow(inputs)
         pipeline_results = {}
@@ -39,4 +41,4 @@ class ZeroShotClassificationPipeline(Pipeline):
         pipeline_results["labels"] = labels
         pipeline_results["scores"] = scores
         pipeline_results["sequence"] = taskflow_results[0]["text_a"]
-        return [pipeline_results]
+        return pipeline_results
