@@ -1,5 +1,5 @@
 starlette==0.14.2
-api-inference-community==0.0.25
+api-inference-community==0.0.27
 huggingface_hub==0.11.0
 diffusers==0.12.0
 -e git+https://github.com/huggingface/transformers@main#egg=transformers
