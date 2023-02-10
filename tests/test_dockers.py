@@ -345,6 +345,12 @@ class DockerImageTests(unittest.TestCase):
             "osanseviero/en_core_web_sm",
         )
 
+    def test_mindspore(self):
+        self.framework_docker_test(
+            "mindspore", "image-classification", "helloway/lenet"
+        )
+        self.framework_invalid_test("mindspore")
+
     def framework_invalid_test(self, framework: str):
         task = "invalid"
         model_id = "invalid"
