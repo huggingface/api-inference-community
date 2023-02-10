@@ -58,5 +58,4 @@ class ImageClassificationPipeline(Pipeline):
             {"label": self.dataset_info.index_to_description(i, detailed=True), "score": v.item()}
             for i, v in zip(indices, values)
         ]
-        print(labels)
         return labels
