@@ -12,7 +12,9 @@ from timm.models import load_model_config_from_hf
 class ImageClassificationPipeline(Pipeline):
     def __init__(self, model_id: str):
         self.model = timm.create_model(f"hf_hub:{model_id}", pretrained=True)
-        self.transform = create_transform(**resolve_model_data_config(self.model, use_test_size=True))
+        self.transform = create_transform(
+            **resolve_model_data_config(self.model, use_test_size=True)
+        )
         self.top_k = min(self.model.num_classes, 5)
         self.model.eval()
 
@@ -55,7 +57,10 @@ class ImageClassificationPipeline(Pipeline):
         values, indices = torch.topk(probabilities, self.top_k)
 
         labels = [
-            {"label": self.dataset_info.index_to_description(i, detailed=True), "score": v.item()}
+            {
+                "label": self.dataset_info.index_to_description(i, detailed=True),
+                "score": v.item(),
+            }
             for i, v in zip(indices, values)
         ]
         return labels
