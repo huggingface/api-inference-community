@@ -1,5 +1,4 @@
 starlette==0.14.2
-pillow==9.3.0
-timm==0.4.12
-api-inference-community==0.0.23
-huggingface-hub==0.5.1
+api-inference-community==0.0.27
+huggingface_hub>=0.11.1
+timm>=0.8.11dev0

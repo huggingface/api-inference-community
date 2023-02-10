@@ -1,29 +1,39 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import timm
 import torch
 from app.pipelines import Pipeline
 from PIL import Image
-from timm.data import resolve_data_config
-from timm.data.transforms_factory import create_transform
-from timm.models.hub import load_model_config_from_hf
+from timm.data import resolve_model_data_config, create_transform
+from timm.data import infer_imagenet_subset, ImageNetInfo, CustomDatasetInfo
+from timm.models import load_model_config_from_hf
 
 
 class ImageClassificationPipeline(Pipeline):
     def __init__(self, model_id: str):
-
-        self.hf_cfg, self.arch = load_model_config_from_hf(model_id)
         self.model = timm.create_model(f"hf_hub:{model_id}", pretrained=True)
-        self.transform = create_transform(
-            **resolve_data_config(self.hf_cfg, model=self.model)
-        )
+        self.transform = create_transform(**resolve_model_data_config(self.model, use_test_size=True))
+        self.top_k = min(self.model.num_classes, 5)
         self.model.eval()
 
-        self.top_k = min(self.model.num_classes, 5)
+        self.dataset_info = None
+        label_names = self.model.pretrained_cfg.get("label_names", None)
+        label_descriptions = self.model.pretrained_cfg.get("label_descriptions", None)
 
-        self.labels = self.hf_cfg.get("labels", None)
-        if self.labels is None:
-            self.labels = [f"LABEL_{i}" for i in range(self.model.num_classes)]
+        if label_names is None:
+            # if no labels added to config, use imagenet labeller in timm
+            imagenet_subset = infer_imagenet_subset(self.model)
+            if imagenet_subset:
+                self.dataset_info = ImageNetInfo(imagenet_subset)
+            else:
+                # fallback label names
+                label_names = [f"LABEL_{i}" for i in range(self.model.num_classes)]
+
+        if self.dataset_info is None:
+            self.dataset_info = CustomDatasetInfo(
+                label_names=label_names,
+                label_descriptions=label_descriptions,
+            )
 
     def __call__(self, inputs: Image.Image) -> List[Dict[str, Any]]:
         """
@@ -41,12 +51,12 @@ class ImageClassificationPipeline(Pipeline):
         with torch.no_grad():
             out = self.model(inputs)
 
-        probabilities = torch.nn.functional.softmax(out[0], dim=0)
-
+        probabilities = out.squeeze(0).softmax(dim=0)
         values, indices = torch.topk(probabilities, self.top_k)
 
         labels = [
-            {"label": self.labels[i], "score": v.item()}
+            {"label": self.dataset_info.index_to_description(i, detailed=True), "score": v.item()}
             for i, v in zip(indices, values)
         ]
+        print(labels)
         return labels
