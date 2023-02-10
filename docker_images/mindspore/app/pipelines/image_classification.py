@@ -1,15 +1,12 @@
-import os
 import json
+import os
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import tinyms as ts
-from tinyms import model
-from tinyms import vision
-from tinyms import Tensor
-from tinyms.primitives import Softmax
-from typing import TYPE_CHECKING, Any, Dict, List
-from huggingface_hub import snapshot_download
-
 from app.pipelines import Pipeline
+from huggingface_hub import snapshot_download
+from tinyms import Tensor, model, vision
+from tinyms.primitives import Softmax
 
 
 if TYPE_CHECKING:
@@ -19,21 +16,23 @@ if TYPE_CHECKING:
 ALLOWED_MODEL = {
     "LeNet5": model.lenet5,
     "ResNet50": model.resnet50,
-    "MobileNetV2": model.mobilenetv2
+    "MobileNetV2": model.mobilenetv2,
 }
 
 
 ALLOWED_TRANSFORM = {
     "mnist": vision.mnist_transform,
     "cifar10": vision.cifar10_transform,
-    'imagenet2012': vision.imagefolder_transform
+    "imagenet2012": vision.imagefolder_transform,
 }
 
 
 def load_tranform_func(config):
-    dataset = config.get('dataset_transform')
+    dataset = config.get("dataset_transform")
     if dataset not in ALLOWED_TRANSFORM:
-        raise EnvironmentError(f"Currently doesn't supports dataset {dataset} transform!")
+        raise EnvironmentError(
+            f"Currently doesn't supports dataset {dataset} transform!"
+        )
     return ALLOWED_TRANSFORM.get(dataset)
 
 
@@ -47,18 +46,22 @@ def load_model_config_from_hf(model_id):
     repo_path = snapshot_download(model_id)
     config_json_file = os.path.join(repo_path, "config.json")
     if not os.path.exists(config_json_file):
-        raise EnvironmentError(f"The path of the config.json file {config_json_file} doesn't exist!")
+        raise EnvironmentError(
+            f"The path of the config.json file {config_json_file} doesn't exist!"
+        )
     config = load_config(config_json_file)
-    architecture = config.get('architecture')
+    architecture = config.get("architecture")
     if architecture not in ALLOWED_MODEL:
         raise EnvironmentError(f"Currently doesn't supports {model} model!")
     net_func = ALLOWED_MODEL.get(architecture)
-    class_num = config.get('num_classes')
+    class_num = config.get("num_classes")
     net = net_func(class_num=class_num, is_training=False)
     ms_model = model.Model(net)
     model_file = os.path.join(repo_path, "mindspore_model.ckpt")
     if not os.path.exists(model_file):
-        raise EnvironmentError(f"The path of the model file {model_file} doesn't exist!")
+        raise EnvironmentError(
+            f"The path of the model file {model_file} doesn't exist!"
+        )
     ms_model.load_checkpoint(model_file)
     return ms_model, config
 
@@ -68,7 +71,7 @@ class ImageClassificationPipeline(Pipeline):
         self.model, self.config = load_model_config_from_hf(model_id)
 
         # Obtain labels
-        self.id2label = self.config.get('id2label')
+        self.id2label = self.config.get("id2label")
 
         # Get dataset transform function
         self.tranform_func = load_tranform_func(self.config)
