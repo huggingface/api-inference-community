@@ -1,12 +1,16 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 import timm
 import torch
 from app.pipelines import Pipeline
 from PIL import Image
-from timm.data import resolve_model_data_config, create_transform
-from timm.data import infer_imagenet_subset, ImageNetInfo, CustomDatasetInfo
-from timm.models import load_model_config_from_hf
+from timm.data import (
+    CustomDatasetInfo,
+    ImageNetInfo,
+    create_transform,
+    infer_imagenet_subset,
+    resolve_model_data_config,
+)
 
 
 class ImageClassificationPipeline(Pipeline):
