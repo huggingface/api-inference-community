@@ -1,4 +1,4 @@
-starlette==0.14.2
+starlette==0.25.0
 api-inference-community==0.0.23
 sentence-transformers==2.2.2
 protobuf==3.18.3
