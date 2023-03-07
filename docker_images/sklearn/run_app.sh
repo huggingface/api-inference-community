@@ -6,7 +6,7 @@
 set -xe
 
 get_requirements() {
-    requirements="pandas uvicorn gunicorn api-inference-community"
+    requirements="pandas uvicorn gunicorn api-inference-community skops"
     # this next command is needed to run the while loop in the same process and
     # therefore modify the same $requirements variable. Otherwise the loop would be
     # a separate process and the variable wouldn't be accessible from this parent
