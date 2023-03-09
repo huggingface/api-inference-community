@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
 class TextToImagePipeline(Pipeline):
     def __init__(self, model_id: str):
-
         model_data = model_info(model_id, token=os.getenv("HF_API_TOKEN"))
         is_lora = any(
             file.rfilename == "pytorch_lora_weights.bin" for file in model_data.siblings
@@ -53,9 +52,7 @@ class TextToImagePipeline(Pipeline):
                 self.ldm.scheduler.config
             )
 
-    def __call__(
-        self, inputs: str, inference_steps=25, negative_prompt=None, **kwargs
-    ) -> "Image.Image":
+    def __call__(self, inputs: str, **kwargs) -> "Image.Image":
         """
         Args:
             inputs (:obj:`str`):
@@ -64,14 +61,13 @@ class TextToImagePipeline(Pipeline):
             A :obj:`PIL.Image` with the raw image representation as PIL.
         """
 
-        if kwargs:
-            raise ValueError(f"Unexpected extra arguments {kwargs}")
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
+            if "inference_steps" not in kwargs:
+                kwargs["inference_steps"] = 25
             images = self.ldm(
                 [inputs],
-                num_inference_steps=inference_steps,
-                negative_prompt=negative_prompt,
+                **kwargs,
             )["images"]
         else:
-            images = self.ldm([inputs])["images"]
+            images = self.ldm([inputs], **kwargs)["images"]
         return images[0]
