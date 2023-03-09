@@ -21,7 +21,6 @@ class LanguageIdentificationTestCase(TestCase):
         from app.main import app
 
         self.app = app
-        print(f"=== app {app} ===")
 
     @classmethod
     def setUpClass(cls):

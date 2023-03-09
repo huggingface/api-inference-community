@@ -11,9 +11,6 @@ from app.main import ALLOWED_TASKS, get_pipeline
 TESTABLE_MODELS: Dict[str, str] = {
     "text-classification": "osanseviero/fasttext_nearest",
     "feature-extraction": "osanseviero/fasttext_embedding",
-    # "text-classification": "sheonhan/fasttext-english-vectors",
-    # "feature-extraction": "sheonhan/fasttext-english-vectors",
-    # "language-identification": "facebook/fasttext-language-identification",
     "language-identification": "sheonhan/fasttext-language-identification",
 }
 
