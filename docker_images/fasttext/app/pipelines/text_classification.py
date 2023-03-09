@@ -25,8 +25,9 @@ class TextClassificationPipeline(Pipeline):
         """
         info = HfApi().model_info(repo_id=self.model_id)
         if "language-identification" in info.tags:
-            result = self.model.predict(inputs, k=5)
-            return { label[FASTTEXT_PREFIX_LENGTH:]: prob for label, prob in zip(result[0], result[1])}
+            preds = self.model.predict(inputs, k=5)
+            result = [{ "label": label[FASTTEXT_PREFIX_LENGTH:], "score": prob } for label, prob in zip(preds[0], preds[1])]
+            return [result]
     
         if len(inputs.split()) > 1:
             raise ValueError("Expected input is a single word")
