@@ -62,8 +62,8 @@ class TextToImagePipeline(Pipeline):
         """
 
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
-            if "inference_steps" not in kwargs:
-                kwargs["inference_steps"] = 25
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 25
             images = self.ldm(
                 [inputs],
                 **kwargs,
