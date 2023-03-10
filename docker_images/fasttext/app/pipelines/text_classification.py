@@ -12,6 +12,7 @@ class TextClassificationPipeline(Pipeline):
         model_id: str,
     ):
         super().__init__(model_id)
+        self.info = HfApi().model_info(repo_id=self.model_id)
 
     def __call__(self, inputs: str) -> List[Dict[str, float]]:
         """
@@ -23,8 +24,8 @@ class TextClassificationPipeline(Pipeline):
                 - "label": A string representing what the label/class is. There can be multiple labels.
                 - "score": A score between 0 and 1 describing how confident the model is for this label/class.
         """
-        info = HfApi().model_info(repo_id=self.model_id)
-        if "language-identification" in info.tags:
+        
+        if "language-identification" in self.info.tags:
             preds = self.model.predict(inputs, k=5)
             result = [{ "label": label[FASTTEXT_PREFIX_LENGTH:], "score": prob } for label, prob in zip(preds[0], preds[1])]
             return [result]
