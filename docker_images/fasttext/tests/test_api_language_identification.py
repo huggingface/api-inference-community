@@ -17,7 +17,7 @@ class LanguageIdentificationTestCase(TestCase):
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = model_id
-        os.environ["TASK"] = "language-identification"
+        os.environ["TASK"] = "text-classification"
         from app.main import app
 
         self.app = app
