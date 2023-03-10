@@ -1,10 +1,11 @@
 from typing import Dict, List
 
 from app.pipelines import Pipeline
-
 from huggingface_hub import HfApi
 
-FASTTEXT_PREFIX_LENGTH = 9 # fasttext labels are formatted like "__label__eng_Latn"
+
+FASTTEXT_PREFIX_LENGTH = 9  # fasttext labels are formatted like "__label__eng_Latn"
+
 
 class TextClassificationPipeline(Pipeline):
     def __init__(
@@ -24,12 +25,15 @@ class TextClassificationPipeline(Pipeline):
                 - "label": A string representing what the label/class is. There can be multiple labels.
                 - "score": A score between 0 and 1 describing how confident the model is for this label/class.
         """
-        
+
         if "language-identification" in self.info.tags:
             preds = self.model.predict(inputs, k=5)
-            result = [{ "label": label[FASTTEXT_PREFIX_LENGTH:], "score": prob } for label, prob in zip(preds[0], preds[1])]
+            result = [
+                {"label": label[FASTTEXT_PREFIX_LENGTH:], "score": prob}
+                for label, prob in zip(preds[0], preds[1])
+            ]
             return [result]
-    
+
         if len(inputs.split()) > 1:
             raise ValueError("Expected input is a single word")
         preds = self.model.get_nearest_neighbors(inputs, k=5)
