@@ -11,6 +11,9 @@ from tests.test_api import TESTABLE_MODELS
     "text-classification" not in ALLOWED_TASKS,
     "text-classification not implemented",
 )
+@parameterized_class(
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["text-classification"]]
+)
 class TextClassificationTestCase(TestCase):
     def setUp(self):
         model_id = TESTABLE_MODELS["text-classification"]
