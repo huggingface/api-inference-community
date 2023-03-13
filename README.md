@@ -34,7 +34,7 @@ along the way if you don't feel confident to follow those steps yourself
 1. Test your creation within a docker
 
 ```python
-./manage.py docker --model-id MY_MODEL
+./manage.py docker MY_MODEL
 ```
 
 should work and responds on port 8000. `curl -X POST -d "test" http://localhost:8000` for instance if 
@@ -43,7 +43,7 @@ the pipeline deals with simple text.
 If it doesn't work out of the box and/or docker is slow for some reason you
 can test locally (using your local python environment) with :
 
-`./manage.py start --model-id MY_MODEL`
+`./manage.py start MY_MODEL`
 
 
 2. Test your docker uses cache properly.
@@ -65,7 +65,7 @@ RUN_DOCKER_TESTS=1 pytest -sv tests/test_dockers.py::DockerImageTests::test_{fra
 ### Modifying files within `api-inference-community/{routes,validation,..}.py`.
 
 If you ever come across a bug within `api-inference-community/` package or want to update it
-the developpement process is slightly more involved.
+the development process is slightly more involved.
 
 - First, make sure you need to change this package, each framework is very autonomous
  so if your code can get away by being standalone go that way first as it's much simpler.

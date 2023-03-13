@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "feature-extraction": FeatureExtractionPipeline,
     "text-classification": TextClassificationPipeline,
+    "language-identification": TextClassificationPipeline,
 }
 
 

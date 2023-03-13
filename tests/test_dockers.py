@@ -104,6 +104,11 @@ class DockerImageTests(unittest.TestCase):
             "feature-extraction",
             "osanseviero/fasttext_embedding",
         )
+        self.framework_docker_test(
+            "fasttext",
+            "text-classification",
+            "sheonhan/fasttext-language-identification",
+        )
         self.framework_invalid_test("fasttext")
 
     def test_sentence_transformers(self):

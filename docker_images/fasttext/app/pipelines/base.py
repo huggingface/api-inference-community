@@ -10,6 +10,7 @@ class Pipeline(ABC):
     def __init__(self, model_id: str):
         model_path = hf_hub_download(model_id, "model.bin", library_name="fasttext")
         self.model = fasttext.load_model(model_path)
+        self.model_id = model_id
 
     @abstractmethod
     def __call__(self, inputs: Any) -> Any:
