@@ -17,7 +17,6 @@ from tests.test_api import TESTABLE_MODELS
 )
 class TextClassificationTestCase(TestCase):
     def setUp(self):
-        model_id = TESTABLE_MODELS["text-classification"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.model_id
@@ -91,8 +90,12 @@ class TextClassificationTestCase(TestCase):
 
     def test_multiple_words(self):
         inputs = "this is great"
-        
-        expected_status_code = 200 if "language-identification" in self.model_id else 400
+
+        # For "language-identification" substask, fasttext can identify the language of a sentence
+        # but when getting a word vector's nearest neighbors, only a single word is valid as an input
+        expected_status_code = (
+            200 if "language-identification" in self.model_id else 400
+        )
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": inputs})
         self.assertEqual(
