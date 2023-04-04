@@ -8,7 +8,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Must contain at least one example of each implemented pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
-TESTABLE_MODELS: Dict[str, str] = {"text-to-image": "CompVis/ldm-text2im-large-256"}
+TESTABLE_MODELS: Dict[str, str] = {"text-to-image": "CompVis/ldm-text2im-large-256", "image-to-image": "lllyasviel/sd-controlnet-canny"}
 
 
 ALL_TASKS = {
