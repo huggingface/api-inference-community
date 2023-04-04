@@ -41,7 +41,7 @@ class ImageToImageTestCase(TestCase):
 
     def test_simple(self):
         text = "soap bubble"
-        image = PIL.Image.new('RGB', (128, 128))
+        image = PIL.Image.new("RGB", (128, 128))
 
         inputs = (text, image)
 

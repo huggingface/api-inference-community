@@ -32,7 +32,10 @@ logger = logging.getLogger(__name__)
 # ALLOWED_TASKS = {"automatic-speech-recognition": AutomaticSpeechRecognitionPipeline}
 # You can check the requirements and expectations of each pipelines in their respective
 # directories. Implement directly within the directories.
-ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {"text-to-image": TextToImagePipeline, "image-to-image": ImageToImagePipeline}
+ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
+    "text-to-image": TextToImagePipeline,
+    "image-to-image": ImageToImagePipeline,
+}
 
 
 @functools.lru_cache()

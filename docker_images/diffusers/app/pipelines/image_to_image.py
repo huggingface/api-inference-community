@@ -2,7 +2,14 @@ import os
 import torch
 import json
 from app.pipelines import Pipeline
-from diffusers import StableDiffusionControlNetPipeline, ControlNetModel, DiffusionPipeline, StableDiffusionImg2ImgPipeline, AltDiffusionImg2ImgPipeline, DPMSolverMultistepScheduler
+from diffusers import (
+    StableDiffusionControlNetPipeline,
+    ControlNetModel,
+    DiffusionPipeline,
+    StableDiffusionImg2ImgPipeline,
+    AltDiffusionImg2ImgPipeline,
+    DPMSolverMultistepScheduler,
+)
 from huggingface_hub import model_info, hf_hub_download
 from PIL import Image
 
@@ -23,7 +30,9 @@ class ImageToImagePipeline(Pipeline):
             file.rfilename == "config.json" for file in model_data.siblings
         )
         if has_config:
-            config_file = hf_hub_download(model_id, "config.json", token=os.getenv("HF_API_TOKEN"))
+            config_file = hf_hub_download(
+                model_id, "config.json", token=os.getenv("HF_API_TOKEN")
+            )
             with open(config_file, "r") as f:
                 config_dict = json.load(f)
 
@@ -31,10 +40,15 @@ class ImageToImagePipeline(Pipeline):
 
         if is_controlnet:
             model_to_load = model_data.cardData["base_model"]
-            controlnet = ControlNetModel.from_pretrained(model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs)
+            controlnet = ControlNetModel.from_pretrained(
+                model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
+            )
 
             self.ldm = StableDiffusionControlNetPipeline.from_pretrained(
-                model_to_load, controlnet=controlnet, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
+                model_to_load,
+                controlnet=controlnet,
+                use_auth_token=os.getenv("HF_API_TOKEN"),
+                **kwargs,
             )
         else:
             self.ldm = DiffusionPipeline.from_pretrained(
@@ -45,8 +59,17 @@ class ImageToImagePipeline(Pipeline):
             self.ldm.to("cuda")
             self.ldm.enable_xformers_memory_efficient_attention()
 
-        if isinstance(self.ldm, (StableDiffusionImg2ImgPipeline, AltDiffusionImg2ImgPipeline, StableDiffusionControlNetPipeline)):
-            self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(self.ldm.scheduler.config)
+        if isinstance(
+            self.ldm,
+            (
+                StableDiffusionImg2ImgPipeline,
+                AltDiffusionImg2ImgPipeline,
+                StableDiffusionControlNetPipeline,
+            ),
+        ):
+            self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
+                self.ldm.scheduler.config
+            )
 
     def __call__(self, inputs: str, image: Image.Image, **kwargs) -> "Image.Image":
         """
@@ -59,7 +82,14 @@ class ImageToImagePipeline(Pipeline):
             A :obj:`PIL.Image.Image` with the raw image representation as PIL.
         """
 
-        if isinstance(self.ldm, (StableDiffusionImg2ImgPipeline, AltDiffusionImg2ImgPipeline, ControlNetModel)):
+        if isinstance(
+            self.ldm,
+            (
+                StableDiffusionImg2ImgPipeline,
+                AltDiffusionImg2ImgPipeline,
+                ControlNetModel,
+            ),
+        ):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
             images = self.ldm(
