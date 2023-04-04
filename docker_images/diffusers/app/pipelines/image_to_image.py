@@ -1,15 +1,10 @@
 import os
-from typing import TYPE_CHECKING
-
 import torch
 import json
 from app.pipelines import Pipeline
 from diffusers import StableDiffusionControlNetPipeline, ControlNetModel, DiffusionPipeline, StableDiffusionImg2ImgPipeline, AltDiffusionImg2ImgPipeline, DPMSolverMultistepScheduler
 from huggingface_hub import model_info, hf_hub_download
-
-
-if TYPE_CHECKING:
-    from PIL import Image
+from PIL import Image
 
 
 class ImageToImagePipeline(Pipeline):
