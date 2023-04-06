@@ -237,6 +237,13 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("spacy")
 
+    def test_span_marker(self):
+        self.framework_docker_test(
+            "span_marker",
+            "token-classification",
+            "tomaarsen/span-marker-bert-tiny-fewnerd-coarse-super"
+        )
+
     def test_speechbrain(self):
         self.framework_docker_test(
             "speechbrain",
