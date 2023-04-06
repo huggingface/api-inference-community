@@ -24,7 +24,7 @@ def _extract_tasks(library_name, variable_name, value):
     """Extract supported tasks of the library.
 
     Args:
-        library_name: The name of the libarary (e.g. paddlenlp)
+        library_name: The name of the library (e.g. paddlenlp)
         variable_name: The name of the Python variable (e.g. ALLOWED_TASKS)
         value: The AST of the variable's Python value.
     """
@@ -38,7 +38,7 @@ def traverse_global_assignments(library_name, file_content, handler):
     """Traverse all global assignments and apply handler on each of them.
 
     Args:
-        library_name: The nmae of the library (e.g. paddlenlp)
+        library_name: The name of the library (e.g. paddlenlp)
         file_content: The content of app/main.py file in string.
         handler: A callback that processes the AST.
     """

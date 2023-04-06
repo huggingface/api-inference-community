@@ -15,7 +15,7 @@ want to be integrated.
     - `docker_images/example/requirements.txt`
     - `docker_images/example/app/main.py`
     - `docker_images/example/app/pipelines/{task_name}.py` 
-    to implement the desired functionnality. All required code is marked with `IMPLEMENT_THIS` markup.
+    to implement the desired functionality. All required code is marked with `IMPLEMENT_THIS` markup.
 3. Remove:
     - Any pipeline files in `docker_images/example/app/pipelines/` that are not used.
     - Any tests associated with deleted pipelines in `docker_images/example/tests`.
@@ -49,7 +49,7 @@ can test locally (using your local python environment) with :
 2. Test your docker uses cache properly.
 
 When doing subsequent docker launch with the same model_id, the docker should start up very fast and not redownload the whole model file. If you see the model/repo being downloaded over and over, it means the cache is not being used correctly.
-You can edit the `docker_images/{framework}/Dockerfile` and add an environement variable (by default it assumes `HUGGINGFACE_HUB_CACHE`), or your code directly to put
+You can edit the `docker_images/{framework}/Dockerfile` and add an environment variable (by default it assumes `HUGGINGFACE_HUB_CACHE`), or your code directly to put
 the model files in the `/data` folder.
 
 3. Add a docker test.
@@ -93,8 +93,8 @@ will be exactly the one in the API.
 - **Text generation**: Input is a text, output is a dict of generated text
 - **Image recognition**: Input is an image, output is a dict of generated text
 - **Question answering**: Input is a question + some context, output is a dict containing necessary information to locate the answer to the `question` within the `context`.
-- **Audio source separation**: Input is some audio, and the output is n audio files that sum up to the original audio but contain individual soures of sound (either speakers or instruments for instant).
-- **Token classification**: Input is some text, and the output is a list of entities mentionned in the text. Entities can be anything remarquable like locations, organisations, persons, times etc...
+- **Audio source separation**: Input is some audio, and the output is n audio files that sum up to the original audio but contain individual sources of sound (either speakers or instruments for instant).
+- **Token classification**: Input is some text, and the output is a list of entities mentioned in the text. Entities can be anything remarkable like locations, organisations, persons, times etc...
 - **Text to speech**: Input is some text, and the output is an audio file saying the text...
 - **Sentence Similarity**: Input is some sentence and a list of reference sentences, and the list of similarity scores.
 

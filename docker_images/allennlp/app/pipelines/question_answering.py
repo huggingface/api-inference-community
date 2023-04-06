@@ -2,7 +2,7 @@ import os
 import shutil
 from typing import Any, Dict
 
-# Even though it is not imported, it is actually required, it downlaods some stuff.
+# Even though it is not imported, it is actually required, it downloads some stuff.
 import allennlp_models  # noqa: F401
 from allennlp.predictors.predictor import Predictor
 from app.pipelines import Pipeline
@@ -27,7 +27,7 @@ class QuestionAnsweringPipeline(Pipeline):
         """
         Args:
             inputs (:obj:`dict`):
-                a dictionnary containing two keys, 'question' being the question being asked and 'context' being some text containing the answer.
+                a dictionary containing two keys, 'question' being the question being asked and 'context' being some text containing the answer.
         Return:
             A :obj:`dict`:. The object return should be like {"answer": "XXX", "start": 3, "end": 6, "score": 0.82} containing :
                 - "answer": the extracted answer from the `context`.

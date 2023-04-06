@@ -19,7 +19,7 @@ class AutomaticSpeechRecognitionPipeline(Pipeline):
                 or if it depends on the model
         Return:
             A :obj:`dict`:. The object return should be liked {"text": "XXX"} containing
-            the detected langage from the input audio
+            the detected language from the input audio
         """
         outputs = self.model(inputs)
         text, *_ = outputs[0]

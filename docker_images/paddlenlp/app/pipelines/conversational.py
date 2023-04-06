@@ -27,7 +27,7 @@ class ConversationalPipeline(Pipeline):
                 generated_text (`str`):
                     The answer of the bot
                 conversation   (`Dict[str, List[str]]`):
-                    A facility dictionnary to send back for the next input (with the new user input addition).
+                    A facility dictionary to send back for the next input (with the new user input addition).
 
                         past_user_inputs (`List[str]`)
                             List of strings. The last inputs from the user in the conversation, after the model has run.

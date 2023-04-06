@@ -33,7 +33,7 @@ class cd:
 
 @unittest.skipIf(
     "RUN_DOCKER_TESTS" not in os.environ,
-    "Docker tests are slow, set `RUN_DOCKER_TESTS=1` environement variable to run them",
+    "Docker tests are slow, set `RUN_DOCKER_TESTS=1` environment variable to run them",
 )
 class DockerImageTests(unittest.TestCase):
     def create_docker(self, name: str) -> str:
