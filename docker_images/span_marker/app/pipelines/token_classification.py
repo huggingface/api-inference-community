@@ -30,7 +30,7 @@ class TokenClassificationPipeline(Pipeline):
                 "word": entity["span"],
                 "start": entity["char_start_index"],
                 "end": entity["char_end_index"],
-                "score": entity["score"]
+                "score": entity["score"],
             }
             for entity in self.model.predict(inputs)
         ]

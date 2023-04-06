@@ -241,7 +241,7 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "span_marker",
             "token-classification",
-            "tomaarsen/span-marker-bert-tiny-fewnerd-coarse-super"
+            "tomaarsen/span-marker-bert-tiny-fewnerd-coarse-super",
         )
 
     def test_speechbrain(self):
