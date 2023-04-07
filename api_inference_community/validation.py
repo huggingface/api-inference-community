@@ -353,7 +353,7 @@ def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, D
         # This is necessary for batch jobs where the datasets can contain
         # filenames instead of the raw data.
         # We attempt to sanitize this roughly, by checking it lives on the data
-        # path (harcoded in the deployment and in all the dockerfiles)
+        # path (hardcoded in the deployment and in all the dockerfiles)
         # We also attempt to prevent opening files that are not obviously
         # audio files, to prevent opening stuff like model weights.
         filename, ext = os.path.splitext(bpayload)
