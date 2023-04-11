@@ -65,9 +65,9 @@ class TextToImagePipeline(Pipeline):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
             images = self.ldm(
-                [inputs],
+                inputs,
                 **kwargs,
             )["images"]
         else:
-            images = self.ldm([inputs], **kwargs)["images"]
+            images = self.ldm(inputs, **kwargs)["images"]
         return images[0]
