@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from base64 import b64decode
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -219,7 +220,9 @@ IMAGE_INPUTS = {
     "image-classification",
     "image-segmentation",
     "image-to-text",
+    "image-to-image",
     "object-detection",
+    "zero-shot-image-classification",
 }
 
 TEXT_INPUTS = {
@@ -336,6 +339,15 @@ def ffmpeg_read(bpayload: bytes, sampling_rate: int) -> np.array:
 
 def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
     from PIL import Image
+
+    try:
+        data = json.loads(bpayload)
+        image = data["inputs"]
+        image_bytes = b64decode(image)
+        img = Image.open(BytesIO(image_bytes))
+        return img, data.get("parameters", {})
+    except Exception:
+        pass
 
     img = Image.open(BytesIO(bpayload))
     return img, {}
