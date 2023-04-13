@@ -1,16 +1,17 @@
-import os
-import torch
 import json
+import os
+
+import torch
 from app.pipelines import Pipeline
 from diffusers import (
-    StableDiffusionControlNetPipeline,
+    AltDiffusionImg2ImgPipeline,
     ControlNetModel,
     DiffusionPipeline,
-    StableDiffusionImg2ImgPipeline,
-    AltDiffusionImg2ImgPipeline,
     DPMSolverMultistepScheduler,
+    StableDiffusionControlNetPipeline,
+    StableDiffusionImg2ImgPipeline,
 )
-from huggingface_hub import model_info, hf_hub_download
+from huggingface_hub import hf_hub_download, model_info
 from PIL import Image
 
 

@@ -48,7 +48,6 @@ class SklearnBasePipeline(Pipeline):
         try:
             with warnings.catch_warnings(record=True) as record:
                 if self.model_format == "pickle":
-
                     self.model = joblib.load(
                         open(Path(cached_folder) / self.model_file, "rb")
                     )
