@@ -15,11 +15,13 @@ want to be integrated.
     - `docker_images/example/requirements.txt`
     - `docker_images/example/app/main.py`
     - `docker_images/example/app/pipelines/{task_name}.py` 
+
     to implement the desired functionality. All required code is marked with `IMPLEMENT_THIS` markup.
 3. Remove:
     - Any pipeline files in `docker_images/example/app/pipelines/` that are not used.
     - Any tests associated with deleted pipelines in `docker_images/example/tests`.
     - Any imports of the pipelines you deleted from `docker_images/example/app/pipelines/__init__.py`
+
 4. Feel free to customize anything required by your lib everywhere you want. The only real requirements, are to honor the HTTP endpoints, in the same fashion as the `common` folder for all your supported tasks.
 5. Edit `example/tests/test_api.py` to add TESTABLE_MODELS.
 6. Pass the test suite `pytest -sv --rootdir docker_images/example/ docker_images/example/`
@@ -58,7 +60,6 @@ Edit the `tests/test_dockers.py` file to add a new test with your new framework
 in it (`def test_{framework}(self):` for instance). As a basic you should have 1 line per task in this test function with a real working model on the hub. Those tests are relatively slow but will check automatically that correct errors are replied by your API and that the cache works properly. To run those tests your can simply do:
 
 ```bash
-
 RUN_DOCKER_TESTS=1 pytest -sv tests/test_dockers.py::DockerImageTests::test_{framework}
 ```
 
@@ -68,17 +69,16 @@ If you ever come across a bug within `api-inference-community/` package or want 
 the development process is slightly more involved.
 
 - First, make sure you need to change this package, each framework is very autonomous
- so if your code can get away by being standalone go that way first as it's much simpler.
+  so if your code can get away by being standalone go that way first as it's much simpler.
 - If you can make the change only in `api-inference-community` without depending on it
-that's also a great option. Make sure to add the proper tests to your PR.
+  that's also a great option. Make sure to add the proper tests to your PR.
 - Finally, the best way to go is to develop locally using `manage.py` command:
 - Do the necessary modifications within `api-inference-community` first.
 - Install it locally in your environment with `pip install -e .`
 - Install your package dependencies locally.
 - Run your webserver locally: `./manage.py start --framework example --task audio-source-separation --model-id MY_MODEL`
 - When everything is working, you will need to split your PR in two, 1 for the `api-inference-community` part.
-  The second one will be for your package specific modifications and will only land once the `api-inference-community`
-  tag has landed.
+  The second one will be for your package specific modifications and will only land once the `api-inference-community` tag has landed.
 - This workflow is still work in progress, don't hesitate to ask questions to maintainers.
 
 Another similar command `./manage.py docker --framework example --task audio-source-separation --model-id MY_MODEL`
