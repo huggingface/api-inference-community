@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import os
+from base64 import b64encode
 from unittest import TestCase
 
 import numpy as np
@@ -319,6 +320,63 @@ class ValidationTestCase(TestCase):
             200,
         )
         self.assertEqual(response.headers["x-compute-characters"], "4")
+        self.assertEqual(
+            response.content,
+            b'{"some":"json serializable","candidate_labels":["a","b"]}',
+        )
+
+    def test_pipeline_zero_shot_image(self):
+        os.environ["TASK"] = "zero-shot-image-classification"
+
+        class Pipeline:
+            def __init__(self):
+                pass
+
+            def __call__(self, input_: Image, candidate_labels=None):
+                return {
+                    "some": "json serializable",
+                    "candidate_labels": candidate_labels,
+                }
+
+        def get_pipeline():
+            return Pipeline()
+
+        routes = [
+            Route("/{whatever:path}", status_ok),
+            Route("/{whatever:path}", pipeline_route, methods=["POST"]),
+        ]
+
+        app = Starlette(routes=routes)
+
+        @app.on_event("startup")
+        async def startup_event():
+            logger = logging.getLogger("uvicorn.access")
+            handler = logging.StreamHandler()
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            )
+            logger.handlers = [handler]
+
+            # Link between `api-inference-community` and framework code.
+            app.get_pipeline = get_pipeline
+
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(dirname, "samples", "plane.jpg")
+        with open(filename, "rb") as f:
+            image = f.read()
+            image = b64encode(image).decode("utf-8")
+
+        with TestClient(app) as client:
+            response = client.post(
+                "/",
+                json={"inputs": image, "parameters": {"candidate_labels": ["a", "b"]}},
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(response.headers["x-compute-images"], "1")
         self.assertEqual(
             response.content,
             b'{"some":"json serializable","candidate_labels":["a","b"]}',
