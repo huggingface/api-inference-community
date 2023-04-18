@@ -344,7 +344,7 @@ def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
         # We accept both binary image with mimetype
         # and {"inputs": base64encodedimage}
         data = json.loads(bpayload)
-        image = data["inputs"]
+        image = data["image"] if "image" in data else data["inputs"]
         image_bytes = b64decode(image)
         img = Image.open(BytesIO(image_bytes))
         return img, data.get("parameters", {})
