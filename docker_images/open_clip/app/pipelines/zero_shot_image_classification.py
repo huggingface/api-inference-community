@@ -42,6 +42,8 @@ class ZeroShotImageClassificationPipeline(Pipeline):
         """
         if candidate_labels is None:
             raise ValueError("'candidate_labels' is a required field")
+        if isinstance(candidate_labels, str):
+            candidate_labels = candidate_labels.split(",")
 
         prompt_templates = (
             "a bad photo of a {}.",

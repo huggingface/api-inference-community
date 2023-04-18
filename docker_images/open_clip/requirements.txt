@@ -1,5 +1,5 @@
 starlette==0.25.0
-api-inference-community==0.0.28
+api-inference-community==0.0.29
 huggingface_hub>=0.12.1
 timm>=0.8.19dev0
 transformers>=4.24.0
