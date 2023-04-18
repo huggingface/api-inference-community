@@ -356,6 +356,14 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("mindspore")
 
+    def test_open_clip(self):
+        self.framework_docker_test(
+            "open_clip",
+            "zero-shot-image-classification",
+            "laion/CLIP-ViT-B-32-laion2B-s34B-b79K",
+        )
+        self.framework_invalid_test("open_clip")
+
     def framework_invalid_test(self, framework: str):
         task = "invalid"
         model_id = "invalid"
