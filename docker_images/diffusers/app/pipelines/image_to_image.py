@@ -72,7 +72,7 @@ class ImageToImagePipeline(Pipeline):
                 self.ldm.scheduler.config
             )
 
-    def __call__(self, image: Image.Image, inputs: str="", **kwargs) -> "Image.Image":
+    def __call__(self, image: Image.Image, inputs: str = "", **kwargs) -> "Image.Image":
         """
         Args:
             inputs (:obj:`str`):
@@ -94,9 +94,10 @@ class ImageToImagePipeline(Pipeline):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
             images = self.ldm(
-                [inputs],
+                inputs,
+                image,
                 **kwargs,
             )["images"]
         else:
-            images = self.ldm([inputs], **kwargs)["images"]
+            images = self.ldm(inputs, image, **kwargs)["images"]
         return images[0]
