@@ -72,7 +72,7 @@ class ImageToImagePipeline(Pipeline):
                 self.ldm.scheduler.config
             )
 
-    def __call__(self, inputs: str, image: Image.Image, **kwargs) -> "Image.Image":
+    def __call__(self, image: Image.Image, inputs: str="", **kwargs) -> "Image.Image":
         """
         Args:
             inputs (:obj:`str`):
