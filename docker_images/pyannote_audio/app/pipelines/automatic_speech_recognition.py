@@ -24,7 +24,7 @@ class AutomaticSpeechRecognitionPipeline(Pipeline):
                 The raw waveform of audio received. By default at self.sampling_rate, otherwise 16KHz.
         Return:
             A :obj:`dict`:. The object return should be liked {"text": "XXX"} containing
-            the detected langage from the input audio
+            the detected language from the input audio
         """
         wav = torch.from_numpy(inputs).unsqueeze(0)
         output = self.model({"waveform": wav, "sample_rate": self.sampling_rate})
