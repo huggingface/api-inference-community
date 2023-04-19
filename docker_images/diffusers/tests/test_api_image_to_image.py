@@ -41,9 +41,9 @@ class ImageToImageTestCase(TestCase):
 
     def test_simple(self):
         text = "soap bubble"
-        image = PIL.Image.new("RGB", (128, 128))
+        image = PIL.Image.new("RGB", (64, 64))
 
-        inputs = (text, image)
+        inputs = (image, text)
 
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": inputs})
