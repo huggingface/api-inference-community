@@ -4,6 +4,7 @@ from unittest import TestCase, skipIf
 
 import PIL
 from app.main import ALLOWED_TASKS
+from parameterized import parameterized_class
 from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
 
@@ -12,12 +13,14 @@ from tests.test_api import TESTABLE_MODELS
     "text-to-image" not in ALLOWED_TASKS,
     "text-to-image not implemented",
 )
+@parameterized_class(
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["text-to-image"]]
+)
 class TextToImageTestCase(TestCase):
     def setUp(self):
-        model_id = TESTABLE_MODELS["text-to-image"]
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
-        os.environ["MODEL_ID"] = model_id
+        os.environ["MODEL_ID"] = self.model_id
         os.environ["TASK"] = "text-to-image"
         from app.main import app
 
