@@ -9,10 +9,6 @@ from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
 
 
-@skipIf(
-    "image-to-image" not in ALLOWED_TASKS,
-    "image-to-image not implemented",
-)
 @parameterized_class(
     [{"model_id": model_id} for model_id in TESTABLE_MODELS["image-to-image"]]
 )
@@ -44,9 +40,9 @@ class ImageToImageTestCase(TestCase):
 
     def test_simple(self):
         text = "soap bubble"
-        image = PIL.Image.new("RGB", (128, 128))
+        image = PIL.Image.new("RGB", (64, 64))
 
-        inputs = (text, image)
+        inputs = (image, text)
 
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": inputs})
