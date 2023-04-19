@@ -24,7 +24,6 @@ CONFIG_FILENAME = "config.json"
 
 class ImageClassificationPipeline(Pipeline):
     def __init__(self, model_id: str):
-
         # Reload Keras SavedModel
         self.model = from_pretrained_keras(model_id)
 
