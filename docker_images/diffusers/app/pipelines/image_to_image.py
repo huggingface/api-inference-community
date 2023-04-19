@@ -88,7 +88,7 @@ class ImageToImagePipeline(Pipeline):
             (
                 StableDiffusionImg2ImgPipeline,
                 AltDiffusionImg2ImgPipeline,
-                ControlNetModel,
+                StableDiffusionControlNetPipeline,
             ),
         ):
             if "num_inference_steps" not in kwargs:
