@@ -301,6 +301,11 @@ class DockerImageTests(unittest.TestCase):
             "text-to-image",
             "hf-internal-testing/tiny-stable-diffusion-pipe",
         )
+        self.framework_docker_test(
+            "diffusers",
+            "image-to-image",
+            "hf-internal-testing/tiny-controlnet",
+        )
         self.framework_invalid_test("diffusers")
 
     def test_pyannote_audio(self):

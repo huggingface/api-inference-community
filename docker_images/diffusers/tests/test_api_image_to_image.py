@@ -10,18 +10,18 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "text-to-image" not in ALLOWED_TASKS,
-    "text-to-image not implemented",
+    "image-to-image" not in ALLOWED_TASKS,
+    "image-to-image not implemented",
 )
 @parameterized_class(
-    [{"model_id": model_id} for model_id in TESTABLE_MODELS["text-to-image"]]
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["image-to-image"]]
 )
-class TextToImageTestCase(TestCase):
+class ImageToImageTestCase(TestCase):
     def setUp(self):
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.model_id
-        os.environ["TASK"] = "text-to-image"
+        os.environ["TASK"] = "image-to-image"
         from app.main import app
 
         self.app = app
@@ -43,7 +43,10 @@ class TextToImageTestCase(TestCase):
             del os.environ["TASK"]
 
     def test_simple(self):
-        inputs = "soap bubble"
+        text = "soap bubble"
+        image = PIL.Image.new("RGB", (64, 64))
+
+        inputs = (image, text)
 
         with TestClient(self.app) as client:
             response = client.post("/", json={"inputs": inputs})
