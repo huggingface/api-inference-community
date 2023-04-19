@@ -9,8 +9,8 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "text-to-image" not in ALLOWED_TASKS,
-    "text-to-image not implemented",
+    "image-to-image" not in ALLOWED_TASKS,
+    "image-to-image not implemented",
 )
 class ImageToImageTestCase(TestCase):
     def setUp(self):
