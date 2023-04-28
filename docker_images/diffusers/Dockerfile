@@ -8,8 +8,8 @@ RUN pip install --no-cache-dir torch==1.13.0 torchvision==0.14.0 torchaudio==0.1
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./prestart.sh /app/
-
+# Uncomment if you want to load the model once before starting the asgi app
+# COPY ./prestart.sh /app/
 
 # Most DL models are quite large in terms of memory, using workers is a HUGE
 # slowdown because of the fork and GIL with python.

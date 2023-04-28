@@ -1,5 +1,15 @@
-import functools
+# isort: off
 import logging
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logger = logging.getLogger(__name__)
+else:
+    logger = logging.getLogger(__name__)
+# isort: on
+import functools
 import os
 from typing import Dict, Type
 
@@ -13,9 +23,6 @@ from starlette.routing import Route
 
 TASK = os.getenv("TASK")
 MODEL_ID = os.getenv("MODEL_ID")
-
-
-logger = logging.getLogger(__name__)
 
 
 # Add the allowed tasks
