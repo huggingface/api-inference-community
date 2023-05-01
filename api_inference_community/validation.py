@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from base64 import b64decode
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -219,7 +220,9 @@ IMAGE_INPUTS = {
     "image-classification",
     "image-segmentation",
     "image-to-text",
+    "image-to-image",
     "object-detection",
+    "zero-shot-image-classification",
 }
 
 TEXT_INPUTS = {
@@ -337,6 +340,17 @@ def ffmpeg_read(bpayload: bytes, sampling_rate: int) -> np.array:
 def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
     from PIL import Image
 
+    try:
+        # We accept both binary image with mimetype
+        # and {"inputs": base64encodedimage}
+        data = json.loads(bpayload)
+        image = data["image"] if "image" in data else data["inputs"]
+        image_bytes = b64decode(image)
+        img = Image.open(BytesIO(image_bytes))
+        return img, data.get("parameters", {})
+    except Exception:
+        pass
+
     img = Image.open(BytesIO(bpayload))
     return img, {}
 
@@ -353,7 +367,7 @@ def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, D
         # This is necessary for batch jobs where the datasets can contain
         # filenames instead of the raw data.
         # We attempt to sanitize this roughly, by checking it lives on the data
-        # path (harcoded in the deployment and in all the dockerfiles)
+        # path (hardcoded in the deployment and in all the dockerfiles)
         # We also attempt to prevent opening files that are not obviously
         # audio files, to prevent opening stuff like model weights.
         filename, ext = os.path.splitext(bpayload)

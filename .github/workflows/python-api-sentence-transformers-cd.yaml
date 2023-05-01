@@ -1,10 +1,10 @@
-name: flair-docker-cd
+name: sentence_transformers-docker-cd
 on:
   push:
     branches:
       - main
     paths:
-      - "docker_images/flair/**"
+      - "docker_images/sentence_transformers/**"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,14 +35,14 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          python build_docker.py flair --out out.txt
+          python build_docker.py sentence_transformers --out out.txt
       - name: Deploy on API
         run: |
           # Load the tags into the env
           cat out.txt >> $GITHUB_ENV
           export $(xargs < out.txt)
-          echo ${FLAIR_CPU_TAG}
+          echo ${SENTENCE_TRANSFORMERS_CPU_TAG}
           # Weird single quote escape mechanism because string interpolation does
           # not work on single quote in bash
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"FLAIR","tag": "'"${FLAIR_CPU_TAG}"'"}}'
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"SENTENCE_TRANSFORMERS","tag": "'"${SENTENCE_TRANSFORMERS_CPU_TAG}"'"}}'
 

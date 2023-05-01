@@ -38,7 +38,6 @@ class TokenClassificationPipeline(Pipeline):
 
         entities = []
         if "ner_model_path" in self.model.config.keys():
-
             for entity in doc.entities:
                 entity_dict = {
                     "entity_group": entity.type,
@@ -50,10 +49,8 @@ class TokenClassificationPipeline(Pipeline):
                 entities.append(entity_dict)
 
         else:
-
             for sent in doc.sentences:
                 for entity in sent.words:
-
                     entity_dict = {
                         "entity_group": entity.upos,
                         "word": entity.text,

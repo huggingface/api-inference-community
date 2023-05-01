@@ -1,9 +1,10 @@
 starlette==0.25.0
-api-inference-community==0.0.27
-huggingface_hub==0.11.0
-diffusers==0.12.0
--e git+https://github.com/huggingface/transformers@main#egg=transformers
-accelerate==0.13.2
+api-inference-community==0.0.30
+huggingface_hub==0.13.3
+safetensors==0.3.0
+diffusers==0.14.0
+transformers==4.27.4
+accelerate==0.18.0
 pydantic==1.8.2
 ftfy==6.1.1
 sentencepiece==0.1.97

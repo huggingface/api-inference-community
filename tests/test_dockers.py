@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import subprocess
@@ -33,7 +34,7 @@ class cd:
 
 @unittest.skipIf(
     "RUN_DOCKER_TESTS" not in os.environ,
-    "Docker tests are slow, set `RUN_DOCKER_TESTS=1` environement variable to run them",
+    "Docker tests are slow, set `RUN_DOCKER_TESTS=1` environment variable to run them",
 )
 class DockerImageTests(unittest.TestCase):
     def create_docker(self, name: str) -> str:
@@ -307,6 +308,11 @@ class DockerImageTests(unittest.TestCase):
             "text-to-image",
             "hf-internal-testing/tiny-stable-diffusion-pipe",
         )
+        self.framework_docker_test(
+            "diffusers",
+            "image-to-image",
+            "hf-internal-testing/tiny-controlnet",
+        )
         self.framework_invalid_test("diffusers")
 
     def test_pyannote_audio(self):
@@ -362,6 +368,14 @@ class DockerImageTests(unittest.TestCase):
             "mindspore", "image-classification", "helloway/lenet"
         )
         self.framework_invalid_test("mindspore")
+
+    def test_open_clip(self):
+        self.framework_docker_test(
+            "open_clip",
+            "zero-shot-image-classification",
+            "laion/CLIP-ViT-B-32-laion2B-s34B-b79K",
+        )
+        self.framework_invalid_test("open_clip")
 
     def framework_invalid_test(self, framework: str):
         task = "invalid"
@@ -625,6 +639,18 @@ class DockerImageTests(unittest.TestCase):
             ) as f:
                 data = f.read()
             response = httpx.post(url, data=data, timeout=timeout)
+            self.assertIn(response.status_code, {200, 400})
+            counter[response.status_code] += 1
+
+            with open(
+                os.path.join(os.path.dirname(__file__), "samples", "plane.jpg"), "rb"
+            ) as f:
+                data = f.read()
+            json_data = {
+                "inputs": base64.b64encode(data).decode("utf-8"),
+                "parameters": {"candidate_labels": ["A", "B"]},
+            }
+            response = httpx.post(url, json=json_data, timeout=timeout)
             self.assertIn(response.status_code, {200, 400})
             counter[response.status_code] += 1
 

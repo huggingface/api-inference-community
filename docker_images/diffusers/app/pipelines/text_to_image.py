@@ -58,16 +58,16 @@ class TextToImagePipeline(Pipeline):
             inputs (:obj:`str`):
                 a string containing some text
         Return:
-            A :obj:`PIL.Image` with the raw image representation as PIL.
+            A :obj:`PIL.Image.Image` with the raw image representation as PIL.
         """
 
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
             images = self.ldm(
-                [inputs],
+                inputs,
                 **kwargs,
             )["images"]
         else:
-            images = self.ldm([inputs], **kwargs)["images"]
+            images = self.ldm(inputs, **kwargs)["images"]
         return images[0]

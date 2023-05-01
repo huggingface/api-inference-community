@@ -145,7 +145,7 @@ def create_repos(est_name, task_name, est, sample, version, serialization_format
     push_repo(repo_name=repo_name, local_repo=local_repo)
 
     if serialization_format == "pickle":
-        # push WIHTOUT CONFIG
+        # push WITHOUT CONFIG
         repo_name = REPO_NAMES[task_name].format(
             version=version,
             est_name=est_name,

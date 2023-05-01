@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List
+from typing import Dict
 from unittest import TestCase, skipIf
 
 from app.main import ALLOWED_TASKS, get_pipeline
@@ -8,12 +8,12 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Must contain at least one example of each implemented pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
-TESTABLE_MODELS: Dict[str, List[str]] = {
-    "text-to-image": ["hf-internal-testing/tiny-stable-diffusion-pipe-no-safety"],
-    "image-to-image": [
-        "hf-internal-testing/tiny-controlnet",
-        "hf-internal-testing/tiny-stable-diffusion-pix2pix",
-    ],
+TESTABLE_MODELS: Dict[str, str] = {
+    "zero-shot-image-classification": [
+        "laion/CLIP-ViT-B-32-laion2B-s34B-b79K",
+        # "laion/CLIP-convnext_base_w-laion2B-s13B-b82K-augreg",
+        # "timm/eva02_base_patch16_clip_224.merged2b_s8b_b131k",
+    ]
 }
 
 
@@ -45,6 +45,7 @@ ALL_TASKS = {
     "text-to-speech",
     "token-classification",
     "zero-shot-classification",
+    "zero-shot-image-classification",
 }
 
 

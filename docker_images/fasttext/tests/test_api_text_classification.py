@@ -91,7 +91,7 @@ class TextClassificationTestCase(TestCase):
     def test_multiple_words(self):
         inputs = "this is great"
 
-        # For "language-identification" substask, fasttext can identify the language of a sentence
+        # For "language-identification" subtask, fasttext can identify the language of a sentence
         # but when getting a word vector's nearest neighbors, only a single word is valid as an input
         expected_status_code = (
             200 if "language-identification" in self.model_id else 400

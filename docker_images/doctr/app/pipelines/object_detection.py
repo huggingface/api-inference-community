@@ -9,7 +9,6 @@ from torchvision.transforms import Compose, ConvertImageDtype, PILToTensor
 
 class ObjectDetectionPipeline(Pipeline):
     def __init__(self, model_id: str):
-
         self.model = from_hub(model_id).eval()
 
         self.transform = Compose(
