@@ -30,7 +30,7 @@ class ImageToImagePipeline(Pipeline):
         has_config = any(
             file.rfilename == "config.json" for file in model_data.siblings
         )
-        
+
         is_controlnet = False
         if has_config:
             config_file = hf_hub_download(
