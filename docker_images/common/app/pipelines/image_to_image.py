@@ -17,12 +17,14 @@ class ImageToImagePipeline(Pipeline):
             "Please implement ImageToImagePipeline.__init__ function"
         )
 
-    def __call__(self, image: Image.Image, inputs: Optional[str] = "") -> "Image.Image":
+    def __call__(
+        self, inputs: Image.Image, prompt: Optional[str] = ""
+    ) -> "Image.Image":
         """
         Args:
-            image (:obj:`PIL.Image.Image`):
+            inputs (:obj:`PIL.Image.Image`):
                 a condition image
-            inputs (:obj:`str`, *optional*):
+            prompt (:obj:`str`, *optional*):
                 a string containing some text
         Return:
             A :obj:`PIL.Image` with the raw image representation as PIL.
