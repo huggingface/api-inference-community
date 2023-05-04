@@ -40,11 +40,11 @@ class ImageToImageTestCase(TestCase):
             del os.environ["TASK"]
 
     def test_simple(self):
-        prompt = "soap bubble"
         image = PIL.Image.new("RGB", (64, 64))
+        parameters = {"prompt": "soap bubble"}
 
         with TestClient(self.app) as client:
-            response = client.post("/", json={"inputs": image, "prompt": prompt})
+            response = client.post("/", json={"image": image, "parameters": parameters})
 
         self.assertEqual(
             response.status_code,
