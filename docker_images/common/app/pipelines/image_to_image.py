@@ -17,12 +17,10 @@ class ImageToImagePipeline(Pipeline):
             "Please implement ImageToImagePipeline.__init__ function"
         )
 
-    def __call__(
-        self, inputs: Image.Image, prompt: Optional[str] = ""
-    ) -> "Image.Image":
+    def __call__(self, image: Image.Image, prompt: Optional[str] = "") -> "Image.Image":
         """
         Args:
-            inputs (:obj:`PIL.Image.Image`):
+            image (:obj:`PIL.Image.Image`):
                 a condition image
             prompt (:obj:`str`, *optional*):
                 a string containing some text
