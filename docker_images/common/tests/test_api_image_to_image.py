@@ -1,3 +1,4 @@
+import base64
 import os
 from io import BytesIO
 from unittest import TestCase, skipIf
@@ -44,7 +45,13 @@ class ImageToImageTestCase(TestCase):
         parameters = {"prompt": "soap bubble"}
 
         with TestClient(self.app) as client:
-            response = client.post("/", json={"image": image, "parameters": parameters})
+            response = client.post(
+                "/",
+                json={
+                    "image": base64.b64encode(image).decode("utf-8"),
+                    "parameters": parameters,
+                },
+            )
 
         self.assertEqual(
             response.status_code,
