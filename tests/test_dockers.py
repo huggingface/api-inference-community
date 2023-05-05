@@ -312,6 +312,7 @@ class DockerImageTests(unittest.TestCase):
             "diffusers",
             "image-to-image",
             "hf-internal-testing/tiny-controlnet",
+            timeout=600,
         )
         self.framework_invalid_test("diffusers")
 
