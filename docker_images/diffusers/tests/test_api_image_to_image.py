@@ -45,13 +45,17 @@ class ImageToImageTestCase(TestCase):
 
     def test_simple(self):
         image = PIL.Image.new("RGB", (64, 64))
+        image_bytes = BytesIO()
+        image.save(image_bytes, format="JPEG")
+        image_bytes.seek(0)
+
         parameters = {"prompt": "soap bubble"}
 
         with TestClient(self.app) as client:
             response = client.post(
                 "/",
                 json={
-                    "image": base64.b64encode(image).decode("utf-8"),
+                    "image": base64.b64encode(image_bytes.read()).decode("utf-8"),
                     "parameters": parameters,
                 },
             )
@@ -72,7 +76,8 @@ class ImageToImageTestCase(TestCase):
             response.status_code,
             400,
         )
-        self.assertEqual(
-            response.content,
-            b'{"error":"\'utf-8\' codec can\'t decode byte 0xc3 in position 0: invalid continuation byte"}',
+
+        self.assertTrue(
+            b'{"error":"cannot identify image file <_io.BytesIO object at'
+            in response.content
         )

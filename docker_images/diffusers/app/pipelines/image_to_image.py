@@ -6,10 +6,10 @@ from app.pipelines import Pipeline
 from diffusers import (
     AltDiffusionImg2ImgPipeline,
     ControlNetModel,
-    DiffusionPipeline,
     DPMSolverMultistepScheduler,
     StableDiffusionControlNetPipeline,
     StableDiffusionImg2ImgPipeline,
+    StableDiffusionInstructPix2PixPipeline,
 )
 from huggingface_hub import hf_hub_download, model_info
 from PIL import Image
@@ -17,7 +17,8 @@ from PIL import Image
 
 class ImageToImagePipeline(Pipeline):
     def __init__(self, model_id: str):
-        model_data = model_info(model_id, token=os.getenv("HF_API_TOKEN"))
+        use_auth_token = os.getenv("HF_API_TOKEN")
+        model_data = model_info(model_id, token=use_auth_token)
 
         kwargs = (
             {"safety_checker": None}
@@ -27,35 +28,51 @@ class ImageToImagePipeline(Pipeline):
         if torch.cuda.is_available():
             kwargs["torch_dtype"] = torch.float16
 
-        has_config = any(
-            file.rfilename == "config.json" for file in model_data.siblings
-        )
+        # check if is controlnet or SD/AD
+        config_file_name = None
+        for file_name in ("config.json", "model_index.json"):
+            if any(file.rfilename == file_name for file in model_data.siblings):
+                config_file_name = file_name
+                break
 
-        is_controlnet = False
-        if has_config:
+        if config_file_name:
             config_file = hf_hub_download(
-                model_id, "config.json", token=os.getenv("HF_API_TOKEN")
+                model_id, config_file_name, token=use_auth_token
             )
             with open(config_file, "r") as f:
                 config_dict = json.load(f)
 
-            is_controlnet = config_dict.get("_class_name", None) == "ControlNetModel"
+            model_type = config_dict.get("_class_name", None)
+        else:
+            raise ValueError("Model type not found")
 
-        if is_controlnet:
+        # load according to model type
+        if model_type == "ControlNetModel":
             model_to_load = model_data.cardData["base_model"]
             controlnet = ControlNetModel.from_pretrained(
-                model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
+                model_id, use_auth_token=use_auth_token, **kwargs
             )
-
             self.ldm = StableDiffusionControlNetPipeline.from_pretrained(
                 model_to_load,
                 controlnet=controlnet,
-                use_auth_token=os.getenv("HF_API_TOKEN"),
+                use_auth_token=use_auth_token,
                 **kwargs,
             )
-        else:
-            self.ldm = DiffusionPipeline.from_pretrained(
-                model_id, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
+
+        elif model_type == "StableDiffusionPipeline":
+            self.ldm = StableDiffusionImg2ImgPipeline.from_pretrained(
+                model_id,
+                use_auth_token=use_auth_token,
+                **kwargs,
+            )
+
+        elif model_type == "AltDiffusionPipeline":
+            self.ldm = AltDiffusionImg2ImgPipeline.from_pretrained(
+                model_id, use_auth_token=use_auth_token, **kwargs
+            )
+        elif model_type == "StableDiffusionInstructPix2PixPipeline":
+            self.ldm = StableDiffusionInstructPix2PixPipeline.from_pretrained(
+                model_id, use_auth_token=use_auth_token, **kwargs
             )
 
         if torch.cuda.is_available():
@@ -68,6 +85,7 @@ class ImageToImagePipeline(Pipeline):
                 StableDiffusionImg2ImgPipeline,
                 AltDiffusionImg2ImgPipeline,
                 StableDiffusionControlNetPipeline,
+                StableDiffusionInstructPix2PixPipeline,
             ),
         ):
             self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
@@ -84,18 +102,18 @@ class ImageToImagePipeline(Pipeline):
         Return:
             A :obj:`PIL.Image.Image` with the raw image representation as PIL.
         """
-
         if isinstance(
             self.ldm,
             (
                 StableDiffusionImg2ImgPipeline,
                 AltDiffusionImg2ImgPipeline,
                 StableDiffusionControlNetPipeline,
+                StableDiffusionInstructPix2PixPipeline,
             ),
         ):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
             images = self.ldm(prompt, image, **kwargs)["images"]
+            return images[0]
         else:
-            images = self.ldm(prompt, image, **kwargs)["images"]
-        return images[0]
+            raise ValueError("Model type not found")
