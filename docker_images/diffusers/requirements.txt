@@ -9,3 +9,4 @@ pydantic==1.8.2
 ftfy==6.1.1
 sentencepiece==0.1.97
 scipy==1.9.3
+xformers==0.0.19
