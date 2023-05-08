@@ -1,8 +1,11 @@
 from typing import Dict, List
+
 from app.pipelines import Pipeline
 from optimum.intel import INCModelForSequenceClassification
 from transformers import AutoTokenizer
-from transformers import TextClassificationPipeline as TransformersTextClassificationPipeline
+from transformers import (
+    TextClassificationPipeline as TransformersTextClassificationPipeline,
+)
 
 
 class TextClassificationPipeline(Pipeline):
@@ -24,7 +27,4 @@ class TextClassificationPipeline(Pipeline):
                 - "label": A string representing what the label/class is. There can be multiple labels.
                 - "score": A score between 0 and 1 describing how confident the model is for this label/class.
         """
-        try:
-            return self.pipeline(inputs, return_all_scores=True)
-        except Exception as e:
-            raise
+        return self.pipeline(inputs, return_all_scores=True)

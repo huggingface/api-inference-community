@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Any
+
 from optimum.intel.neural_compressor import INCModel
 from transformers import Pipeline as TransformersPipeline
+
 
 class Pipeline(ABC):
     _MODEL_CLASS = INCModel

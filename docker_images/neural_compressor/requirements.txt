@@ -3,6 +3,5 @@ api-inference-community==0.0.30
 huggingface_hub==0.13.3
 diffusers==0.14.0
 transformers==4.27.4
-sentencepiece==0.1.97
-optimum==1.8.0
-optimum-intel[neural-compressor]==1.5.5
+optimum==1.8.4
+optimum-intel[neural-compressor]==1.8.0
