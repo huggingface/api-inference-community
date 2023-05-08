@@ -7,8 +7,7 @@ LABEL maintainer="Nicolas Patry <nicolas@huggingface.co>"
 RUN pip install --no-cache-dir torch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
-# Specifically built for T4.
-RUN pip install https://huggingface.co/datasets/Narsil/test/resolve/main/xformers-0.0.14.dev0-cp38-cp38-linux_x86_64.whl
+
 COPY ./prestart.sh /app/
 
 
