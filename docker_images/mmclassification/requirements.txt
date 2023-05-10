@@ -1,0 +1,5 @@
+starlette==0.25.0
+api-inference-community==0.0.25
+huggingface_hub==0.11.0
+mmcv==1.7.0
+mmcls=0.25.0
