@@ -1,9 +1,6 @@
 import json
 import os
 
-import jax
-import jax.numpy as jnp
-import numpy as np
 import torch
 from app.pipelines import Pipeline
 from diffusers import (
@@ -12,8 +9,6 @@ from diffusers import (
     ControlNetModel,
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
-    FlaxControlNetModel,
-    FlaxStableDiffusionControlNetPipeline,
     StableDiffusionControlNetPipeline,
     StableDiffusionImageVariationPipeline,
     StableDiffusionImg2ImgPipeline,
@@ -23,8 +18,6 @@ from diffusers import (
     StableUnCLIPPipeline,
 )
 from diffusers.models.attention_processor import AttnProcessor2_0
-from flax.jax_utils import replicate
-from flax.training.common_utils import shard
 from huggingface_hub import hf_hub_download, model_info
 from PIL import Image
 
@@ -76,28 +69,6 @@ class ImageToImagePipeline(Pipeline):
                 use_auth_token=use_auth_token,
                 **kwargs,
             )
-        elif model_type == "FlaxControlNetModel":
-            model_to_load = (
-                model_data.cardData["base_model"]
-                if "base_model" in model_data.cardData
-                else "runwayml/stable-diffusion-v1-5"
-            )
-            controlnet, controlnet_params = FlaxControlNetModel.from_pretrained(
-                model_id, dtype=jnp.bfloat16
-            )
-            (
-                self.ldm,
-                self.params,
-            ) = FlaxStableDiffusionControlNetPipeline.from_pretrained(
-                model_to_load,
-                controlnet=controlnet,
-                revision="flax",
-                use_auth_token=use_auth_token,
-                dtype=jnp.bfloat16,
-            )
-            self.params["controlnet"] = controlnet_params
-            self.p_params = replicate(self.params)
-
         elif model_type in ["AltDiffusionPipeline", "AltDiffusionImg2ImgPipeline"]:
             self.ldm = AltDiffusionImg2ImgPipeline.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
@@ -113,14 +84,17 @@ class ImageToImagePipeline(Pipeline):
             self.ldm = StableUnCLIPImg2ImgPipeline.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
             )
-        else:
+        elif model_type in [
+            "StableDiffusionImageVariationPipeline",
+            "StableDiffusionInstructPix2PixPipeline",
+        ]:
             self.ldm = DiffusionPipeline.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
             )
+        else:
+            raise ValueError("Model type not found or pipeline not implemented")
 
-        if torch.cuda.is_available() and not isinstance(
-            self.ldm, FlaxStableDiffusionControlNetPipeline
-        ):
+        if torch.cuda.is_available():
             self.ldm.to("cuda")
             self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
@@ -176,35 +150,5 @@ class ImageToImagePipeline(Pipeline):
             # only image is needed
             images = self.ldm(image, **kwargs)["images"]
             return images[0]
-        elif isinstance(self.ldm, FlaxStableDiffusionControlNetPipeline):
-            if "negative_prompt" in kwargs:
-                negative_prompt = kwargs["negative_prompt"]
-                del kwargs["negative_prompt"]
-            else:
-                negative_prompt = ""
-
-            prompt_ids = self.ldm.prepare_text_inputs(prompt)
-            processed_image = self.ldm.prepare_image_inputs(image)
-            negative_prompt_ids = self.ldm.prepare_text_inputs(negative_prompt)
-
-            prompt_ids = shard(prompt_ids)
-            negative_prompt_ids = shard(negative_prompt_ids)
-            processed_image = shard(processed_image)
-            rng = jax.random.PRNGKey(np.random.randint(0, 1000000))
-            rng = jax.random.split(rng, jax.device_count())
-
-            output = self.ldm(
-                prompt_ids=prompt_ids,
-                image=processed_image,
-                params=self.p_params,
-                prng_seed=rng,
-                neg_prompt_ids=negative_prompt_ids,
-                jit=True,
-            ).images
-
-            output = output.reshape((1,) + output.shape[-3:])
-            final_image = [np.array(x * 255, dtype=np.uint8) for x in output]
-
-            return Image.fromarray(final_image[0])
         else:
-            raise ValueError("Model type not found")
+            raise ValueError("Model type not found or pipeline not implemented")

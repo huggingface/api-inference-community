@@ -3,7 +3,7 @@ api-inference-community==0.0.30
 huggingface_hub==0.14.1
 safetensors==0.3.1
 # diffusers==0.16.1
-git+https://github.com/huggingface/diffusers@main
+git+https://github.com/huggingface/diffusers@909742dbd6873052995dc6cd5f4150ff238015d2
 transformers==4.28.1
 accelerate==0.18.0
 pydantic==1.8.2
@@ -13,7 +13,3 @@ scipy==1.9.3
 torch==2.0.1
 torchvision==0.15.2
 torchaudio==2.0.2
--f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-flax
-jax[cuda11_cudnn82]
-jaxlib
