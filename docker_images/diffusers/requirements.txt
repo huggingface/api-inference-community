@@ -2,11 +2,18 @@ starlette==0.25.0
 api-inference-community==0.0.30
 huggingface_hub==0.14.1
 safetensors==0.3.1
-diffusers==0.16.1
+# diffusers==0.16.1
+git+https://github.com/huggingface/diffusers@main
 transformers==4.28.1
 accelerate==0.18.0
 pydantic==1.8.2
 ftfy==6.1.1
 sentencepiece==0.1.97
 scipy==1.9.3
-xformers==0.0.19
+torch==2.0.1
+torchvision==0.15.2
+torchaudio==2.0.2
+-f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+flax
+jax[cuda11_cudnn82]
+jaxlib
