@@ -9,6 +9,7 @@ from diffusers import (
     DPMSolverMultistepScheduler,
     StableDiffusionPipeline,
 )
+from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import model_info
 
 
@@ -39,8 +40,7 @@ class TextToImagePipeline(Pipeline):
         )
         if torch.cuda.is_available():
             self.ldm.to("cuda")
-            self.ldm.enable_xformers_memory_efficient_attention()
-            self.ldm.unet.to(memory_format=torch.channels_last)
+            self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
         if is_lora:
             self.ldm.unet.load_attn_procs(
