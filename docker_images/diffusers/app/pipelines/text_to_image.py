@@ -43,7 +43,7 @@ class TextToImagePipeline(Pipeline):
             self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
         if is_lora:
-            self.ldm.unet.load_attn_procs(
+            self.ldm.load_lora_weights(
                 model_id, use_auth_token=os.getenv("HF_API_TOKEN")
             )
 
