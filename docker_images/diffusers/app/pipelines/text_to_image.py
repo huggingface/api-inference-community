@@ -43,7 +43,7 @@ class TextToImagePipeline(Pipeline):
             self.ldm.unet.to(memory_format=torch.channels_last)
 
         if is_lora:
-            self.ldm.unet.load_attn_procs(
+            self.ldm.load_lora_weights(
                 model_id, use_auth_token=os.getenv("HF_API_TOKEN")
             )
 
