@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # You can check the requirements and expectations of each pipelines in their respective
 # directories. Implement directly within the directories.
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
-   "text-classification": TextClassificationPipeline 
+    "text-classification": TextClassificationPipeline
 }
 
 

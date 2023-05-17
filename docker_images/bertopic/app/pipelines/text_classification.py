@@ -3,6 +3,7 @@ from typing import Dict, List
 from app.pipelines import Pipeline
 from bertopic import BERTopic
 
+
 class TextClassificationPipeline(Pipeline):
     def __init__(
         self,
@@ -24,6 +25,6 @@ class TextClassificationPipeline(Pipeline):
                 - "label": A string representing what the label/class is. There can be multiple labels.
                 - "score": A score between 0 and 1 describing how confident the model is for this label/class.
         """
-        topics, probs =  self.model.transform(inputs)
+        topics, probs = self.model.transform(inputs)
         topic_label = self.model.generate_topic_labels()[topics[0]]
         return [[{"label": topic_label, "score": probs[0]}]]
