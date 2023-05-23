@@ -1,4 +1,4 @@
-starlette==0.25.0
+starlette==0.27.0
 api-inference-community==0.0.30
 huggingface_hub==0.14.1
 safetensors==0.3.1
