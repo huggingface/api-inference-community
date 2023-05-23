@@ -9,7 +9,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    "text-classification": "MaartenGr/BERTopic_ArXiv",
+    "text-classification": ["MaartenGr/BERTopic_ArXiv", "MaartenGr/BERTopic_Wikipedia"],
 }
 
 
