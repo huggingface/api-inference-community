@@ -1,4 +1,4 @@
-starlette==0.25.0
+starlette==0.27.0
 api-inference-community==0.0.27
 huggingface_hub>=0.10.1
 paddlepaddle==2.4.1
