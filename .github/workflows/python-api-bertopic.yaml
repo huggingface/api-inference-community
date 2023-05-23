@@ -3,7 +3,7 @@ name: bertopic-docker
 on:
   pull_request:
     paths:
-      - "docker_images/span_marker/**"
+      - "docker_images/berttopic/**"
 jobs:
   build:
     runs-on: ubuntu-latest
