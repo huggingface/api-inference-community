@@ -23,4 +23,4 @@ class TextClassificationPipeline(Pipeline):
         """
         topics, probs = self.model.transform(inputs)
         topic_label = self.model.generate_topic_labels()[topics[0]]
-        return [[{"label": topic_label, "score": probs[0]}]]
+        return [[{"label": topic_label, "score": float(probs[0])}]]
