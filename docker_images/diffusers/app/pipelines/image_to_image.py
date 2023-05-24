@@ -10,10 +10,13 @@ from diffusers import (
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
     StableDiffusionControlNetPipeline,
+    StableDiffusionDepth2ImgPipeline,
     StableDiffusionImageVariationPipeline,
     StableDiffusionImg2ImgPipeline,
     StableDiffusionInstructPix2PixPipeline,
+    StableDiffusionLatentUpscalePipeline,
     StableDiffusionPipeline,
+    StableDiffusionUpscalePipeline,
     StableUnCLIPImg2ImgPipeline,
     StableUnCLIPPipeline,
 )
@@ -87,6 +90,9 @@ class ImageToImagePipeline(Pipeline):
         elif model_type in [
             "StableDiffusionImageVariationPipeline",
             "StableDiffusionInstructPix2PixPipeline",
+            "StableDiffusionUpscalePipeline",
+            "StableDiffusionLatentUpscalePipeline",
+            "StableDiffusionDepth2ImgPipeline",
         ]:
             self.ldm = DiffusionPipeline.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
@@ -110,6 +116,7 @@ class ImageToImagePipeline(Pipeline):
                 StableDiffusionControlNetPipeline,
                 StableDiffusionInstructPix2PixPipeline,
                 StableDiffusionImageVariationPipeline,
+                StableDiffusionDepth2ImgPipeline,
             ),
         ):
             self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
@@ -138,6 +145,9 @@ class ImageToImagePipeline(Pipeline):
                 AltDiffusionImg2ImgPipeline,
                 StableDiffusionControlNetPipeline,
                 StableDiffusionInstructPix2PixPipeline,
+                StableDiffusionUpscalePipeline,
+                StableDiffusionLatentUpscalePipeline,
+                StableDiffusionDepth2ImgPipeline,
             ),
         ):
             images = self.ldm(prompt, image, **kwargs)["images"]
