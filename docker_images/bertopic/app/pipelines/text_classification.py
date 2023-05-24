@@ -11,7 +11,7 @@ class TextClassificationPipeline(Pipeline):
     ):
         self.model = BERTopic.load(model_id)
 
-    def __call__(self, inputs: str) -> List[Dict[str, float]]:
+    def __call__(self, inputs: str) -> List[List[Dict[str, float]]]:
         """
         Args:
             inputs (:obj:`str`):
