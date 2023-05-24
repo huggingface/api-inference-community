@@ -21,6 +21,9 @@ class TextClassificationPipeline(Pipeline):
                 - "label": A string representing what the label/class is. There can be multiple labels.
                 - "score": A score between 0 and 1 describing how confident the model is for this label/class.
         """
-        topics, probs = self.model.transform(inputs)
-        topic_label = self.model.generate_topic_labels()[topics[0]]
-        return [[{"label": topic_label, "score": float(probs[0])}]]
+        topics, probabilities = self.model.transform(inputs)
+        results = []
+        for topic, prob in zip(topics, probabilities):
+            topic_label = self.model.generate_topic_labels()[topic]
+            results.append({"label": topic_label, "score": float(prob)})
+        return [results]
