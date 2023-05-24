@@ -24,6 +24,9 @@ class TextClassificationPipeline(Pipeline):
         topics, probabilities = self.model.transform(inputs)
         results = []
         for topic, prob in zip(topics, probabilities):
-            topic_label = self.model.generate_topic_labels()[topic]
+            if self.model.custom_labels_ is not None:
+                topic_label = self.model.custom_labels_[topic + self.model_outliers]
+           else:
+                topic_label = self.model.topic_labels_[topic]
             results.append({"label": topic_label, "score": float(prob)})
         return [results]
