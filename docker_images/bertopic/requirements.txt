@@ -1,0 +1,5 @@
+starlette==0.25.0
+api-inference-community==0.0.25
+huggingface_hub==0.14.0
+bertopic==0.15.0
+safetensors==0.3.1

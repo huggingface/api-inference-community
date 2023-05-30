@@ -68,6 +68,12 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("asteroid")
 
+    def test_bertopic(self):
+        self.framework_docker_test(
+            "bertopic", "text-classification", "MaartenGr/BERTopic_ArXiv"
+        )
+        self.framework_invalid_test("bertopic")
+
     def test_espnet(self):
         self.framework_docker_test(
             "espnet",
