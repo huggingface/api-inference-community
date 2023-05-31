@@ -2,6 +2,7 @@ import json
 import os
 
 import torch
+from app import idle, timing
 from app.pipelines import Pipeline
 from diffusers import (
     AltDiffusionImg2ImgPipeline,
@@ -100,10 +101,6 @@ class ImageToImagePipeline(Pipeline):
         else:
             raise ValueError("Model type not found or pipeline not implemented")
 
-        if torch.cuda.is_available():
-            self.ldm.to("cuda")
-            self.ldm.unet.set_attn_processor(AttnProcessor2_0())
-
         if isinstance(
             self.ldm,
             (
@@ -123,6 +120,15 @@ class ImageToImagePipeline(Pipeline):
                 self.ldm.scheduler.config
             )
 
+        if not idle.UNLOAD_IDLE:
+            self._model_to_gpu()
+
+    @timing.timing
+    def _model_to_gpu(self):
+        if torch.cuda.is_available():
+            self.ldm.to("cuda")
+            self.ldm.unet.set_attn_processor(AttnProcessor2_0())
+
     def __call__(self, image: Image.Image, prompt: str = "", **kwargs) -> "Image.Image":
         """
         Args:
@@ -133,6 +139,17 @@ class ImageToImagePipeline(Pipeline):
         Return:
             A :obj:`PIL.Image.Image` with the raw image representation as PIL.
         """
+
+        if idle.UNLOAD_IDLE:
+            with idle.request_witnesses():
+                self._model_to_gpu()
+                resp = self._process_req(image, prompt)
+        else:
+            resp = self._process_req(image, prompt)
+
+        return resp
+
+    def _process_req(self, image, prompt, **kwargs):
         if "num_inference_steps" not in kwargs:
             kwargs["num_inference_steps"] = 25
 

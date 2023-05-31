@@ -1,7 +1,9 @@
+import logging
 import os
 from typing import TYPE_CHECKING
 
 import torch
+from app import idle, timing
 from app.pipelines import Pipeline
 from diffusers import (
     AltDiffusionPipeline,
@@ -12,6 +14,8 @@ from diffusers import (
 from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import model_info
 
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from PIL import Image
@@ -38,9 +42,6 @@ class TextToImagePipeline(Pipeline):
         self.ldm = DiffusionPipeline.from_pretrained(
             model_to_load, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
         )
-        if torch.cuda.is_available():
-            self.ldm.to("cuda")
-            self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
         if is_lora:
             self.ldm.load_lora_weights(
@@ -52,6 +53,15 @@ class TextToImagePipeline(Pipeline):
                 self.ldm.scheduler.config
             )
 
+        if not idle.UNLOAD_IDLE:
+            self._model_to_gpu()
+
+    @timing.timing
+    def _model_to_gpu(self):
+        if torch.cuda.is_available():
+            self.ldm.to("cuda")
+            self.ldm.unet.set_attn_processor(AttnProcessor2_0())
+
     def __call__(self, inputs: str, **kwargs) -> "Image.Image":
         """
         Args:
@@ -60,7 +70,15 @@ class TextToImagePipeline(Pipeline):
         Return:
             A :obj:`PIL.Image.Image` with the raw image representation as PIL.
         """
+        if idle.UNLOAD_IDLE:
+            with idle.request_witnesses():
+                self._model_to_gpu()
+                resp = self._process_req(inputs, **kwargs)
+        else:
+            resp = self._process_req(inputs, **kwargs)
+        return resp
 
+    def _process_req(self, inputs, **kwargs):
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
