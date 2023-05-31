@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 LAST_START = None
 LAST_END = None
 
-UNLOAD_IDLE = os.getenv("UNLOAD_IDLE", "").lower() in ('1', 'true')
+UNLOAD_IDLE = os.getenv("UNLOAD_IDLE", "").lower() in ("1", "true")
 IDLE_TIMEOUT = int(os.getenv("IDLE_TIMEOUT", 15))
 
 
