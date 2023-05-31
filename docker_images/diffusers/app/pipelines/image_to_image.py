@@ -10,6 +10,8 @@ from diffusers import (
     ControlNetModel,
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
+    KandinskyImg2ImgPipeline,
+    KandinskyPriorPipeline,
     StableDiffusionControlNetPipeline,
     StableDiffusionDepth2ImgPipeline,
     StableDiffusionImageVariationPipeline,
@@ -98,6 +100,14 @@ class ImageToImagePipeline(Pipeline):
             self.ldm = DiffusionPipeline.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
             )
+        elif model_type in ["KandinskyImg2ImgPipeline", "KandinskyPipeline"]:
+            model_to_load = "kandinsky-community/kandinsky-2-1-prior"
+            self.ldm = KandinskyImg2ImgPipeline.from_pretrained(
+                model_id, use_auth_token=use_auth_token, **kwargs
+            )
+            self.prior = KandinskyPriorPipeline.from_pretrained(
+                model_to_load, use_auth_token=use_auth_token, **kwargs
+            )
         else:
             raise ValueError("Model type not found or pipeline not implemented")
 
@@ -127,7 +137,10 @@ class ImageToImagePipeline(Pipeline):
     def _model_to_gpu(self):
         if torch.cuda.is_available():
             self.ldm.to("cuda")
-            self.ldm.unet.set_attn_processor(AttnProcessor2_0())
+            if isinstance(self.ldm, (KandinskyImg2ImgPipeline)):
+                self.prior.to("cuda")
+            else:
+                self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
     def __call__(self, image: Image.Image, prompt: str = "", **kwargs) -> "Image.Image":
         """
@@ -150,9 +163,7 @@ class ImageToImagePipeline(Pipeline):
         return resp
 
     def _process_req(self, image, prompt, **kwargs):
-        if "num_inference_steps" not in kwargs:
-            kwargs["num_inference_steps"] = 25
-
+        kwargs["num_images_per_prompt"] = 1
         if isinstance(
             self.ldm,
             (
@@ -167,15 +178,46 @@ class ImageToImagePipeline(Pipeline):
                 StableDiffusionDepth2ImgPipeline,
             ),
         ):
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 25
             images = self.ldm(prompt, image, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, (StableUnCLIPImg2ImgPipeline, StableUnCLIPPipeline)):
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 25
             # image comes first
             images = self.ldm(image, prompt, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, StableDiffusionImageVariationPipeline):
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 25
             # only image is needed
             images = self.ldm(image, **kwargs)["images"]
+            return images[0]
+        elif isinstance(self.ldm, (KandinskyImg2ImgPipeline)):
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 100
+            # not all args are supported by the prior
+            prior_args = {
+                "num_inference_steps": kwargs["num_inference_steps"],
+                "num_images_per_prompt": kwargs["num_images_per_prompt"],
+                "negative_prompt": kwargs.get("negative_prompt", None),
+                "guidance_scale": kwargs.get("guidance_scale", 7),
+            }
+            prior_emb = self.prior(prompt, **prior_args)
+            image_emb = prior_emb.images
+            zero_image_emb = prior_emb.zero_embeds
+            if "negative_prompt" in kwargs:
+                zero_image_emb = self.prior(
+                    kwargs["negative_prompt"], **prior_args
+                ).images
+            images = self.ldm(
+                prompt,
+                image=image,
+                image_embeds=image_emb,
+                negative_image_embeds=zero_image_emb,
+                **kwargs,
+            )["images"]
             return images[0]
         else:
             raise ValueError("Model type not found or pipeline not implemented")

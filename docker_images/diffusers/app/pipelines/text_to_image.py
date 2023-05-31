@@ -113,17 +113,28 @@ class TextToImagePipeline(Pipeline):
 
     def _process_req(self, inputs, **kwargs):
         kwargs["num_images_per_prompt"] = 1
-        if "num_inference_steps" not in kwargs:
-            kwargs["num_inference_steps"] = 25
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 25
             images = self.ldm(inputs, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, (KandinskyPipeline)):
-            prior_emb = self.prior(inputs, **kwargs)
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 50
+            # not all args are supported by the prior
+            prior_args = {
+                "num_inference_steps": kwargs["num_inference_steps"],
+                "num_images_per_prompt": kwargs["num_images_per_prompt"],
+                "negative_prompt": kwargs.get("negative_prompt", None),
+                "guidance_scale": kwargs.get("guidance_scale", 4),
+            }
+            prior_emb = self.prior(inputs, **prior_args)
             image_emb = prior_emb.images
             zero_image_emb = prior_emb.zero_embeds
             if "negative_prompt" in kwargs:
-                zero_image_emb = self.prior(kwargs["negative_prompt"], **kwargs).images
+                zero_image_emb = self.prior(
+                    kwargs["negative_prompt"], **prior_args
+                ).images
             images = self.ldm(
                 inputs,
                 image_embeds=image_emb,
