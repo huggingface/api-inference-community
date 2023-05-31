@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from typing import TYPE_CHECKING
@@ -9,10 +10,12 @@ from diffusers import (
     AltDiffusionPipeline,
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
+    KandinskyPipeline,
+    KandinskyPriorPipeline,
     StableDiffusionPipeline,
 )
 from diffusers.models.attention_processor import AttnProcessor2_0
-from huggingface_hub import model_info
+from huggingface_hub import hf_hub_download, model_info
 
 
 logger = logging.getLogger(__name__)
@@ -23,29 +26,56 @@ if TYPE_CHECKING:
 
 class TextToImagePipeline(Pipeline):
     def __init__(self, model_id: str):
-        model_data = model_info(model_id, token=os.getenv("HF_API_TOKEN"))
-        is_lora = any(
-            file.rfilename == "pytorch_lora_weights.bin" for file in model_data.siblings
-        )
-
-        model_to_load = model_data.cardData["base_model"] if is_lora else model_id
+        use_auth_token = os.getenv("HF_API_TOKEN")
+        model_data = model_info(model_id, token=use_auth_token)
 
         kwargs = (
             {"safety_checker": None}
             if model_id.startswith("hf-internal-testing/")
             else {}
         )
-
         if torch.cuda.is_available():
             kwargs["torch_dtype"] = torch.float16
 
-        self.ldm = DiffusionPipeline.from_pretrained(
-            model_to_load, use_auth_token=os.getenv("HF_API_TOKEN"), **kwargs
+        model_type = None
+        is_lora = any(
+            file.rfilename == "pytorch_lora_weights.bin" for file in model_data.siblings
+        )
+        has_model_index = any(
+            file.rfilename == "model_index.json" for file in model_data.siblings
         )
 
         if is_lora:
-            self.ldm.load_lora_weights(
-                model_id, use_auth_token=os.getenv("HF_API_TOKEN")
+            model_type = "LoraModel"
+        elif has_model_index:
+            config_file = hf_hub_download(
+                model_id, "model_index.json", token=use_auth_token
+            )
+            with open(config_file, "r") as f:
+                config_dict = json.load(f)
+            model_type = config_dict.get("_class_name", None)
+        else:
+            raise ValueError("Model type not found")
+
+        if model_type == "LoraModel":
+            model_to_load = model_data.cardData["base_model"]
+
+            self.ldm = DiffusionPipeline.from_pretrained(
+                model_to_load, use_auth_token=use_auth_token, **kwargs
+            )
+            self.ldm.load_lora_weights(model_id, use_auth_token=use_auth_token)
+
+        elif model_type == "KandinskyPipeline":
+            model_to_load = "kandinsky-community/kandinsky-2-1-prior"
+            self.ldm = KandinskyPipeline.from_pretrained(
+                model_id, use_auth_token=use_auth_token, **kwargs
+            )
+            self.prior = KandinskyPriorPipeline.from_pretrained(
+                model_to_load, use_auth_token=use_auth_token, **kwargs
+            )
+        else:
+            self.ldm = DiffusionPipeline.from_pretrained(
+                model_id, use_auth_token=use_auth_token, **kwargs
             )
 
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
@@ -60,7 +90,10 @@ class TextToImagePipeline(Pipeline):
     def _model_to_gpu(self):
         if torch.cuda.is_available():
             self.ldm.to("cuda")
-            self.ldm.unet.set_attn_processor(AttnProcessor2_0())
+            if isinstance(self.ldm, (KandinskyPipeline)):
+                self.prior.to("cuda")
+            else:
+                self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
     def __call__(self, inputs: str, **kwargs) -> "Image.Image":
         """
@@ -79,13 +112,24 @@ class TextToImagePipeline(Pipeline):
         return resp
 
     def _process_req(self, inputs, **kwargs):
+        kwargs["num_images_per_prompt"] = 1
+        if "num_inference_steps" not in kwargs:
+            kwargs["num_inference_steps"] = 25
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
-            if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 25
+            images = self.ldm(inputs, **kwargs)["images"]
+            return images[0]
+        elif isinstance(self.ldm, (KandinskyPipeline)):
+            prior_emb = self.prior(inputs, **kwargs)
+            image_emb = prior_emb.images
+            zero_image_emb = prior_emb.zero_embeds
+            if "negative_prompt" in kwargs:
+                zero_image_emb = self.prior(kwargs["negative_prompt"], **kwargs).images
             images = self.ldm(
                 inputs,
+                image_embeds=image_emb,
+                negative_image_embeds=zero_image_emb,
                 **kwargs,
             )["images"]
+            return images[0]
         else:
-            images = self.ldm(inputs, **kwargs)["images"]
-        return images[0]
+            raise ValueError("Model type not found or pipeline not implemented")

@@ -3,7 +3,7 @@ api-inference-community==0.0.30
 huggingface_hub==0.14.1
 safetensors==0.3.1
 # diffusers==0.16.1
-git+https://github.com/huggingface/diffusers@7d0ac4eeabfe78f5c38ad6582bb1062a43195a74
+git+https://github.com/huggingface/diffusers@4f14b363297cf8deac3e88a3bf31f59880ac8a96
 transformers==4.28.1
 accelerate==0.18.0
 hf_transfer==0.1.3
