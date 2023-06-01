@@ -23,7 +23,6 @@ from diffusers import (
     StableUnCLIPImg2ImgPipeline,
     StableUnCLIPPipeline,
 )
-from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import hf_hub_download, model_info
 from PIL import Image
 
@@ -139,8 +138,6 @@ class ImageToImagePipeline(Pipeline):
             self.ldm.to("cuda")
             if isinstance(self.ldm, (KandinskyImg2ImgPipeline)):
                 self.prior.to("cuda")
-            else:
-                self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
     def __call__(self, image: Image.Image, prompt: str = "", **kwargs) -> "Image.Image":
         """
@@ -163,6 +160,7 @@ class ImageToImagePipeline(Pipeline):
         return resp
 
     def _process_req(self, image, prompt, **kwargs):
+        # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
         if isinstance(
             self.ldm,

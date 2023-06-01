@@ -14,7 +14,6 @@ from diffusers import (
     KandinskyPriorPipeline,
     StableDiffusionPipeline,
 )
-from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import hf_hub_download, model_info
 
 
@@ -92,8 +91,6 @@ class TextToImagePipeline(Pipeline):
             self.ldm.to("cuda")
             if isinstance(self.ldm, (KandinskyPipeline)):
                 self.prior.to("cuda")
-            else:
-                self.ldm.unet.set_attn_processor(AttnProcessor2_0())
 
     def __call__(self, inputs: str, **kwargs) -> "Image.Image":
         """
@@ -112,6 +109,7 @@ class TextToImagePipeline(Pipeline):
         return resp
 
     def _process_req(self, inputs, **kwargs):
+        # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
         if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
             if "num_inference_steps" not in kwargs:
