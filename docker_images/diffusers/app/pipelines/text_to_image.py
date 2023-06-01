@@ -126,9 +126,7 @@ class TextToImagePipeline(Pipeline):
                 "negative_prompt": kwargs.get("negative_prompt", None),
                 "guidance_scale": kwargs.get("guidance_scale", 4),
             }
-            prior_emb = self.prior(inputs, **prior_args)
-            image_emb = prior_emb.images
-            zero_image_emb = prior_emb.zero_embeds
+            image_emb, zero_image_emb = self.prior(prompt, **prior_args).to_tuple()
             if "negative_prompt" in kwargs:
                 zero_image_emb = self.prior(
                     kwargs["negative_prompt"], **prior_args
