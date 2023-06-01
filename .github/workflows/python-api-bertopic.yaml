@@ -3,7 +3,7 @@ name: bertopic-docker
 on:
   pull_request:
     paths:
-      - "docker_images/berttopic/**"
+      - "docker_images/bertopic/**"
 jobs:
   build:
     runs-on: ubuntu-latest
