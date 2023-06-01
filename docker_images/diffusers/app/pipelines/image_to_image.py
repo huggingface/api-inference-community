@@ -202,13 +202,7 @@ class ImageToImagePipeline(Pipeline):
                 "negative_prompt": kwargs.get("negative_prompt", None),
                 "guidance_scale": kwargs.get("guidance_scale", 7),
             }
-            prior_emb = self.prior(prompt, **prior_args)
-            image_emb = prior_emb.images
-            zero_image_emb = prior_emb.zero_embeds
-            if "negative_prompt" in kwargs:
-                zero_image_emb = self.prior(
-                    kwargs["negative_prompt"], **prior_args
-                ).images
+            image_emb, zero_image_emb = self.prior(prompt, **prior_args).to_tuple()
             images = self.ldm(
                 prompt,
                 image=image,
