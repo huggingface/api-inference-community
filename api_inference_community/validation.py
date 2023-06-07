@@ -3,6 +3,7 @@ import os
 import subprocess
 from base64 import b64decode
 from io import BytesIO
+from mimetypes import MimeTypes
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -242,10 +243,13 @@ MIME_TYPES = {
 }
 
 
-def check_mime_types(mime_types: Dict[str, str]):
-    for mime_type in mime_types:
+def validate_mime_types(accept_header: Any) -> Dict[str, str]:
+    mime = MimeTypes()
+    mime_dict = {mime_type: mime.guess_extension(mime_type) for mime_type in accept_header.split(',')}
+    for mime_type in mime_dict:
         if mime_type not in MIME_TYPES:
             raise ValueError(f"{mime_type} is not a supported MIME type.")
+    return mime_dict
 
 
 AUDIO_INPUTS = {
