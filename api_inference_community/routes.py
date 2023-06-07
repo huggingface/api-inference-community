@@ -29,7 +29,7 @@ async def pipeline_route(request: Request) -> Response:
     payload = await request.body()
     task = os.environ["TASK"]
     accept = request.headers["accept"]
-    # Parse accept header and determine the appropriate format
+    # Parse accept header and determine the appropriate response format
     mime = MimeTypes()
     mime_types = [x for x in accept.split(',') if mime.file_ext(x)]
     if os.getenv("DEBUG", "0") in {"1", "true"}:
