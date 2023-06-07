@@ -36,11 +36,11 @@ async def pipeline_route(request: Request) -> Response:
         pipe = request.app.get_pipeline()
     try:
         pipe = request.app.get_pipeline()
-        check_mime_types(mime_types)
         try:
             sampling_rate = pipe.sampling_rate
         except Exception:
             sampling_rate = None
+        check_mime_types(mime_types)
         inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate)
     except ValidationError as e:
         errors = []
