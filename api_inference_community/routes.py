@@ -11,6 +11,7 @@ from api_inference_community.validation import (
     IMAGE_INPUTS,
     ffmpeg_convert,
     normalize_payload,
+    check_mime_types
 )
 from pydantic import ValidationError
 from starlette.requests import Request
@@ -50,7 +51,7 @@ async def pipeline_route(request: Request) -> Response:
 
     # Parse accept header and determine the appropriate format
     mime = MimeTypes()
-    mimetypes = [x for x in accept.split(',') if mime.file_ext(x)]
+    mimetypes = check_mime_types([x for x in accept.split(',') if mime.file_ext(x)])
 
     return call_pipe(pipe, inputs, params, start, mimetypes)
 
