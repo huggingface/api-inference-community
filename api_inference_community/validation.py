@@ -242,7 +242,7 @@ MIME_TYPES = {
 }
 
 
-def check_mime_types(mime_types: List[str]):
+def check_mime_types(mime_types: Dict[str, str]):
     for mime_type in mime_types:
         if mime_type not in MIME_TYPES:
             raise ValueError(f"{mime_type} is not a supported MIME type.")
