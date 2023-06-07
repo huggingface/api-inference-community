@@ -28,10 +28,15 @@ async def pipeline_route(request: Request) -> Response:
     start = time.time()
     payload = await request.body()
     task = os.environ["TASK"]
+    accept = request.headers["accept"]
+    # Parse accept header and determine the appropriate format
+    mime = MimeTypes()
+    mime_types = [x for x in accept.split(',') if mime.file_ext(x)]
     if os.getenv("DEBUG", "0") in {"1", "true"}:
         pipe = request.app.get_pipeline()
     try:
         pipe = request.app.get_pipeline()
+        check_mime_types(mime_types)
         try:
             sampling_rate = pipe.sampling_rate
         except Exception:
@@ -46,13 +51,6 @@ async def pipeline_route(request: Request) -> Response:
         return JSONResponse({"error": str(e)}, status_code=400)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
-
-    accept = request.headers["accept"]
-
-    # Parse accept header and determine the appropriate format
-    mime = MimeTypes()
-    mime_types = [x for x in accept.split(',') if mime.file_ext(x)]
-    check_mime_types(mime_types)
 
     return call_pipe(pipe, inputs, params, start, mime_types)
 
