@@ -51,12 +51,13 @@ async def pipeline_route(request: Request) -> Response:
 
     # Parse accept header and determine the appropriate format
     mime = MimeTypes()
-    mimetypes = check_mime_types([x for x in accept.split(',') if mime.file_ext(x)])
+    mime_types = [x for x in accept.split(',') if mime.file_ext(x)]
+    check_mime_types(mime_types)
 
-    return call_pipe(pipe, inputs, params, start, mimetypes)
+    return call_pipe(pipe, inputs, params, start, mime_types)
 
 
-def call_pipe(pipe: Any, inputs, params: Dict, start: float, mimetypes: list) -> Response:
+def call_pipe(pipe: Any, inputs, params: Dict, start: float, mime_types: list) -> Response:
     root_logger = logging.getLogger()
     warnings = set()
 
@@ -109,7 +110,7 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float, mimetypes: list) ->
             waveform, sampling_rate = outputs
 
             # Use the first valid mime type for the conversion format or "flac" as default
-            ext = mimetypes[0] if mimetypes else "flac"
+            ext = mime_types[0] if mime_types else "flac"
             format_for_conversion = ext[1:] if ext else "flac"
             data = ffmpeg_convert(waveform, format_for_conversion, sampling_rate)
             headers["content-type"] = f'audio/{format_for_conversion}'
@@ -120,7 +121,7 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float, mimetypes: list) ->
             headers["content-type"] = "application/json"
 
             # Use the first valid mime type for the conversion format or "flac" as default
-            ext = mimetypes[0] if mimetypes else "flac"
+            ext = mime_types[0] if mime_types else "flac"
             format_for_conversion = ext[1:] if ext else "flac"
 
             for waveform, label in zip(waveforms, labels):
