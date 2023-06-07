@@ -108,7 +108,7 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float, mime_types: Dict[st
             content_type, ext = list(mime_types.items())[0] if mime_types else ("audio/flac", "flac")
             format_for_conversion = ext.lstrip(".")
 
-            data = ffmpeg_convert(waveform, format_for_conversion, sampling_rate)
+            data = ffmpeg_convert(waveform, sampling_rate, format_for_conversion)
             headers["content-type"] = content_type
             return Response(data, headers=headers, status_code=status_code)
         elif task == "audio-to-audio":
@@ -121,7 +121,7 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float, mime_types: Dict[st
             format_for_conversion = ext.lstrip(".")
 
             for waveform, label in zip(waveforms, labels):
-                data = ffmpeg_convert(waveform, format_for_conversion, sampling_rate)
+                data = ffmpeg_convert(waveform, sampling_rate, format_for_conversion)
                 items.append(
                     {
                         "label": label,

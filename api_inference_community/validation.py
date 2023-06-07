@@ -309,7 +309,7 @@ def normalize_payload(
         )
 
 
-def ffmpeg_convert(array: np.array, format_for_conversion: str, sampling_rate: int) -> bytes:
+def ffmpeg_convert(array: np.array, sampling_rate: int, format_for_conversion: str) -> bytes:
     """
     Helper function to convert raw waveforms to actual compressed file (lossless compression here)
     """
