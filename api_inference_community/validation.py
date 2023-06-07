@@ -165,6 +165,7 @@ class StringInput(BaseModel):
 
 BATCH_ENABLED_PIPELINES = ["feature-extraction"]
 
+
 PARAMS_MAPPING = {
     "conversational": SharedGenerationParams,
     "fill-mask": FillMaskParamsCheck,
@@ -174,10 +175,12 @@ PARAMS_MAPPING = {
     "zero-shot-classification": ZeroShotParamsCheck,
 }
 
+
 def check_params(params, tag):
     if tag in PARAMS_MAPPING:
         PARAMS_MAPPING[tag].parse_obj(params)
     return True
+
 
 INPUTS_MAPPING = {
     "conversational": ConversationalInputsCheck,
@@ -199,12 +202,14 @@ INPUTS_MAPPING = {
     "text-to-image": StringInput,
 }
 
+
 def check_inputs(inputs, tag):
     if tag in INPUTS_MAPPING:
         INPUTS_MAPPING[tag].parse_obj(inputs)
         return True
     else:
         raise ValueError(f"{tag} is not a valid pipeline.")
+
 
 MIME_TYPES = {
     "application/json",
@@ -236,10 +241,12 @@ MIME_TYPES = {
     "audio/x-m4a"
 }
 
+
 def check_mime_types(mime_types: List[str]):
     for mime_type in mime_types:
         if mime_type not in MIME_TYPES:
             raise ValueError(f"{mime_type} is not a supported MIME type.")
+
 
 AUDIO_INPUTS = {
     "automatic-speech-recognition",
@@ -247,6 +254,7 @@ AUDIO_INPUTS = {
     "speech-segmentation",
     "audio-classification",
 }
+
 
 IMAGE_INPUTS = {
     "image-classification",
@@ -256,6 +264,7 @@ IMAGE_INPUTS = {
     "object-detection",
     "zero-shot-image-classification",
 }
+
 
 TEXT_INPUTS = {
     "conversational",
