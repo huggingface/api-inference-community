@@ -360,7 +360,7 @@ class DockerImageTests(unittest.TestCase):
 
     def test_nemo(self):
         self.framework_docker_test(
-            "nemo", "automatic-speech-recognition", "nvidia/stt_en_conformer_ctc_medium"
+            "nemo", "automatic-speech-recognition", "nvidia/stt_en_conformer_ctc_large"
         )
 
     def test_generic(self):
