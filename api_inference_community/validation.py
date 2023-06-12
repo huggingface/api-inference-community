@@ -164,9 +164,6 @@ class StringInput(BaseModel):
     __root__: str
 
 
-BATCH_ENABLED_PIPELINES = ["feature-extraction"]
-
-
 PARAMS_MAPPING = {
     "conversational": SharedGenerationParams,
     "fill-mask": FillMaskParamsCheck,
@@ -175,12 +172,6 @@ PARAMS_MAPPING = {
     "summarization": SummarizationParamsCheck,
     "zero-shot-classification": ZeroShotParamsCheck,
 }
-
-
-def check_params(params, tag):
-    if tag in PARAMS_MAPPING:
-        PARAMS_MAPPING[tag].parse_obj(params)
-    return True
 
 
 INPUTS_MAPPING = {
@@ -202,6 +193,15 @@ INPUTS_MAPPING = {
     "text-to-speech": StringInput,
     "text-to-image": StringInput,
 }
+
+
+BATCH_ENABLED_PIPELINES = ["feature-extraction"]
+
+
+def check_params(params, tag):
+    if tag in PARAMS_MAPPING:
+        PARAMS_MAPPING[tag].parse_obj(params)
+    return True
 
 
 def check_inputs(inputs, tag):
