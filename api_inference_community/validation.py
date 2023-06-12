@@ -212,46 +212,6 @@ def check_inputs(inputs, tag):
         raise ValueError(f"{tag} is not a valid pipeline.")
 
 
-MIME_TYPES = {
-    "application/json",
-    "text/csv",
-    "text/plain",
-    "image/png",
-    "image/jpeg",
-    "image/jpg",
-    "image/tiff",
-    "image/bmp",
-    "image/gif",
-    "image/webp",
-    "image/x-image",
-    "audio/x-flac",
-    "audio/flac",
-    "audio/mpeg",
-    "audio/x-mpeg-3",
-    "audio/wave",
-    "audio/wav",
-    "audio/x-wav",
-    "audio/ogg",
-    "audio/x-audio",
-    "audio/webm;codecs=opus"
-    "audio/AMR",
-    "audio/amr",
-    "audio/AMR-WB",
-    "audio/AMR-WB+",
-    "audio/m4a",
-    "audio/x-m4a"
-}
-
-
-def validate_mime_types(accept_header: Any) -> Dict[str, str]:
-    mime = MimeTypes()
-    mime_dict = {mime_type: mime.guess_extension(mime_type) for mime_type in accept_header.split(',')}
-    for mime_type in mime_dict:
-        if mime_type not in MIME_TYPES:
-            raise ValueError(f"{mime_type} is not a supported MIME type.")
-    return mime_dict
-
-
 AUDIO_INPUTS = {
     "automatic-speech-recognition",
     "audio-to-audio",

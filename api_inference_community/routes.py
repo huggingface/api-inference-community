@@ -10,8 +10,7 @@ from api_inference_community.validation import (
     AUDIO_INPUTS,
     IMAGE_INPUTS,
     ffmpeg_convert,
-    normalize_payload,
-    validate_mime_types
+    normalize_payload
 )
 from pydantic import ValidationError
 from starlette.requests import Request
@@ -37,7 +36,6 @@ async def pipeline_route(request: Request) -> Response:
             sampling_rate = pipe.sampling_rate
         except Exception:
             sampling_rate = None
-        mime_types = validate_mime_types(request.headers["accept"])
         inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate)
     except ValidationError as e:
         errors = []
@@ -49,10 +47,10 @@ async def pipeline_route(request: Request) -> Response:
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-    return call_pipe(pipe, inputs, params, start, mime_types)
+    return call_pipe(pipe, inputs, params, start)
 
 
-def call_pipe(pipe: Any, inputs, params: Dict, start: float, mime_types: Dict[str, str]) -> Response:
+def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
     root_logger = logging.getLogger()
     warnings = set()
 
@@ -102,31 +100,22 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float, mime_types: Dict[st
         headers.update(**{k: str(v) for k, v in metrics.items()})
         task = os.getenv("TASK")
         if task == "text-to-speech":
-            waveform, sampling_rate = outputs
-
-            # Use the first valid mime type and its corresponding extension for the conversion format or "flac" as default
-            content_type, ext = list(mime_types.items())[0] if mime_types else ("audio/flac", "flac")
-            format_for_conversion = ext.lstrip(".")
-
-            data = ffmpeg_convert(waveform, sampling_rate, format_for_conversion)
-            headers["content-type"] = content_type
+            waveform, sampling_rate, audio_format = outputs
+            data = ffmpeg_convert(waveform, sampling_rate, audio_format)
+            headers["content-type"] = f'audio/{audio_format}',
             return Response(data, headers=headers, status_code=status_code)
         elif task == "audio-to-audio":
-            waveforms, sampling_rate, labels = outputs
+            waveforms, sampling_rate, audio_format, labels = outputs
             items = []
             headers["content-type"] = "application/json"
 
-            # Use the first valid mime type and its corresponding extension for the conversion format or "flac" as default
-            content_type, ext = list(mime_types.items())[0] if mime_types else ("audio/flac", "flac")
-            format_for_conversion = ext.lstrip(".")
-
             for waveform, label in zip(waveforms, labels):
-                data = ffmpeg_convert(waveform, sampling_rate, format_for_conversion)
+                data = ffmpeg_convert(waveform, sampling_rate, audio_format)
                 items.append(
                     {
                         "label": label,
                         "blob": base64.b64encode(data).decode("utf-8"),
-                        "content-type": content_type,
+                        "content-type": f'audio/{audio_format}',
                     }
                 )
             return JSONResponse(items, headers=headers, status_code=status_code)
