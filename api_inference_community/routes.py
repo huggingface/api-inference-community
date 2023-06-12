@@ -10,7 +10,7 @@ from api_inference_community.validation import (
     AUDIO_INPUTS,
     IMAGE_INPUTS,
     ffmpeg_convert,
-    normalize_payload
+    normalize_payload,
 )
 from pydantic import ValidationError
 from starlette.requests import Request
