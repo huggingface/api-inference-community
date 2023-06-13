@@ -4,7 +4,7 @@ huggingface_hub==0.14.1
 safetensors==0.3.1
 # diffusers==0.16.1
 git+https://github.com/huggingface/diffusers@0dbdc0cbae466a10df146bf61db489fb447029b3
-transformers==4.28.1
+transformers==4.30.0
 accelerate==0.18.0
 hf_transfer==0.1.3
 pydantic==1.8.2
