@@ -1,5 +1,4 @@
 starlette==0.27.0
-api-inference-community==0.0.23
-#Dummy update to retrieve latest version
-nemo_toolkit[all]
-huggingface_hub==0.5.1
+api-inference-community==0.0.25
+nemo_toolkit[asr]>=1.18.1
+huggingface_hub==0.11.0
