@@ -10,7 +10,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
     # IMPLEMENT_THIS
-    "automatic-speech-recognition": "nvidia/stt_en_conformer_ctc_large",
+    "automatic-speech-recognition": "nvidia/stt_en_conformer_ctc_small",
 }
 
 
