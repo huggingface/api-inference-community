@@ -1,4 +1,4 @@
-starlette==0.28.0
-api-inference-community==0.0.27
-nemo_toolkit[all]>=1.18.1
-huggingface_hub==0.15.1
+starlette==0.27.0
+api-inference-community==0.0.25
+nemo_toolkit[asr]>=1.18.1
+huggingface_hub==0.11.0
