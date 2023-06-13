@@ -250,8 +250,9 @@ TEXT_INPUTS = {
 
 
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int] = None
+    bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_headers: Optional[Any] = None
 ) -> Tuple[Any, Dict]:
+    # TODO do something with accept_headers
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
             raise EnvironmentError(

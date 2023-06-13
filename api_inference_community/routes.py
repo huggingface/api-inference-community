@@ -35,7 +35,7 @@ async def pipeline_route(request: Request) -> Response:
             sampling_rate = pipe.sampling_rate
         except Exception:
             sampling_rate = None
-        inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate)
+        inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate, accept_headers=request.headers["accept"])
     except ValidationError as e:
         errors = []
         for error in e.errors():
