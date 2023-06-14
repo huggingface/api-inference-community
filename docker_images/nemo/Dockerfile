@@ -1,12 +1,13 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
+FROM tiangolo/uvicorn-gunicorn:python3.9
 LABEL maintainer="me <me@example.com>"
 
 # Add any system dependency here
 RUN apt-get update -y && \
     apt-get install libsndfile1 ffmpeg -y
 
+# See PyTorch releases for pip here: https://download.pytorch.org/whl/torch_stable.html
 COPY ./requirements.txt /app
-RUN pip install torch==1.11 && \
+RUN pip install https://download.pytorch.org/whl/cpu/torch-1.13.1%2Bcpu-cp39-cp39-linux_x86_64.whl && \
     pip install Cython numpy==1.21.6
 RUN pip install -r requirements.txt
 COPY ./prestart.sh /app/
