@@ -188,7 +188,7 @@ class ValidationTestCase(TestCase):
                 pass
 
             def __call__(self, input_: str):
-                return np.array([0, 0, 0]), 16000, "wav"
+                return np.array([0, 0, 0]), 16000
 
         def get_pipeline():
             return Pipeline()
@@ -228,7 +228,7 @@ class ValidationTestCase(TestCase):
                 pass
 
             def __call__(self, input_: str):
-                return np.array([0, 0, 0]), 16000, "ogg"
+                return np.array([0, 0, 0]), 16000
 
         def get_pipeline():
             return Pipeline()
