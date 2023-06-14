@@ -4,7 +4,6 @@ import logging
 import os
 import time
 from typing import Any, Dict
-from mimetypes import MimeTypes
 
 from api_inference_community.validation import (
     AUDIO_INPUTS,
@@ -35,7 +34,7 @@ async def pipeline_route(request: Request) -> Response:
             sampling_rate = pipe.sampling_rate
         except Exception:
             sampling_rate = None
-        inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate, accept_headers=request.headers["accept"])
+        inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate, accept_header=request.headers["accept"])
     except ValidationError as e:
         errors = []
         for error in e.errors():

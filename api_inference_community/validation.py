@@ -248,9 +248,22 @@ TEXT_INPUTS = {
     "zero-shot-classification",
 }
 
+MIME_TYPES = {
+    #"image/png",
+    #"image/jpeg",
+    #"image/jpg",
+    #"image/tiff",
+    #"image/bmp",
+    #"image/gif",
+    #"image/webp",
+    "audio/flac",
+    "audio/mpeg",
+    "audio/wav",
+    "audio/ogg",
+}
 
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_headers: Optional[Any] = None
+    bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_header: Optional[Any] = None
 ) -> Tuple[Any, Dict]:
     # TODO do something with accept_headers
     if task in AUDIO_INPUTS:
