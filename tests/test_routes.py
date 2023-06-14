@@ -180,6 +180,87 @@ class ValidationTestCase(TestCase):
         )
         self.assertEqual(response.headers["content-type"], "audio/flac")
 
+    def test_tts_pipeline_wav(self):
+        os.environ["TASK"] = "text-to-speech"
+
+        class Pipeline:
+            def __init__(self):
+                pass
+
+            def __call__(self, input_: str):
+                return np.array([0, 0, 0]), 16000, "wav"
+
+        def get_pipeline():
+            return Pipeline()
+
+        routes = [
+            Route("/{whatever:path}", status_ok),
+            Route("/{whatever:path}", pipeline_route, methods=["POST"]),
+        ]
+
+        app = Starlette(routes=routes)
+
+        @app.on_event("startup")
+        async def startup_event():
+            logger = logging.getLogger("uvicorn.access")
+            handler = logging.StreamHandler()
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            )
+            logger.handlers = [handler]
+
+            app.get_pipeline = get_pipeline
+
+        with TestClient(app) as client:
+            response = client.post("/", data=b"2222", headers={"accept": "audio/wav"})
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(response.headers["content-type"], "audio/wav")
+
+    def test_tts_pipeline_ogg(self):
+        os.environ["TASK"] = "text-to-speech"
+
+        class Pipeline:
+            def __init__(self):
+                pass
+
+            def __call__(self, input_: str):
+                return np.array([0, 0, 0]), 16000, "ogg"
+
+        def get_pipeline():
+            return Pipeline()
+
+        routes = [
+            Route("/{whatever:path}", status_ok),
+            Route("/{whatever:path}", pipeline_route, methods=["POST"]),
+        ]
+
+        app = Starlette(routes=routes)
+
+        @app.on_event("startup")
+        async def startup_event():
+            logger = logging.getLogger("uvicorn.access")
+            handler = logging.StreamHandler()
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            )
+            logger.handlers = [handler]
+
+            app.get_pipeline = get_pipeline
+
+        with TestClient(app) as client:
+            response = client.post("/", data=b"2222", headers={"accept": "audio/ogg"})
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(response.headers["content-type"], "audio/ogg")
+
+
     def test_audio_to_audio_pipeline(self):
         os.environ["TASK"] = "audio-to-audio"
 
