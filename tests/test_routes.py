@@ -260,7 +260,6 @@ class ValidationTestCase(TestCase):
         )
         self.assertEqual(response.headers["content-type"], "audio/ogg")
 
-
     def test_audio_to_audio_pipeline(self):
         os.environ["TASK"] = "audio-to-audio"
 
