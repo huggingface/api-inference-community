@@ -255,6 +255,9 @@ WHITELISTED_MIME_TYPES = {
     "audio/mpeg": "mp3",
     "audio/wav": "wav",
     "audio/ogg": "ogg",
+    "audio/mp4": "m4a",
+    "audio/aac": "aac",
+    "audio/webm": "webm",
 }
 
 
