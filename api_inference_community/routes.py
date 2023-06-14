@@ -119,15 +119,16 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
                 )
             return JSONResponse(items, headers=headers, status_code=status_code)
         elif task in {"text-to-image", "image-to-image"}:
-            buf = io.BytesIO()
-            outputs.save(buf, format="JPEG")
-            buf.seek(0)
-            img_bytes = buf.read()
+            image, image_format = outputs
+            buffer = io.BytesIO()
+            image.save(buffer, format=image_format.upper())
+            buffer.seek(0)
+            img_bytes = buffer.read()
             return Response(
                 img_bytes,
                 headers=headers,
                 status_code=200,
-                media_type="image/jpeg",
+                media_type=f"image/{image_format}",
             )
 
     return JSONResponse(

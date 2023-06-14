@@ -249,7 +249,6 @@ TEXT_INPUTS = {
 }
 
 
-# TODO add image formats for requested mime types?
 WHITELISTED_MIME_TYPES = {
     "audio/flac": "flac",
     "audio/mpeg": "mp3",
@@ -258,14 +257,23 @@ WHITELISTED_MIME_TYPES = {
     "audio/mp4": "m4a",
     "audio/aac": "aac",
     "audio/webm": "webm",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/bmp": "bmp",
+    "image/tiff": "tiff",
+    "image/webp": "webp",
 }
 
 
 def normalize_payload(
     bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_header: Optional[Any] = None
 ) -> Tuple[Any, Dict]:
-    mime = MimeTypes()
-    requested_formats = {mime_type: mime.guess_extension(mime_type).lstrip('.') for mime_type in accept_header.split(',')}
+
+    if accept_header:
+        mime = MimeTypes()
+        requested_formats = {mime_type: mime.guess_extension(mime_type).lstrip('.') for mime_type in accept_header.split(',')}
+    else:
+        requested_formats = {}
 
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
@@ -282,7 +290,15 @@ def normalize_payload(
 
         return outputs, audio_format
     elif task in IMAGE_INPUTS:
-        return normalize_payload_image(bpayload)
+        outputs = normalize_payload_image(bpayload)
+        image_format = "jpeg"
+
+        for requested_format in requested_formats.values():
+            if requested_format in WHITELISTED_MIME_TYPES.values():
+                image_format = requested_format
+                break
+
+        return outputs, image_format
     elif task in TEXT_INPUTS:
         return normalize_payload_nlp(bpayload, task)
     else:
