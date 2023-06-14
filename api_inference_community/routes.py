@@ -15,6 +15,7 @@ from pydantic import ValidationError
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+
 HF_HEADER_COMPUTE_TIME = "x-compute-time"
 HF_HEADER_COMPUTE_TYPE = "x-compute-type"
 COMPUTE_TYPE = os.getenv("COMPUTE_TYPE", "cpu")
