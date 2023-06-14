@@ -248,31 +248,36 @@ TEXT_INPUTS = {
     "zero-shot-classification",
 }
 
-MIME_TYPES = {
-    #"image/png",
-    #"image/jpeg",
-    #"image/jpg",
-    #"image/tiff",
-    #"image/bmp",
-    #"image/gif",
-    #"image/webp",
-    "audio/flac",
-    "audio/mpeg",
-    "audio/wav",
-    "audio/ogg",
+
+# TODO add image formats for requested mime types?
+WHITELISTED_MIME_TYPES = {
+    "audio/flac": "flac",
+    "audio/mpeg": "mp3",
+    "audio/wav": "wav",
+    "audio/ogg": "ogg",
 }
+
 
 def normalize_payload(
     bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_header: Optional[Any] = None
 ) -> Tuple[Any, Dict]:
-    # TODO do something with accept_headers
+    mime = MimeTypes()
+    requested_formats = {mime_type: mime.guess_extension(mime_type).lstrip('.') for mime_type in accept_header.split(',')}
+
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
             raise EnvironmentError(
                 "We cannot normalize audio file if we don't know the sampling rate"
             )
         outputs = normalize_payload_audio(bpayload, sampling_rate)
-        return outputs
+        audio_format = "flac"
+
+        for requested_format in requested_formats.values():
+            if requested_format in WHITELISTED_MIME_TYPES.values():
+                audio_format = requested_format
+                break
+
+        return outputs, audio_format
     elif task in IMAGE_INPUTS:
         return normalize_payload_image(bpayload)
     elif task in TEXT_INPUTS:
