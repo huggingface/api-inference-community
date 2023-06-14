@@ -235,6 +235,7 @@ TEXT_INPUTS = {
     "tabular-classification",
     "tabular-regression",
     "summarization",
+    "text-generation",
     "text2text-generation",
     "text-classification",
     "text-to-image",

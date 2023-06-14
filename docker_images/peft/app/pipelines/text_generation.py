@@ -59,15 +59,6 @@ class TextGenerationPipeline(Pipeline):
             resp = self._process_req(inputs, **kwargs)
         return resp
 
-    @timing.timing
-    def _model_to_gpu(self):
-        if torch.cuda.is_available():
-            self.model.to("cuda")
-            self.device = "cuda"
-        else:
-            self.device = "cpu"
-
-
     def _process_req(self, inputs: str, **kwargs) -> str:
         """
         Args:
@@ -76,10 +67,15 @@ class TextGenerationPipeline(Pipeline):
         Returns:
             A string of completed text.
         """
+        tokenized_inputs = self.tokenizer(inputs, return_tensors="pt")
+        if torch.cuda.is_available():
+            self.model.to("cuda")
+            device = "cuda"
+            tokenized_inputs = {"input_ids": tokenized_inputs["input_ids"].to(device), 
+            "attention_mask": tokenized_inputs["attention_mask"].to(device)}
         with torch.no_grad():
-            inputs = {k: v.to(self.device) for k, v in inputs.items()}
             outputs = self.model.generate(
-                input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"], max_new_tokens=10, eos_token_id=3
+                input_ids=tokenized_inputs["input_ids"], attention_mask=tokenized_inputs["attention_mask"], max_new_tokens=10, eos_token_id=3
             )
         
-        return self.tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)
+        return self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
