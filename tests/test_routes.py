@@ -400,6 +400,7 @@ class ValidationTestCase(TestCase):
             200,
         )
         self.assertTrue(isinstance(image, Image.Image))
+        self.assertEqual(response.headers["content-type"], "image/jpeg")
 
     def test_pipeline_zero_shot(self):
         os.environ["TASK"] = "text-classification"
