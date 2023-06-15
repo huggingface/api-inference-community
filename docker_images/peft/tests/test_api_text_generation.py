@@ -49,7 +49,6 @@ class TextGenerationTestCase(TestCase):
         )
         content = json.loads(response.content)
         self.assertEqual(type(content), str)
-        
 
         with TestClient(self.app) as client:
             response = client.post("/", json=inputs)
@@ -60,7 +59,6 @@ class TextGenerationTestCase(TestCase):
         )
         content = json.loads(response.content)
         self.assertEqual(type(content), str)
-        
 
     def test_malformed_question(self):
         with TestClient(self.app) as client:

@@ -1,20 +1,17 @@
-from app.pipelines import Pipeline
-from peft import (
-    PeftModel
-)
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-)
-from app import idle, timing
-import torch
-from huggingface_hub import hf_hub_download, model_info
-
 import json
-import os
 import logging
+import os
+
+import torch
+from app import idle, timing
+from app.pipelines import Pipeline
+from huggingface_hub import hf_hub_download, model_info
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 
 logger = logging.getLogger(__name__)
+
 
 class TextGenerationPipeline(Pipeline):
     def __init__(self, model_id: str):
@@ -36,13 +33,10 @@ class TextGenerationPipeline(Pipeline):
 
         base_model_id = config_dict["base_model_name_or_path"]
         self.tokenizer = AutoTokenizer.from_pretrained(base_model_id)
-        model = AutoModelForCausalLM.from_pretrained(
-        base_model_id, device_map="auto"
-        )
+        model = AutoModelForCausalLM.from_pretrained(base_model_id, device_map="auto")
         # wrap base model with peft
         self.model = PeftModel.from_pretrained(model, model_id)
 
-    
     def __call__(self, inputs: str, **kwargs) -> str:
         """
         Args:
@@ -77,11 +71,16 @@ class TextGenerationPipeline(Pipeline):
 
         if torch.cuda.is_available():
             device = "cuda"
-            tokenized_inputs = {"input_ids": tokenized_inputs["input_ids"].to(device), 
-            "attention_mask": tokenized_inputs["attention_mask"].to(device)}
+            tokenized_inputs = {
+                "input_ids": tokenized_inputs["input_ids"].to(device),
+                "attention_mask": tokenized_inputs["attention_mask"].to(device),
+            }
         with torch.no_grad():
             outputs = self.model.generate(
-                input_ids=tokenized_inputs["input_ids"], attention_mask=tokenized_inputs["attention_mask"], max_new_tokens=10, eos_token_id=3
+                input_ids=tokenized_inputs["input_ids"],
+                attention_mask=tokenized_inputs["attention_mask"],
+                max_new_tokens=10,
+                eos_token_id=3,
             )
-        
+
         return self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
