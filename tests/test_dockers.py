@@ -321,13 +321,9 @@ class DockerImageTests(unittest.TestCase):
             timeout=600,
         )
         self.framework_invalid_test("diffusers")
-        
+
     def test_peft(self):
-        self.framework_docker_test(
-            "peft",
-            "text-generation",
-            "merve/peft-test-3"
-        )
+        self.framework_docker_test("peft", "text-generation", "merve/peft-test-3")
 
     def test_pyannote_audio(self):
         self.framework_docker_test(
