@@ -249,7 +249,7 @@ TEXT_INPUTS = {
 }
 
 
-WHITELISTED_MIME_TYPES = {
+WHITELISTED_AUDIO_MIME_TYPES = {
     "audio/flac": "flac",
     "audio/mpeg": "mp3",
     "audio/wav": "wav",
@@ -257,6 +257,9 @@ WHITELISTED_MIME_TYPES = {
     "audio/mp4": "m4a",
     "audio/aac": "aac",
     "audio/webm": "webm",
+}
+
+WHITELISTED_IMAGE_MIME_TYPES = {
     "image/jpeg": "jpg",
     "image/png": "png",
     "image/bmp": "bmp",
@@ -284,7 +287,7 @@ def normalize_payload(
         audio_format = "flac"
 
         for requested_format in requested_formats.values():
-            if requested_format in WHITELISTED_MIME_TYPES.values():
+            if requested_format in WHITELISTED_AUDIO_MIME_TYPES.values():
                 audio_format = requested_format
                 break
 
@@ -294,7 +297,7 @@ def normalize_payload(
         image_format = "jpeg"
 
         for requested_format in requested_formats.values():
-            if requested_format in WHITELISTED_MIME_TYPES.values():
+            if requested_format in WHITELISTED_IMAGE_MIME_TYPES.values():
                 image_format = requested_format
                 break
 
@@ -402,7 +405,7 @@ DATA_PREFIX = os.getenv("HF_TRANSFORMERS_CACHE", "")
 
 def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, Dict]:
     audio_extensions = {
-        f".{ext}" for mime_type, ext in WHITELISTED_MIME_TYPES.items() if "audio" in mime_type
+        f".{ext}" for mime_type, ext in WHITELISTED_AUDIO_MIME_TYPES.items() if "audio" in mime_type
     }
 
     if os.path.isfile(bpayload) and bpayload.startswith(DATA_PREFIX.encode("utf-8")):
