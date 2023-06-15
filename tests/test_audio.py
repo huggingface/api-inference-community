@@ -49,7 +49,19 @@ class ValidationTestCase(TestCase):
         waveform, params = normalize_payload_audio(bpayload, sampling_rate)
         self.assertEqual(waveform.shape, (219040,))
 
-        out = ffmpeg_convert(waveform, sampling_rate)
+        out = ffmpeg_convert(waveform, sampling_rate, "flac")
+        self.assertEqual(len(out), 280204)
+        waveform2, params = normalize_payload_audio(out, sampling_rate)
+        self.assertEqual(waveform2.shape, (219040,))
+
+    def test_ffmpeg_convert_wav(self):
+        bpayload = self.read("sample1.flac")
+        sampling_rate = 16000
+        self.assertEqual(len(bpayload), 282378)
+        waveform, params = normalize_payload_audio(bpayload, sampling_rate)
+        self.assertEqual(waveform.shape, (219040,))
+
+        out = ffmpeg_convert(waveform, sampling_rate, "wav")
         self.assertEqual(len(out), 280204)
         waveform2, params = normalize_payload_audio(out, sampling_rate)
         self.assertEqual(waveform2.shape, (219040,))
@@ -61,7 +73,7 @@ class ValidationTestCase(TestCase):
         waveform, params = normalize_payload_audio(bpayload, sampling_rate)
         self.assertEqual(waveform.shape, (109520,))
 
-        out = ffmpeg_convert(waveform, sampling_rate)
+        out = ffmpeg_convert(waveform, sampling_rate, "flac")
         self.assertEqual(len(out), 258996)
         waveform2, params = normalize_payload_audio(out, sampling_rate)
         self.assertEqual(waveform2.shape, (109520,))
