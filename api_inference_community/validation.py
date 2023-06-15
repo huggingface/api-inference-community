@@ -397,21 +397,14 @@ def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
     return img, {}
 
 
-AUDIO_EXTENSIONS = {
-    ".mp3",
-    ".wav",
-    ".flac",
-    ".mp4",
-    ".webm",
-    ".aac",
-    ".ogg"
-}
-
-
 DATA_PREFIX = os.getenv("HF_TRANSFORMERS_CACHE", "")
 
 
 def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, Dict]:
+    audio_extensions = {
+        f".{ext}" for mime_type, ext in WHITELISTED_MIME_TYPES.items() if "audio" in mime_type
+    }
+
     if os.path.isfile(bpayload) and bpayload.startswith(DATA_PREFIX.encode("utf-8")):
         # XXX:
         # This is necessary for batch jobs where the datasets can contain
@@ -421,7 +414,7 @@ def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, D
         # We also attempt to prevent opening files that are not obviously
         # audio files, to prevent opening stuff like model weights.
         filename, ext = os.path.splitext(bpayload)
-        if ext.decode("utf-8") in AUDIO_EXTENSIONS:
+        if ext.decode("utf-8") in audio_extensions:
             with open(bpayload, "rb") as f:
                 bpayload = f.read()
     inputs = ffmpeg_read(bpayload, sampling_rate)
