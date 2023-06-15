@@ -308,6 +308,53 @@ class ValidationTestCase(TestCase):
         self.assertEqual(data[0]["content-type"], "audio/flac")
         self.assertEqual(data[0]["label"], "label_0")
 
+    def test_audio_to_audio_pipeline_wav(self):
+        os.environ["TASK"] = "audio-to-audio"
+
+        class Pipeline:
+            def __init__(self):
+                self.sampling_rate = 16000
+
+            def __call__(self, input_: str):
+                return np.array([[0, 0, 0]]), 16000, ["label_0"]
+
+        def get_pipeline():
+            return Pipeline()
+
+        routes = [
+            Route("/{whatever:path}", status_ok),
+            Route("/{whatever:path}", pipeline_route, methods=["POST"]),
+        ]
+
+        app = Starlette(routes=routes)
+
+        @app.on_event("startup")
+        async def startup_event():
+            logger = logging.getLogger("uvicorn.access")
+            handler = logging.StreamHandler()
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            )
+            logger.handlers = [handler]
+
+            app.get_pipeline = get_pipeline
+
+        bpayload = self.read("sample1.flac")
+        with TestClient(app) as client:
+            response = client.post("/", data=bpayload, headers={"accept": "audio/wav"})
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertEqual(response.headers["content-type"], "application/json")
+        self.assertEqual(response.headers["x-compute-audio-length"], "13.69")
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(set(data[0].keys()), {"blob", "label", "content-type"})
+        self.assertEqual(data[0]["content-type"], "audio/wav")
+        self.assertEqual(data[0]["label"], "label_0")
+
     def test_text_to_image_pipeline(self):
         os.environ["TASK"] = "text-to-image"
 
