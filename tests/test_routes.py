@@ -402,6 +402,52 @@ class ValidationTestCase(TestCase):
         self.assertTrue(isinstance(image, Image.Image))
         self.assertEqual(response.headers["content-type"], "image/jpeg")
 
+    def test_text_to_image_pipeline_png(self):
+        os.environ["TASK"] = "text-to-image"
+
+        class Pipeline:
+            def __init__(self):
+                pass
+
+            def __call__(self, input_: str):
+                dirname = os.path.dirname(os.path.abspath(__file__))
+                filename = os.path.join(dirname, "samples", "plane.jpg")
+                returned_image = Image.open(filename)
+                return returned_image
+
+        def get_pipeline():
+            return Pipeline()
+
+        routes = [
+            Route("/{whatever:path}", status_ok),
+            Route("/{whatever:path}", pipeline_route, methods=["POST"]),
+        ]
+
+        app = Starlette(routes=routes)
+
+        @app.on_event("startup")
+        async def startup_event():
+            logger = logging.getLogger("uvicorn.access")
+            handler = logging.StreamHandler()
+            handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            )
+            logger.handlers = [handler]
+
+            app.get_pipeline = get_pipeline
+
+        with TestClient(app) as client:
+            response = client.post("/", data=b"", headers={"accept": "image/png"})
+
+        buf = io.BytesIO(response.content)
+        image = Image.open(buf)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertTrue(isinstance(image, Image.Image))
+        self.assertEqual(response.headers["content-type"], "image/png")
+
     def test_pipeline_zero_shot(self):
         os.environ["TASK"] = "text-classification"
 
