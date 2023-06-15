@@ -266,7 +266,7 @@ WHITELISTED_MIME_TYPES = {
 
 
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_header: Optional[Any] = None
+    bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_header: Optional[str] = None
 ) -> Tuple[Any, Dict]:
 
     if accept_header:
