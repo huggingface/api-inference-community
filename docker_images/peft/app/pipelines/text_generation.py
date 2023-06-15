@@ -59,6 +59,11 @@ class TextGenerationPipeline(Pipeline):
             resp = self._process_req(inputs, **kwargs)
         return resp
 
+    @timing.timing
+    def _model_to_gpu(self):
+        if torch.cuda.is_available():
+            self.model.to("cuda")
+
     def _process_req(self, inputs: str, **kwargs) -> str:
         """
         Args:
@@ -68,8 +73,9 @@ class TextGenerationPipeline(Pipeline):
             A string of completed text.
         """
         tokenized_inputs = self.tokenizer(inputs, return_tensors="pt")
+        self._model_to_gpu()
+
         if torch.cuda.is_available():
-            self.model.to("cuda")
             device = "cuda"
             tokenized_inputs = {"input_ids": tokenized_inputs["input_ids"].to(device), 
             "attention_mask": tokenized_inputs["attention_mask"].to(device)}
