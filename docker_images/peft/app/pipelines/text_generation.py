@@ -37,7 +37,7 @@ class TextGenerationPipeline(Pipeline):
         base_model_id = config_dict["base_model_name_or_path"]
         self.tokenizer = AutoTokenizer.from_pretrained(base_model_id)
         model = AutoModelForCausalLM.from_pretrained(
-        base_model_id, device_map="auto", trust_remote_code=True
+        base_model_id, device_map="auto"
         )
         # wrap base model with peft
         self.model = PeftModel.from_pretrained(model, model_id)
