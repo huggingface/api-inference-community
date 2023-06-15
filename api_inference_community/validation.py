@@ -259,6 +259,7 @@ WHITELISTED_AUDIO_MIME_TYPES = {
     "audio/webm": "webm",
 }
 
+
 WHITELISTED_IMAGE_MIME_TYPES = {
     "image/jpeg": "jpg",
     "image/png": "png",
