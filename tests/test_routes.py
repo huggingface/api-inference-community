@@ -363,10 +363,9 @@ class ValidationTestCase(TestCase):
                 pass
 
             def __call__(self, input_: str):
-                dirname = os.path.dirname(os.path.abspath(__file__))
-                filename = os.path.join(dirname, "samples", "plane.jpg")
-                returned_image = Image.open(filename)
-                return returned_image
+                image = Image.open(io.BytesIO(input_))
+                image_format = image.format
+                return image, image_format
 
         def get_pipeline():
             return Pipeline()
@@ -410,10 +409,9 @@ class ValidationTestCase(TestCase):
                 pass
 
             def __call__(self, input_: str):
-                dirname = os.path.dirname(os.path.abspath(__file__))
-                filename = os.path.join(dirname, "samples", "plane.jpg")
-                returned_image = Image.open(filename)
-                return returned_image
+                image = Image.open(io.BytesIO(input_))
+                image_format = image.format
+                return image, image_format
 
         def get_pipeline():
             return Pipeline()
