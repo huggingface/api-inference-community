@@ -1,11 +1,10 @@
-import json
 import logging
 import os
 
 import torch
 from app import idle, timing
 from app.pipelines import Pipeline
-from huggingface_hub import hf_hub_download, model_info
+from huggingface_hub import model_info
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -17,25 +16,21 @@ class TextGenerationPipeline(Pipeline):
     def __init__(self, model_id: str):
         use_auth_token = os.getenv("HF_API_TOKEN")
         model_data = model_info(model_id, token=use_auth_token)
+        config_dict = model_data.config["peft"]
 
-        has_config = any(
-            file.rfilename == "adapter_config.json" for file in model_data.siblings
-        )
-
-        if has_config:
-            config_file = hf_hub_download(
-                model_id, "adapter_config.json", token=use_auth_token
-            )
-            with open(config_file, "r") as f:
-                config_dict = json.load(f)
+        if config_dict:
+            base_model_id = config_dict["base_model_name"]
+            if base_model_id:
+                self.tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+                model = AutoModelForCausalLM.from_pretrained(
+                    base_model_id, device_map="auto"
+                )
+                # wrap base model with peft
+                self.model = PeftModel.from_pretrained(model, model_id)
+            else:
+                raise ValueError("There's no base model ID in configuration file.")
         else:
-            raise FileNotFoundError("Config file is not found in model repository")
-
-        base_model_id = config_dict["base_model_name_or_path"]
-        self.tokenizer = AutoTokenizer.from_pretrained(base_model_id)
-        model = AutoModelForCausalLM.from_pretrained(base_model_id, device_map="auto")
-        # wrap base model with peft
-        self.model = PeftModel.from_pretrained(model, model_id)
+            raise ValueError("Config file for this model does not exist or is invalid.")
 
     def __call__(self, inputs: str, **kwargs) -> str:
         """
