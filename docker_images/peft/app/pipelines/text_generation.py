@@ -16,7 +16,7 @@ class TextGenerationPipeline(Pipeline):
     def __init__(self, model_id: str):
         use_auth_token = os.getenv("HF_API_TOKEN")
         model_data = model_info(model_id, token=use_auth_token)
-        config_dict = model_data.config["peft"]
+        config_dict = model_data.config.get("peft")
 
         if config_dict:
             base_model_id = config_dict["base_model_name"]
