@@ -1,6 +1,5 @@
 starlette==0.27.0
-# TODO: Replace with the correct tag once the core PR is merged
-api-inference-community==0.0.23
+api-inference-community==0.0.31
 huggingface_hub==0.5.1
 transformers==4.30.0
 git+https://github.com/speechbrain/speechbrain@v0.5.13
