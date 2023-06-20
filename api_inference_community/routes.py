@@ -6,14 +6,14 @@ import time
 from typing import Any, Dict
 
 from api_inference_community.validation import (
+    AUDIO,
     AUDIO_INPUTS,
+    IMAGE,
     IMAGE_INPUTS,
     IMAGE_OUTPUTS,
-    parse_accept,
-    AUDIO,
-    IMAGE,
     ffmpeg_convert,
     normalize_payload,
+    parse_accept,
 )
 from pydantic import ValidationError
 from starlette.requests import Request

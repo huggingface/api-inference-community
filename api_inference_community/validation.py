@@ -297,23 +297,15 @@ def normalize_payload(
             raise EnvironmentError(
                 "We cannot normalize audio file if we don't know the sampling rate"
             )
-        inputs, params = normalize_payload_audio(bpayload, sampling_rate)
+        return normalize_payload_audio(bpayload, sampling_rate)
     elif task in IMAGE_INPUTS:
-        inputs, params = normalize_payload_image(bpayload)
+        return normalize_payload_image(bpayload)
     elif task in TEXT_INPUTS:
-        inputs, params = normalize_payload_nlp(bpayload, task)
+        return normalize_payload_nlp(bpayload, task)
     else:
         raise EnvironmentError(
             f"The task `{task}` is not recognized by api-inference-community"
         )
-    # if task in AUDIO_OUTPUTS:
-    #     audio_format = parse_accept(accept, AUDIO)
-    #     params["audio_format"] = audio_format
-    # elif task in IMAGE_OUTPUTS:
-    #     image_format = parse_accept(accept, IMAGE)
-    #     params["image_format"] = image_format
-
-    return inputs, params
 
 
 def ffmpeg_convert(
