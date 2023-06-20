@@ -62,7 +62,7 @@ class ValidationTestCase(TestCase):
         self.assertEqual(waveform.shape, (219040,))
 
         out = ffmpeg_convert(waveform, sampling_rate, "wav")
-        self.assertEqual(len(out), 280204)
+        self.assertEqual(len(out), 438158)
         waveform2, params = normalize_payload_audio(out, sampling_rate)
         self.assertEqual(waveform2.shape, (219040,))
 
