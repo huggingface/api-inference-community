@@ -3,7 +3,6 @@ import os
 import subprocess
 from base64 import b64decode
 from io import BytesIO
-from mimetypes import MimeTypes
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -218,6 +217,10 @@ AUDIO_INPUTS = {
     "speech-segmentation",
     "audio-classification",
 }
+AUDIO_OUTPUTS = {
+    "audio-to-audio",
+    "text-to-speech",
+}
 
 
 IMAGE_INPUTS = {
@@ -227,6 +230,10 @@ IMAGE_INPUTS = {
     "image-to-image",
     "object-detection",
     "zero-shot-image-classification",
+}
+IMAGE_OUTPUTS = {
+    "image-to-image",
+    "text-to-image",
 }
 
 
@@ -249,69 +256,69 @@ TEXT_INPUTS = {
 }
 
 
-WHITELISTED_AUDIO_MIME_TYPES = {
-    "audio/flac": "flac",
-    "audio/mpeg": "mp3",
-    "audio/wav": "wav",
-    "audio/ogg": "ogg",
-    "audio/mp4": "m4a",
-    "audio/aac": "aac",
-    "audio/webm": "webm",
-}
+AUDIO = [
+    "flac",
+    "ogg",
+    "mp3",
+    "wav",
+    "m4a",
+    "aac",
+    "webm",
+]
 
 
-WHITELISTED_IMAGE_MIME_TYPES = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/bmp": "bmp",
-    "image/tiff": "tiff",
-    "image/webp": "webp",
-}
+IMAGE = [
+    "jpeg",
+    "png",
+    "webp",
+    "tiff",
+    "bmp",
+]
+
+
+def parse_accept(accept: str, accepted: List[str]) -> str:
+    for mimetype in accept.split(","):
+        # remove quality
+        mimetype = mimetype.split(";")[0]
+
+        # remove prefix
+        extension = mimetype.split("/")[-1]
+
+        if extension in accepted:
+            return extension
+    return accepted[0]
 
 
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int] = None, accept_header: Optional[str] = None
+    bpayload: bytes, task: str, sampling_rate: Optional[int]
 ) -> Tuple[Any, Dict]:
-
-    if accept_header:
-        mime = MimeTypes()
-        requested_formats = {mime_type: mime.guess_extension(mime_type).lstrip('.') for mime_type in accept_header.split(',')}
-    else:
-        requested_formats = {}
-
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
             raise EnvironmentError(
                 "We cannot normalize audio file if we don't know the sampling rate"
             )
-        outputs = normalize_payload_audio(bpayload, sampling_rate)
-        audio_format = "flac"
-
-        for requested_format in requested_formats.values():
-            if requested_format in WHITELISTED_AUDIO_MIME_TYPES.values():
-                audio_format = requested_format
-                break
-
-        return outputs, audio_format
+        inputs, params = normalize_payload_audio(bpayload, sampling_rate)
     elif task in IMAGE_INPUTS:
-        outputs = normalize_payload_image(bpayload)
-        image_format = "jpeg"
-
-        for requested_format in requested_formats.values():
-            if requested_format in WHITELISTED_IMAGE_MIME_TYPES.values():
-                image_format = requested_format
-                break
-
-        return outputs, image_format
+        inputs, params = normalize_payload_image(bpayload)
     elif task in TEXT_INPUTS:
-        return normalize_payload_nlp(bpayload, task)
+        inputs, params = normalize_payload_nlp(bpayload, task)
     else:
         raise EnvironmentError(
             f"The task `{task}` is not recognized by api-inference-community"
         )
+    # if task in AUDIO_OUTPUTS:
+    #     audio_format = parse_accept(accept, AUDIO)
+    #     params["audio_format"] = audio_format
+    # elif task in IMAGE_OUTPUTS:
+    #     image_format = parse_accept(accept, IMAGE)
+    #     params["image_format"] = image_format
+
+    return inputs, params
 
 
-def ffmpeg_convert(array: np.array, sampling_rate: int, format_for_conversion: str) -> bytes:
+def ffmpeg_convert(
+    array: np.array, sampling_rate: int, format_for_conversion: str
+) -> bytes:
     """
     Helper function to convert raw waveforms to actual compressed file (lossless compression here)
     """
@@ -405,10 +412,6 @@ DATA_PREFIX = os.getenv("HF_TRANSFORMERS_CACHE", "")
 
 
 def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, Dict]:
-    audio_extensions = {
-        f".{ext}" for mime_type, ext in WHITELISTED_AUDIO_MIME_TYPES.items() if "audio" in mime_type
-    }
-
     if os.path.isfile(bpayload) and bpayload.startswith(DATA_PREFIX.encode("utf-8")):
         # XXX:
         # This is necessary for batch jobs where the datasets can contain
@@ -418,7 +421,7 @@ def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, D
         # We also attempt to prevent opening files that are not obviously
         # audio files, to prevent opening stuff like model weights.
         filename, ext = os.path.splitext(bpayload)
-        if ext.decode("utf-8") in audio_extensions:
+        if ext.decode("utf-8")[1:] in AUDIO:
             with open(bpayload, "rb") as f:
                 bpayload = f.read()
     inputs = ffmpeg_read(bpayload, sampling_rate)

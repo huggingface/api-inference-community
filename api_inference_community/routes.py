@@ -8,6 +8,10 @@ from typing import Any, Dict
 from api_inference_community.validation import (
     AUDIO_INPUTS,
     IMAGE_INPUTS,
+    IMAGE_OUTPUTS,
+    parse_accept,
+    AUDIO,
+    IMAGE,
     ffmpeg_convert,
     normalize_payload,
 )
@@ -35,7 +39,7 @@ async def pipeline_route(request: Request) -> Response:
             sampling_rate = pipe.sampling_rate
         except Exception:
             sampling_rate = None
-        inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate, accept_header=request.headers["accept"])
+        inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate)
     except ValidationError as e:
         errors = []
         for error in e.errors():
@@ -46,10 +50,11 @@ async def pipeline_route(request: Request) -> Response:
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-    return call_pipe(pipe, inputs, params, start)
+    accept = request.headers.get("accept", "")
+    return call_pipe(pipe, inputs, params, start, accept)
 
 
-def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
+def call_pipe(pipe: Any, inputs, params: Dict, start: float, accept: str) -> Response:
     root_logger = logging.getLogger()
     warnings = set()
 
@@ -99,14 +104,17 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
         headers.update(**{k: str(v) for k, v in metrics.items()})
         task = os.getenv("TASK")
         if task == "text-to-speech":
-            waveform, sampling_rate, audio_format = outputs
+            waveform, sampling_rate = outputs
+            audio_format = parse_accept(accept, AUDIO)
             data = ffmpeg_convert(waveform, sampling_rate, audio_format)
-            headers["content-type"] = f'audio/{audio_format}',
+            headers["content-type"] = f"audio/{audio_format}"
             return Response(data, headers=headers, status_code=status_code)
         elif task == "audio-to-audio":
-            waveforms, sampling_rate, audio_format, labels = outputs
+            waveforms, sampling_rate, labels = outputs
             items = []
             headers["content-type"] = "application/json"
+
+            audio_format = parse_accept(accept, AUDIO)
 
             for waveform, label in zip(waveforms, labels):
                 data = ffmpeg_convert(waveform, sampling_rate, audio_format)
@@ -114,12 +122,13 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
                     {
                         "label": label,
                         "blob": base64.b64encode(data).decode("utf-8"),
-                        "content-type": f'audio/{audio_format}',
+                        "content-type": f"audio/{audio_format}",
                     }
                 )
             return JSONResponse(items, headers=headers, status_code=status_code)
-        elif task in {"text-to-image", "image-to-image"}:
-            image, image_format = outputs
+        elif task in IMAGE_OUTPUTS:
+            image = outputs
+            image_format = parse_accept(accept, IMAGE)
             buffer = io.BytesIO()
             image.save(buffer, format=image_format.upper())
             buffer.seek(0)
