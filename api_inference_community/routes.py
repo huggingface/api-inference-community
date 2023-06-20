@@ -6,10 +6,14 @@ import time
 from typing import Any, Dict
 
 from api_inference_community.validation import (
+    AUDIO,
     AUDIO_INPUTS,
+    IMAGE,
     IMAGE_INPUTS,
+    IMAGE_OUTPUTS,
     ffmpeg_convert,
     normalize_payload,
+    parse_accept,
 )
 from pydantic import ValidationError
 from starlette.requests import Request
@@ -46,10 +50,11 @@ async def pipeline_route(request: Request) -> Response:
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-    return call_pipe(pipe, inputs, params, start)
+    accept = request.headers.get("accept", "")
+    return call_pipe(pipe, inputs, params, start, accept)
 
 
-def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
+def call_pipe(pipe: Any, inputs, params: Dict, start: float, accept: str) -> Response:
     root_logger = logging.getLogger()
     warnings = set()
 
@@ -94,39 +99,45 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float) -> Response:
         # https://stackoverflow.com/questions/43344819/reading-response-headers-with-fetch-api/44816592#44816592
         "access-control-expose-headers": f"{HF_HEADER_COMPUTE_TYPE}, {HF_HEADER_COMPUTE_TIME}",
     }
+
     if status_code == 200:
         headers.update(**{k: str(v) for k, v in metrics.items()})
         task = os.getenv("TASK")
         if task == "text-to-speech":
-            # Special case, right now everything is flac audio we can output
             waveform, sampling_rate = outputs
-            data = ffmpeg_convert(waveform, sampling_rate)
-            headers["content-type"] = "audio/flac"
+            audio_format = parse_accept(accept, AUDIO)
+            data = ffmpeg_convert(waveform, sampling_rate, audio_format)
+            headers["content-type"] = f"audio/{audio_format}"
             return Response(data, headers=headers, status_code=status_code)
         elif task == "audio-to-audio":
             waveforms, sampling_rate, labels = outputs
             items = []
             headers["content-type"] = "application/json"
+
+            audio_format = parse_accept(accept, AUDIO)
+
             for waveform, label in zip(waveforms, labels):
-                data = ffmpeg_convert(waveform, sampling_rate)
+                data = ffmpeg_convert(waveform, sampling_rate, audio_format)
                 items.append(
                     {
                         "label": label,
                         "blob": base64.b64encode(data).decode("utf-8"),
-                        "content-type": "audio/flac",
+                        "content-type": f"audio/{audio_format}",
                     }
                 )
             return JSONResponse(items, headers=headers, status_code=status_code)
-        elif task in {"text-to-image", "image-to-image"}:
-            buf = io.BytesIO()
-            outputs.save(buf, format="JPEG")
-            buf.seek(0)
-            img_bytes = buf.read()
+        elif task in IMAGE_OUTPUTS:
+            image = outputs
+            image_format = parse_accept(accept, IMAGE)
+            buffer = io.BytesIO()
+            image.save(buffer, format=image_format.upper())
+            buffer.seek(0)
+            img_bytes = buffer.read()
             return Response(
                 img_bytes,
                 headers=headers,
                 status_code=200,
-                media_type="image/jpeg",
+                media_type=f"image/{image_format}",
             )
 
     return JSONResponse(

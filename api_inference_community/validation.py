@@ -172,6 +172,7 @@ PARAMS_MAPPING = {
     "zero-shot-classification": ZeroShotParamsCheck,
 }
 
+
 INPUTS_MAPPING = {
     "conversational": ConversationalInputsCheck,
     "question-answering": QuestionInputsCheck,
@@ -191,6 +192,7 @@ INPUTS_MAPPING = {
     "text-to-speech": StringInput,
     "text-to-image": StringInput,
 }
+
 
 BATCH_ENABLED_PIPELINES = ["feature-extraction"]
 
@@ -215,6 +217,11 @@ AUDIO_INPUTS = {
     "speech-segmentation",
     "audio-classification",
 }
+AUDIO_OUTPUTS = {
+    "audio-to-audio",
+    "text-to-speech",
+}
+
 
 IMAGE_INPUTS = {
     "image-classification",
@@ -224,6 +231,11 @@ IMAGE_INPUTS = {
     "object-detection",
     "zero-shot-image-classification",
 }
+IMAGE_OUTPUTS = {
+    "image-to-image",
+    "text-to-image",
+}
+
 
 TEXT_INPUTS = {
     "conversational",
@@ -244,16 +256,48 @@ TEXT_INPUTS = {
 }
 
 
+AUDIO = [
+    "flac",
+    "ogg",
+    "mp3",
+    "wav",
+    "m4a",
+    "aac",
+    "webm",
+]
+
+
+IMAGE = [
+    "jpeg",
+    "png",
+    "webp",
+    "tiff",
+    "bmp",
+]
+
+
+def parse_accept(accept: str, accepted: List[str]) -> str:
+    for mimetype in accept.split(","):
+        # remove quality
+        mimetype = mimetype.split(";")[0]
+
+        # remove prefix
+        extension = mimetype.split("/")[-1]
+
+        if extension in accepted:
+            return extension
+    return accepted[0]
+
+
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int] = None
+    bpayload: bytes, task: str, sampling_rate: Optional[int]
 ) -> Tuple[Any, Dict]:
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
             raise EnvironmentError(
                 "We cannot normalize audio file if we don't know the sampling rate"
             )
-        outputs = normalize_payload_audio(bpayload, sampling_rate)
-        return outputs
+        return normalize_payload_audio(bpayload, sampling_rate)
     elif task in IMAGE_INPUTS:
         return normalize_payload_image(bpayload)
     elif task in TEXT_INPUTS:
@@ -264,13 +308,14 @@ def normalize_payload(
         )
 
 
-def ffmpeg_convert(array: np.array, sampling_rate: int) -> bytes:
+def ffmpeg_convert(
+    array: np.array, sampling_rate: int, format_for_conversion: str
+) -> bytes:
     """
     Helper function to convert raw waveforms to actual compressed file (lossless compression here)
     """
     ar = str(sampling_rate)
     ac = "1"
-    format_for_conversion = "flac"
     ffmpeg_command = [
         "ffmpeg",
         "-ac",
@@ -355,9 +400,6 @@ def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
     return img, {}
 
 
-AUDIO_EXTENSIONS = {".mp3", ".wav", ".flac", ".mp4", ".webm", ".aac"}
-
-
 DATA_PREFIX = os.getenv("HF_TRANSFORMERS_CACHE", "")
 
 
@@ -371,7 +413,7 @@ def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, D
         # We also attempt to prevent opening files that are not obviously
         # audio files, to prevent opening stuff like model weights.
         filename, ext = os.path.splitext(bpayload)
-        if ext.decode("utf-8") in AUDIO_EXTENSIONS:
+        if ext.decode("utf-8")[1:] in AUDIO:
             with open(bpayload, "rb") as f:
                 bpayload = f.read()
     inputs = ffmpeg_read(bpayload, sampling_rate)
