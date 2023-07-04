@@ -25,7 +25,7 @@ RepetitionPenalty = Annotated[
 Temperature = Annotated[
     float, annotated_types.Ge(0.0), annotated_types.Le(100.0), Strict()
 ]
-CandidateLabels = list
+CandidateLabels = Annotated[list, annotated_types.MinLen(1)]
 
 
 class FillMaskParamsCheck(BaseModel):
@@ -50,7 +50,9 @@ class SharedGenerationParams(BaseModel):
     def max_length_must_be_larger_than_min_length(
         cls, max_length: Optional[MaxLength], values
     ):
-        min_length = values.get("min_length", 0)
+        min_length = values.data.get("min_length", 0)
+        if min_length is None:
+            min_length = 0
         if max_length is not None and max_length < min_length:
             raise ValueError("min_length cannot be larger than max_length")
         return max_length
@@ -390,6 +392,8 @@ def normalize_payload_nlp(bpayload: bytes, task: str) -> Tuple[Any, Dict]:
     # We used to accept raw strings, we need to maintain backward compatibility
     try:
         payload = json.loads(payload)
+        if isinstance(payload, (float, int)):
+            payload = str(payload)
     except Exception:
         pass
 

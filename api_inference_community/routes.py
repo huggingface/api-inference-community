@@ -43,7 +43,14 @@ async def pipeline_route(request: Request) -> Response:
     except ValidationError as e:
         errors = []
         for error in e.errors():
-            errors.append(f'{error["msg"]}: `{error["loc"][0]}` in `parameters`')
+            if len(error["loc"]) > 0:
+                errors.append(
+                    f'{error["msg"]}: received `{error["loc"][0]}` in `parameters`'
+                )
+            else:
+                errors.append(
+                    f'{error["msg"]}: received `{error["input"]}` in `parameters`'
+                )
         return JSONResponse({"error": errors}, status_code=400)
     except (EnvironmentError, ValueError) as e:
         return JSONResponse({"error": str(e)}, status_code=400)
