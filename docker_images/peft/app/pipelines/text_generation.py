@@ -46,7 +46,7 @@ class TextGenerationPipeline(Pipeline):
                 resp = self._process_req(inputs, **kwargs)
         else:
             resp = self._process_req(inputs, **kwargs)
-        return resp
+        return {"generated_text": resp[0]}
 
     @timing.timing
     def _model_to_gpu(self):
