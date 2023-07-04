@@ -11,4 +11,5 @@ ftfy==6.1.1
 sentencepiece==0.1.97
 scipy==1.9.3
 torch==2.0.1
+pydantic<2
 #Dummy.
