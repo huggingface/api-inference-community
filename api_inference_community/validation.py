@@ -1,4 +1,6 @@
 import json
+from typing_extensions import Annotated
+import annotated_types
 import os
 import subprocess
 from base64 import b64decode
@@ -8,63 +10,30 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 from pydantic import (
     BaseModel,
-    ConstrainedFloat,
-    ConstrainedInt,
-    ConstrainedList,
+    Strict,
+    # ConstrainedFloat,
+    # ConstrainedInt,
+    # ConstrainedList,
     validator,
+    field_validator,
+    RootModel,
 )
 
-
-class MinLength(ConstrainedInt):
-    ge = 1
-    le = 500
-    strict = True
-
-
-class MaxLength(ConstrainedInt):
-    ge = 1
-    le = 500
-    strict = True
-
-
-class TopK(ConstrainedInt):
-    ge = 1
-    strict = True
-
-
-class TopP(ConstrainedFloat):
-    ge = 0.0
-    le = 1.0
-    strict = True
-
-
-class MaxTime(ConstrainedFloat):
-    ge = 0.0
-    le = 120.0
-    strict = True
-
-
-class NumReturnSequences(ConstrainedInt):
-    ge = 1
-    le = 10
-    strict = True
-
-
-class RepetitionPenalty(ConstrainedFloat):
-    ge = 0.0
-    le = 100.0
-    strict = True
-
-
-class Temperature(ConstrainedFloat):
-    ge = 0.0
-    le = 100.0
-    strict = True
-
-
-class CandidateLabels(ConstrainedList):
-    min_items = 1
-    __args__ = [str]
+MinLength = Annotated[int, annotated_types.Ge(1), annotated_types.Le(500), Strict()]
+MaxLength = Annotated[int, annotated_types.Ge(1), annotated_types.Le(500), Strict()]
+TopK = Annotated[int, annotated_types.Ge(1), Strict()]
+TopP = Annotated[float, annotated_types.Ge(0.0), annotated_types.Le(1.0), Strict()]
+MaxTime = Annotated[float, annotated_types.Ge(0.0), annotated_types.Le(120.0), Strict()]
+NumReturnSequences = Annotated[
+    int, annotated_types.Ge(1), annotated_types.Le(10), Strict()
+]
+RepetitionPenalty = Annotated[
+    float, annotated_types.Ge(0.0), annotated_types.Le(100.0), Strict()
+]
+Temperature = Annotated[
+    float, annotated_types.Ge(0.0), annotated_types.Le(100.0), Strict()
+]
+CandidateLabels = list
 
 
 class FillMaskParamsCheck(BaseModel):
@@ -85,14 +54,13 @@ class SharedGenerationParams(BaseModel):
     repetition_penalty: Optional[RepetitionPenalty] = None
     temperature: Optional[Temperature] = None
 
-    @validator("max_length")
+    @field_validator("max_length")
     def max_length_must_be_larger_than_min_length(
-        cls, max_length: Optional[MinLength], values: Dict[str, Optional[str]]
+        cls, max_length: Optional[MaxLength], values
     ):
-        if "min_length" in values:
-            if values["min_length"] is not None:
-                if max_length < values["min_length"]:
-                    raise ValueError("min_length cannot be larger than max_length")
+        min_length = values.get("min_length", 0)
+        if max_length is not None and max_length < min_length:
+            raise ValueError("min_length cannot be larger than max_length")
         return max_length
 
 
@@ -125,7 +93,7 @@ class TableQuestionAnsweringInputsCheck(BaseModel):
     table: Dict[str, List[str]]
     query: str
 
-    @validator("table")
+    @field_validator("table")
     def all_rows_must_have_same_length(cls, table: Dict[str, List[str]]):
         rows = list(table.values())
         n = len(rows[0])
@@ -137,7 +105,7 @@ class TableQuestionAnsweringInputsCheck(BaseModel):
 class TabularDataInputsCheck(BaseModel):
     data: Dict[str, List[str]]
 
-    @validator("data")
+    @field_validator("data")
     def all_rows_must_have_same_length(cls, data: Dict[str, List[str]]):
         rows = list(data.values())
         n = len(rows[0])
@@ -146,21 +114,21 @@ class TabularDataInputsCheck(BaseModel):
         raise ValueError("All rows in the data must be the same length")
 
 
-class StringOrStringBatchInputCheck(BaseModel):
-    __root__: Union[List[str], str]
+class StringOrStringBatchInputCheck(RootModel):
+    root: Union[List[str], str]
 
-    @validator("__root__")
-    def input_must_not_be_empty(cls, __root__: Union[List[str], str]):
-        if isinstance(__root__, list):
-            if len(__root__) == 0:
+    @field_validator("root")
+    def input_must_not_be_empty(cls, root: Union[List[str], str]):
+        if isinstance(root, list):
+            if len(root) == 0:
                 raise ValueError(
                     "The inputs are invalid, at least one input is required"
                 )
-        return __root__
+        return root
 
 
-class StringInput(BaseModel):
-    __root__: str
+class StringInput(RootModel):
+    root: str
 
 
 PARAMS_MAPPING = {
@@ -199,13 +167,13 @@ BATCH_ENABLED_PIPELINES = ["feature-extraction"]
 
 def check_params(params, tag):
     if tag in PARAMS_MAPPING:
-        PARAMS_MAPPING[tag].parse_obj(params)
+        PARAMS_MAPPING[tag].model_validate(params)
     return True
 
 
 def check_inputs(inputs, tag):
     if tag in INPUTS_MAPPING:
-        INPUTS_MAPPING[tag].parse_obj(inputs)
+        INPUTS_MAPPING[tag].model_validate(inputs)
         return True
     else:
         raise ValueError(f"{tag} is not a valid pipeline.")

@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from api_inference_community.validation import normalize_payload_nlp
 from parameterized import parameterized
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
 
 
 class ValidationTestCase(TestCase):
