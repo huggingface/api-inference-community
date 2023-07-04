@@ -326,7 +326,7 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "peft",
             "text-generation",
-            "smangrul/bloomz-560m_LORA_CAUSAL_LM",
+            "merve/peft-test-3",
             timeout=600,
         )
 
