@@ -57,4 +57,3 @@ class PipelineTestCase(TestCase):
                 os.environ["MODEL_ID"] = "XX"
                 with self.assertRaises(EnvironmentError):
                     get_pipeline()
-                    
