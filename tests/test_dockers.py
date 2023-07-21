@@ -326,8 +326,8 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "peft",
             "text-generation",
-            "merve/peft-test-3",
-            timeout=600,
+            "ybelkada/test-st-lora",
+            timeout=1000,
         )
 
     def test_pyannote_audio(self):
