@@ -4,7 +4,11 @@ import numpy as np
 import torch
 from app.common import ModelType, get_type
 from app.pipelines import Pipeline
-from speechbrain.pretrained import SepformerSeparation, WaveformEnhancement, SpectralMaskEnhancement
+from speechbrain.pretrained import (
+    SepformerSeparation,
+    SpectralMaskEnhancement,
+    WaveformEnhancement,
+)
 
 
 class AudioToAudioPipeline(Pipeline):
@@ -43,6 +47,8 @@ class AudioToAudioPipeline(Pipeline):
         if self.type == "speech-enhancement":
             return self.enhance(inputs)
         elif self.type == "audio-source-separation":
+            return self.separate(inputs)
+        else:
             return self.separate(inputs)
 
     def separate(self, inputs):

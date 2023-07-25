@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from app.common import ModelType, get_type, get_vocoder_model_id
 from app.pipelines import Pipeline
-from speechbrain.pretrained import HIFIGAN, Tacotron2, FastSpeech2
+from speechbrain.pretrained import HIFIGAN, FastSpeech2, Tacotron2
 
 
 class TextToSpeechPipeline(Pipeline):
@@ -40,6 +40,8 @@ class TextToSpeechPipeline(Pipeline):
         if self.type == "tacotron2":
             mel_output, _, _ = self.model.encode_text(inputs)
         elif self.type == "fastspeech2":
-            mel_output, _, _, _  = self.model.encode_text([inputs], pace=1.0, pitch_rate=1.0, energy_rate=1.0)
+            mel_output, _, _, _ = self.model.encode_text(
+                [inputs], pace=1.0, pitch_rate=1.0, energy_rate=1.0
+            )
         waveforms = self.vocoder_model.decode_batch(mel_output).numpy()
         return waveforms, self.sampling_rate
