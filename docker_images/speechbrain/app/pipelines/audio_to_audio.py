@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from app.common import ModelType, get_type
 from app.pipelines import Pipeline
-from speechbrain.pretrained import SepformerSeparation, SpectralMaskEnhancement
+from speechbrain.pretrained import SepformerSeparation, WaveformEnhancement, SpectralMaskEnhancement
 
 
 class AudioToAudioPipeline(Pipeline):
@@ -16,6 +16,9 @@ class AudioToAudioPipeline(Pipeline):
         elif model_type == ModelType.SPECTRALMASKENHANCEMENT:
             self.model = SpectralMaskEnhancement.from_hparams(source=model_id)
             self.type = "speech-enhancement"
+        elif model_type == ModelType.WAVEFORMENHANCEMENT:
+            self.type = "speech-enhancement"
+            self.model = WaveformEnhancement.from_hparams(source=model_id)
         else:
             raise ValueError(f"{model_type.value} is invalid for audio-to-audio")
 

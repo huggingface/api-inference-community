@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from app.common import ModelType, get_type
 from app.pipelines import Pipeline
-from speechbrain.pretrained import EncoderASR, EncoderDecoderASR
+from speechbrain.pretrained import EncoderASR, EncoderDecoderASR, WhisperASR
 
 
 class AutomaticSpeechRecognitionPipeline(Pipeline):
@@ -14,9 +14,10 @@ class AutomaticSpeechRecognitionPipeline(Pipeline):
             self.model = EncoderASR.from_hparams(source=model_id)
         elif model_type is ModelType.ENCODERDECODERASR:
             self.model = EncoderDecoderASR.from_hparams(source=model_id)
-
             # Reduce latency
             self.model.mods.decoder.beam_size = 1
+        elif model_type is ModelType.WHISPERASR:
+            self.model = WhisperASR.from_hparams(source=model_id)
         else:
             raise ValueError(
                 f"{model_type.value} is invalid for automatic-speech-recognition"
