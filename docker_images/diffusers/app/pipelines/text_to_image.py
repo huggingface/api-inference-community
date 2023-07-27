@@ -10,7 +10,6 @@ from diffusers import (
     AutoPipelineForTextToImage,
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
-    KarrasVePipeline,
 )
 from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
 from huggingface_hub import hf_hub_download, model_info
