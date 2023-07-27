@@ -6,8 +6,13 @@ from typing import TYPE_CHECKING
 import torch
 from app import idle, timing
 from app.pipelines import Pipeline
+from diffusers import (
+    AutoPipelineForTextToImage,
+    DiffusionPipeline,
+    DPMSolverMultistepScheduler,
+    KarrasVePipeline,
+)
 from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
-from diffusers import AutoPipelineForTextToImage, DiffusionPipeline,  DPMSolverMultistepScheduler, KarrasVePipeline
 from huggingface_hub import hf_hub_download, model_info
 
 
@@ -62,7 +67,10 @@ class TextToImagePipeline(Pipeline):
                 model_id, use_auth_token=use_auth_token, **kwargs
             )
 
-        self.is_karras_compatible = self.ldm.__class__.__init__.__annotations__.get("scheduler", None) == KarrasDiffusionSchedulers
+        self.is_karras_compatible = (
+            self.ldm.__class__.__init__.__annotations__.get("scheduler", None)
+            == KarrasDiffusionSchedulers
+        )
         if self.is_karras_compatible:
             self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
                 self.ldm.scheduler.config
@@ -95,7 +103,7 @@ class TextToImagePipeline(Pipeline):
     def _process_req(self, inputs, **kwargs):
         # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
-        self.is_karras_compatible:
+        if self.is_karras_compatible:
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
 
