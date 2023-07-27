@@ -95,16 +95,17 @@ class TextToImagePipeline(Pipeline):
         if idle.UNLOAD_IDLE:
             with idle.request_witnesses():
                 self._model_to_gpu()
-        if self.is_karras_compatible and "num_inference_steps" not in kwargs:
-            kwargs["num_inference_steps"] = 25
+                resp = self._process_req(inputs, **kwargs)
+        else:
+            resp = self._process_req(inputs, **kwargs)
         return resp
 
     def _process_req(self, inputs, **kwargs):
         # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
-        if self.is_karras_compatible:
-            if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 25
+
+        if self.is_karras_compatible and "num_inference_steps" not in kwargs:
+            kwargs["num_inference_steps"] = 25
 
         images = self.ldm(inputs, **kwargs)["images"]
         return images[0]
