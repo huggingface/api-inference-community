@@ -7,13 +7,11 @@ import torch
 from app import idle, timing
 from app.pipelines import Pipeline
 from diffusers import (
-    AltDiffusionPipeline,
+    AutoPipelineForText2Image,
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
-    KandinskyPipeline,
-    KandinskyPriorPipeline,
-    StableDiffusionPipeline,
 )
+from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
 from huggingface_hub import hf_hub_download, model_info
 
 
@@ -63,21 +61,16 @@ class TextToImagePipeline(Pipeline):
                 model_to_load, use_auth_token=use_auth_token, **kwargs
             )
             self.ldm.load_lora_weights(model_id, use_auth_token=use_auth_token)
-
-        elif model_type == "KandinskyPipeline":
-            model_to_load = "kandinsky-community/kandinsky-2-1-prior"
-            self.ldm = KandinskyPipeline.from_pretrained(
-                model_id, use_auth_token=use_auth_token, **kwargs
-            )
-            self.prior = KandinskyPriorPipeline.from_pretrained(
-                model_to_load, use_auth_token=use_auth_token, **kwargs
-            )
         else:
-            self.ldm = DiffusionPipeline.from_pretrained(
+            self.ldm = AutoPipelineForText2Image.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
             )
 
-        if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
+        self.is_karras_compatible = (
+            self.ldm.__class__.__init__.__annotations__.get("scheduler", None)
+            == KarrasDiffusionSchedulers
+        )
+        if self.is_karras_compatible:
             self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
                 self.ldm.scheduler.config
             )
@@ -89,8 +82,6 @@ class TextToImagePipeline(Pipeline):
     def _model_to_gpu(self):
         if torch.cuda.is_available():
             self.ldm.to("cuda")
-            if isinstance(self.ldm, (KandinskyPipeline)):
-                self.prior.to("cuda")
 
     def __call__(self, inputs: str, **kwargs) -> "Image.Image":
         """
@@ -111,28 +102,9 @@ class TextToImagePipeline(Pipeline):
     def _process_req(self, inputs, **kwargs):
         # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
-        if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
-            if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 25
-            images = self.ldm(inputs, **kwargs)["images"]
-            return images[0]
-        elif isinstance(self.ldm, (KandinskyPipeline)):
-            if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 50
-            # not all args are supported by the prior
-            prior_args = {
-                "num_inference_steps": kwargs["num_inference_steps"],
-                "num_images_per_prompt": kwargs["num_images_per_prompt"],
-                "negative_prompt": kwargs.get("negative_prompt", None),
-                "guidance_scale": kwargs.get("guidance_scale", 4),
-            }
-            image_emb, zero_image_emb = self.prior(inputs, **prior_args).to_tuple()
-            images = self.ldm(
-                inputs,
-                image_embeds=image_emb,
-                negative_image_embeds=zero_image_emb,
-                **kwargs,
-            )["images"]
-            return images[0]
-        else:
-            raise ValueError("Model type not found or pipeline not implemented")
+
+        if self.is_karras_compatible and "num_inference_steps" not in kwargs:
+            kwargs["num_inference_steps"] = 25
+
+        images = self.ldm(inputs, **kwargs)["images"]
+        return images[0]
