@@ -7,7 +7,7 @@ import torch
 from app import idle, timing
 from app.pipelines import Pipeline
 from diffusers import (
-    AutoPipelineForTextToImage,
+    AutoPipelineForText2Image,
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
 )
@@ -62,7 +62,7 @@ class TextToImagePipeline(Pipeline):
             )
             self.ldm.load_lora_weights(model_id, use_auth_token=use_auth_token)
         else:
-            self.ldm = AutoPipelineForTextToImage.from_pretrained(
+            self.ldm = AutoPipelineForText2Image.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
             )
 
