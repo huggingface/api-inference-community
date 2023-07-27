@@ -4,6 +4,8 @@ LABEL maintainer="Nicolas Patry <nicolas@huggingface.co>"
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y
 
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install libgl1 -y
 RUN pip install --no-cache-dir torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt

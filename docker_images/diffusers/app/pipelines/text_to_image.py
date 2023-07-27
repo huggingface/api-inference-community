@@ -13,6 +13,7 @@ from diffusers import (
     KandinskyPipeline,
     KandinskyPriorPipeline,
     StableDiffusionPipeline,
+    StableDiffusionXLPipeline,
 )
 from huggingface_hub import hf_hub_download, model_info
 
@@ -77,7 +78,7 @@ class TextToImagePipeline(Pipeline):
                 model_id, use_auth_token=use_auth_token, **kwargs
             )
 
-        if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
+        if isinstance(self.ldm, (StableDiffusionXLPipeline, StableDiffusionPipeline, AltDiffusionPipeline)):
             self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
                 self.ldm.scheduler.config
             )
@@ -111,7 +112,7 @@ class TextToImagePipeline(Pipeline):
     def _process_req(self, inputs, **kwargs):
         # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
-        if isinstance(self.ldm, (StableDiffusionPipeline, AltDiffusionPipeline)):
+        if isinstance(self.ldm, (StableDiffusionXLPipeline, StableDiffusionPipeline, AltDiffusionPipeline)):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
             images = self.ldm(inputs, **kwargs)["images"]
