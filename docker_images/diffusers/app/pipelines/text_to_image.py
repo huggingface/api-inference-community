@@ -95,9 +95,8 @@ class TextToImagePipeline(Pipeline):
         if idle.UNLOAD_IDLE:
             with idle.request_witnesses():
                 self._model_to_gpu()
-                resp = self._process_req(inputs, **kwargs)
-        else:
-            resp = self._process_req(inputs, **kwargs)
+        if self.is_karras_compatible and "num_inference_steps" not in kwargs:
+            kwargs["num_inference_steps"] = 25
         return resp
 
     def _process_req(self, inputs, **kwargs):
