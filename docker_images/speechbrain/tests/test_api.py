@@ -17,6 +17,10 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
         # Speaker recognition
         "speechbrain/spkrec-xvect-voxceleb",
     ],
+    "audio-diarization": [
+        # Emotion Diarization
+        "speechbrain/emotion-diarization-wavlm-large",
+    ],
     "audio-to-audio": [
         # Speech Enhancement
         "speechbrain/mtl-mimic-voicebank",
@@ -44,6 +48,7 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
 
 ALL_TASKS = {
     "audio-classification",
+    "audio-diarization",
     "audio-to-audio",
     "automatic-speech-recognition",
     "audio-source-separation",
