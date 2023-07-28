@@ -2,7 +2,7 @@ FROM tiangolo/uvicorn-gunicorn:python3.8
 LABEL maintainer="Ella Charlaix <ella@huggingface.co>"
 
 RUN apt-get update -y && apt-get install ffmpeg libsm6 libxext6 -y
-RUN pip install --no-cache-dir torch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0
+RUN pip install --no-cache-dir torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./prestart.sh /app/
