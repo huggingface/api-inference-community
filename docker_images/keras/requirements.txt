@@ -1,4 +1,4 @@
-starlette==0.25.0
+starlette==0.27.0
 api-inference-community==0.0.23
 numpy>=1.17
 tensorflow>=2.3

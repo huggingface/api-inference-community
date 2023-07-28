@@ -1,4 +1,4 @@
-starlette==0.25.0
+starlette==0.27.0
 api-inference-community==0.0.23
 python-doctr[torch]==0.5.1
 huggingface_hub==0.5.1

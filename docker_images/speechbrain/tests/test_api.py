@@ -28,9 +28,12 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
         "speechbrain/asr-wav2vec2-commonvoice-fr",
         # ASR with EncoderDecoderASR
         "speechbrain/asr-crdnn-commonvoice-it",
+        # ASR with WhisperASR
+        "speechbrain/asr-whisper-large-v2-commonvoice-fr",
     ],
     "text-to-speech": [
         "speechbrain/tts-tacotron2-ljspeech",
+        "speechbrain/tts-fastspeech2-ljspeech",
     ],
     "text2text-generation": [
         # SoundChoice G2P

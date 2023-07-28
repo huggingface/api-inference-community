@@ -5,66 +5,27 @@ from base64 import b64decode
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import annotated_types
 import numpy as np
-from pydantic import (
-    BaseModel,
-    ConstrainedFloat,
-    ConstrainedInt,
-    ConstrainedList,
-    validator,
-)
+from pydantic import BaseModel, RootModel, Strict, field_validator
+from typing_extensions import Annotated
 
 
-class MinLength(ConstrainedInt):
-    ge = 1
-    le = 500
-    strict = True
-
-
-class MaxLength(ConstrainedInt):
-    ge = 1
-    le = 500
-    strict = True
-
-
-class TopK(ConstrainedInt):
-    ge = 1
-    strict = True
-
-
-class TopP(ConstrainedFloat):
-    ge = 0.0
-    le = 1.0
-    strict = True
-
-
-class MaxTime(ConstrainedFloat):
-    ge = 0.0
-    le = 120.0
-    strict = True
-
-
-class NumReturnSequences(ConstrainedInt):
-    ge = 1
-    le = 10
-    strict = True
-
-
-class RepetitionPenalty(ConstrainedFloat):
-    ge = 0.0
-    le = 100.0
-    strict = True
-
-
-class Temperature(ConstrainedFloat):
-    ge = 0.0
-    le = 100.0
-    strict = True
-
-
-class CandidateLabels(ConstrainedList):
-    min_items = 1
-    __args__ = [str]
+MinLength = Annotated[int, annotated_types.Ge(1), annotated_types.Le(500), Strict()]
+MaxLength = Annotated[int, annotated_types.Ge(1), annotated_types.Le(500), Strict()]
+TopK = Annotated[int, annotated_types.Ge(1), Strict()]
+TopP = Annotated[float, annotated_types.Ge(0.0), annotated_types.Le(1.0), Strict()]
+MaxTime = Annotated[float, annotated_types.Ge(0.0), annotated_types.Le(120.0), Strict()]
+NumReturnSequences = Annotated[
+    int, annotated_types.Ge(1), annotated_types.Le(10), Strict()
+]
+RepetitionPenalty = Annotated[
+    float, annotated_types.Ge(0.0), annotated_types.Le(100.0), Strict()
+]
+Temperature = Annotated[
+    float, annotated_types.Ge(0.0), annotated_types.Le(100.0), Strict()
+]
+CandidateLabels = Annotated[list, annotated_types.MinLen(1)]
 
 
 class FillMaskParamsCheck(BaseModel):
@@ -85,14 +46,15 @@ class SharedGenerationParams(BaseModel):
     repetition_penalty: Optional[RepetitionPenalty] = None
     temperature: Optional[Temperature] = None
 
-    @validator("max_length")
+    @field_validator("max_length")
     def max_length_must_be_larger_than_min_length(
-        cls, max_length: Optional[MinLength], values: Dict[str, Optional[str]]
+        cls, max_length: Optional[MaxLength], values
     ):
-        if "min_length" in values:
-            if values["min_length"] is not None:
-                if max_length < values["min_length"]:
-                    raise ValueError("min_length cannot be larger than max_length")
+        min_length = values.data.get("min_length", 0)
+        if min_length is None:
+            min_length = 0
+        if max_length is not None and max_length < min_length:
+            raise ValueError("min_length cannot be larger than max_length")
         return max_length
 
 
@@ -125,7 +87,7 @@ class TableQuestionAnsweringInputsCheck(BaseModel):
     table: Dict[str, List[str]]
     query: str
 
-    @validator("table")
+    @field_validator("table")
     def all_rows_must_have_same_length(cls, table: Dict[str, List[str]]):
         rows = list(table.values())
         n = len(rows[0])
@@ -137,7 +99,7 @@ class TableQuestionAnsweringInputsCheck(BaseModel):
 class TabularDataInputsCheck(BaseModel):
     data: Dict[str, List[str]]
 
-    @validator("data")
+    @field_validator("data")
     def all_rows_must_have_same_length(cls, data: Dict[str, List[str]]):
         rows = list(data.values())
         n = len(rows[0])
@@ -146,21 +108,21 @@ class TabularDataInputsCheck(BaseModel):
         raise ValueError("All rows in the data must be the same length")
 
 
-class StringOrStringBatchInputCheck(BaseModel):
-    __root__: Union[List[str], str]
+class StringOrStringBatchInputCheck(RootModel):
+    root: Union[List[str], str]
 
-    @validator("__root__")
-    def input_must_not_be_empty(cls, __root__: Union[List[str], str]):
-        if isinstance(__root__, list):
-            if len(__root__) == 0:
+    @field_validator("root")
+    def input_must_not_be_empty(cls, root: Union[List[str], str]):
+        if isinstance(root, list):
+            if len(root) == 0:
                 raise ValueError(
                     "The inputs are invalid, at least one input is required"
                 )
-        return __root__
+        return root
 
 
-class StringInput(BaseModel):
-    __root__: str
+class StringInput(RootModel):
+    root: str
 
 
 PARAMS_MAPPING = {
@@ -171,6 +133,7 @@ PARAMS_MAPPING = {
     "summarization": SummarizationParamsCheck,
     "zero-shot-classification": ZeroShotParamsCheck,
 }
+
 
 INPUTS_MAPPING = {
     "conversational": ConversationalInputsCheck,
@@ -192,18 +155,19 @@ INPUTS_MAPPING = {
     "text-to-image": StringInput,
 }
 
+
 BATCH_ENABLED_PIPELINES = ["feature-extraction"]
 
 
 def check_params(params, tag):
     if tag in PARAMS_MAPPING:
-        PARAMS_MAPPING[tag].parse_obj(params)
+        PARAMS_MAPPING[tag].model_validate(params)
     return True
 
 
 def check_inputs(inputs, tag):
     if tag in INPUTS_MAPPING:
-        INPUTS_MAPPING[tag].parse_obj(inputs)
+        INPUTS_MAPPING[tag].model_validate(inputs)
         return True
     else:
         raise ValueError(f"{tag} is not a valid pipeline.")
@@ -215,6 +179,11 @@ AUDIO_INPUTS = {
     "speech-segmentation",
     "audio-classification",
 }
+AUDIO_OUTPUTS = {
+    "audio-to-audio",
+    "text-to-speech",
+}
+
 
 IMAGE_INPUTS = {
     "image-classification",
@@ -224,6 +193,11 @@ IMAGE_INPUTS = {
     "object-detection",
     "zero-shot-image-classification",
 }
+IMAGE_OUTPUTS = {
+    "image-to-image",
+    "text-to-image",
+}
+
 
 TEXT_INPUTS = {
     "conversational",
@@ -235,6 +209,7 @@ TEXT_INPUTS = {
     "tabular-classification",
     "tabular-regression",
     "summarization",
+    "text-generation",
     "text2text-generation",
     "text-classification",
     "text-to-image",
@@ -244,16 +219,48 @@ TEXT_INPUTS = {
 }
 
 
+AUDIO = [
+    "flac",
+    "ogg",
+    "mp3",
+    "wav",
+    "m4a",
+    "aac",
+    "webm",
+]
+
+
+IMAGE = [
+    "jpeg",
+    "png",
+    "webp",
+    "tiff",
+    "bmp",
+]
+
+
+def parse_accept(accept: str, accepted: List[str]) -> str:
+    for mimetype in accept.split(","):
+        # remove quality
+        mimetype = mimetype.split(";")[0]
+
+        # remove prefix
+        extension = mimetype.split("/")[-1]
+
+        if extension in accepted:
+            return extension
+    return accepted[0]
+
+
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int] = None
+    bpayload: bytes, task: str, sampling_rate: Optional[int]
 ) -> Tuple[Any, Dict]:
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
             raise EnvironmentError(
                 "We cannot normalize audio file if we don't know the sampling rate"
             )
-        outputs = normalize_payload_audio(bpayload, sampling_rate)
-        return outputs
+        return normalize_payload_audio(bpayload, sampling_rate)
     elif task in IMAGE_INPUTS:
         return normalize_payload_image(bpayload)
     elif task in TEXT_INPUTS:
@@ -264,13 +271,14 @@ def normalize_payload(
         )
 
 
-def ffmpeg_convert(array: np.array, sampling_rate: int) -> bytes:
+def ffmpeg_convert(
+    array: np.array, sampling_rate: int, format_for_conversion: str
+) -> bytes:
     """
     Helper function to convert raw waveforms to actual compressed file (lossless compression here)
     """
     ar = str(sampling_rate)
     ac = "1"
-    format_for_conversion = "flac"
     ffmpeg_command = [
         "ffmpeg",
         "-ac",
@@ -355,9 +363,6 @@ def normalize_payload_image(bpayload: bytes) -> Tuple[Any, Dict]:
     return img, {}
 
 
-AUDIO_EXTENSIONS = {".mp3", ".wav", ".flac", ".mp4", ".webm", ".aac"}
-
-
 DATA_PREFIX = os.getenv("HF_TRANSFORMERS_CACHE", "")
 
 
@@ -371,7 +376,7 @@ def normalize_payload_audio(bpayload: bytes, sampling_rate: int) -> Tuple[Any, D
         # We also attempt to prevent opening files that are not obviously
         # audio files, to prevent opening stuff like model weights.
         filename, ext = os.path.splitext(bpayload)
-        if ext.decode("utf-8") in AUDIO_EXTENSIONS:
+        if ext.decode("utf-8")[1:] in AUDIO:
             with open(bpayload, "rb") as f:
                 bpayload = f.read()
     inputs = ffmpeg_read(bpayload, sampling_rate)
@@ -387,6 +392,8 @@ def normalize_payload_nlp(bpayload: bytes, task: str) -> Tuple[Any, Dict]:
     # We used to accept raw strings, we need to maintain backward compatibility
     try:
         payload = json.loads(payload)
+        if isinstance(payload, (float, int)):
+            payload = str(payload)
     except Exception:
         pass
 

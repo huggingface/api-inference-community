@@ -1,4 +1,4 @@
-starlette==0.25.0
+starlette==0.27.0
 api-inference-community==0.0.29
 huggingface_hub>=0.12.1
 timm>=0.8.19dev0

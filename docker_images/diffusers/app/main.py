@@ -1,9 +1,11 @@
+import asyncio
 import functools
 import logging
 import os
 from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
+from app import idle
 from app.pipelines import ImageToImagePipeline, Pipeline, TextToImagePipeline
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
@@ -13,9 +15,6 @@ from starlette.routing import Route
 
 TASK = os.getenv("TASK")
 MODEL_ID = os.getenv("MODEL_ID")
-
-
-logger = logging.getLogger(__name__)
 
 
 # Add the allowed tasks
@@ -70,12 +69,10 @@ app = Starlette(routes=routes, middleware=middleware)
 
 @app.on_event("startup")
 async def startup_event():
-    logger = logging.getLogger("uvicorn.access")
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-    logger.handlers = [handler]
-
+    reset_logging()
     # Link between `api-inference-community` and framework code.
+    if idle.UNLOAD_IDLE:
+        asyncio.create_task(idle.live_check_loop(), name="live_check_loop")
     app.get_pipeline = get_pipeline
     try:
         get_pipeline()
@@ -84,7 +81,16 @@ async def startup_event():
         pass
 
 
+def reset_logging():
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        force=True,
+    )
+
+
 if __name__ == "__main__":
+    reset_logging()
     try:
         get_pipeline()
     except Exception:

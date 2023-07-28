@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from app.common import ModelType, get_type, get_vocoder_model_id
 from app.pipelines import Pipeline
-from speechbrain.pretrained import HIFIGAN, Tacotron2
+from speechbrain.pretrained import HIFIGAN, FastSpeech2, Tacotron2
 
 
 class TextToSpeechPipeline(Pipeline):
@@ -11,6 +11,10 @@ class TextToSpeechPipeline(Pipeline):
         model_type = get_type(model_id)
         if model_type is ModelType.TACOTRON2:
             self.model = Tacotron2.from_hparams(source=model_id)
+            self.type = "tacotron2"
+        elif model_type is ModelType.FASTSPEECH2:
+            self.model = FastSpeech2.from_hparams(source=model_id)
+            self.type = "fastspeech2"
         else:
             raise ValueError(f"{model_type.value} is invalid for text-to-speech")
 
@@ -33,6 +37,11 @@ class TextToSpeechPipeline(Pipeline):
         Return:
             A :obj:`np.array` and a :obj:`int`: The raw waveform as a numpy array, and the sampling rate as an int.
         """
-        mel_output, _, _ = self.model.encode_text(inputs)
+        if self.type == "tacotron2":
+            mel_output, _, _ = self.model.encode_text(inputs)
+        elif self.type == "fastspeech2":
+            mel_output, _, _, _ = self.model.encode_text(
+                [inputs], pace=1.0, pitch_rate=1.0, energy_rate=1.0
+            )
         waveforms = self.vocoder_model.decode_batch(mel_output).numpy()
         return waveforms, self.sampling_rate

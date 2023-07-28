@@ -1,3 +1,4 @@
+import base64
 import os
 from io import BytesIO
 from unittest import TestCase, skipIf
@@ -43,13 +44,21 @@ class ImageToImageTestCase(TestCase):
             del os.environ["TASK"]
 
     def test_simple(self):
-        text = "soap bubble"
         image = PIL.Image.new("RGB", (64, 64))
+        image_bytes = BytesIO()
+        image.save(image_bytes, format="JPEG")
+        image_bytes.seek(0)
 
-        inputs = (image, text)
+        parameters = {"prompt": "soap bubble"}
 
         with TestClient(self.app) as client:
-            response = client.post("/", json={"inputs": inputs})
+            response = client.post(
+                "/",
+                json={
+                    "image": base64.b64encode(image_bytes.read()).decode("utf-8"),
+                    "parameters": parameters,
+                },
+            )
 
         self.assertEqual(
             response.status_code,
@@ -67,7 +76,8 @@ class ImageToImageTestCase(TestCase):
             response.status_code,
             400,
         )
-        self.assertEqual(
-            response.content,
-            b'{"error":"\'utf-8\' codec can\'t decode byte 0xc3 in position 0: invalid continuation byte"}',
+
+        self.assertTrue(
+            b'{"error":"cannot identify image file <_io.BytesIO object at'
+            in response.content
         )

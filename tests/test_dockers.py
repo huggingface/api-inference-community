@@ -68,6 +68,12 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("asteroid")
 
+    def test_bertopic(self):
+        self.framework_docker_test(
+            "bertopic", "text-classification", "MaartenGr/BERTopic_ArXiv"
+        )
+        self.framework_invalid_test("bertopic")
+
     def test_espnet(self):
         self.framework_docker_test(
             "espnet",
@@ -312,8 +318,17 @@ class DockerImageTests(unittest.TestCase):
             "diffusers",
             "image-to-image",
             "hf-internal-testing/tiny-controlnet",
+            timeout=600,
         )
         self.framework_invalid_test("diffusers")
+
+    def test_peft(self):
+        self.framework_docker_test(
+            "peft",
+            "text-generation",
+            "ybelkada/test-st-lora",
+            timeout=1000,
+        )
 
     def test_pyannote_audio(self):
         self.framework_docker_test(
@@ -353,7 +368,7 @@ class DockerImageTests(unittest.TestCase):
 
     def test_nemo(self):
         self.framework_docker_test(
-            "nemo", "automatic-speech-recognition", "nvidia/stt_en_conformer_ctc_medium"
+            "nemo", "automatic-speech-recognition", "nvidia/stt_en_conformer_ctc_large"
         )
 
     def test_generic(self):
