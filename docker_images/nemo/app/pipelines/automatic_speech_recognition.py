@@ -58,7 +58,7 @@ class AutomaticSpeechRecognitionPipeline(Pipeline):
             transcriptions = self.model.transcribe([audio_path])
 
             # if transcriptions form a tuple (from RNNT), extract just "best" hypothesis
-            if type(transcriptions) == tuple and len(transcriptions) == 2:
+            if type(transcriptions) is tuple and len(transcriptions) == 2:
                 transcriptions = transcriptions[0]
 
         audio_transcription = transcriptions[0]

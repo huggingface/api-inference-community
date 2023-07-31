@@ -79,7 +79,7 @@ class TabularRegressionTestCase(TestCase):
 
         assert response.status_code == 200
         content = json.loads(response.content)
-        assert type(content) == list
+        assert type(content) is list
         assert len(content) == expected_output_len
 
     def test_wrong_sklearn_version_warning(self):
