@@ -10,8 +10,11 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
     "text-classification": [
-        "Intel/distilbert-base-uncased-finetuned-sst-2-english-int8-static",
+        "Intel/distilbert-base-uncased-finetuned-sst-2-english-int8-dynamic",
         "echarlaix/distilbert-sst2-inc-dynamic-quantization-magnitude-pruning-0.1",
+    ],
+    "question-answering": [
+        "Intel/distilbert-base-uncased-distilled-squad-int8-static",
     ],
 }
 
