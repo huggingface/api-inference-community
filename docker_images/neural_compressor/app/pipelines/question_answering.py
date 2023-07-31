@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from app.pipelines import Pipeline
 from optimum.intel import INCModelForQuestionAnswering
