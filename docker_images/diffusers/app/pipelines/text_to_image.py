@@ -36,13 +36,22 @@ class TextToImagePipeline(Pipeline):
 
         model_type = None
         is_diffusers_lora = any(
-            file.rfilename in ("pytorch_lora_weights.bin", "pytorch_lora_weights.safetensors") for file in model_data.siblings
-        ) 
+            file.rfilename
+            in ("pytorch_lora_weights.bin", "pytorch_lora_weights.safetensors")
+            for file in model_data.siblings
+        )
         has_model_index = any(
             file.rfilename == "model_index.json" for file in model_data.siblings
         )
 
-        file_to_load = next((file.rfilename for file in model_data.siblings if file.rfilename.endswith('.safetensors')), None)
+        file_to_load = next(
+            (
+                file.rfilename
+                for file in model_data.siblings
+                if file.rfilename.endswith(".safetensors")
+            ),
+            None,
+        )
 
         if is_diffusers_lora or "lora" in model_data.cardData.get("tags", []):
             model_type = "LoraModel"
@@ -60,14 +69,18 @@ class TextToImagePipeline(Pipeline):
 
         if model_type == "LoraModel":
             model_to_load = model_data.cardData["base_model"]
-            if(not model_to_load):
-                raise ValueError("No `base_model` found. Please include a `base_model` on your README.md tags")
-            
+            if not model_to_load:
+                raise ValueError(
+                    "No `base_model` found. Please include a `base_model` on your README.md tags"
+                )
+
             self.ldm = DiffusionPipeline.from_pretrained(
                 model_to_load, use_auth_token=use_auth_token, **kwargs
             )
             weight_name = file_to_load if not is_diffusers_lora else None
-            self.ldm.load_lora_weights(model_id, weight_name=weight_name, use_auth_token=use_auth_token)
+            self.ldm.load_lora_weights(
+                model_id, weight_name=weight_name, use_auth_token=use_auth_token
+            )
         else:
             self.ldm = AutoPipelineForText2Image.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
