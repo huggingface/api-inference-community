@@ -1,17 +1,42 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 LABEL maintainer="Nicolas Patry <nicolas@huggingface.co>"
 
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install libgl1 -y
-RUN pip install --no-cache-dir torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
+
+# Install prerequisites
+RUN apt-get update && \
+    apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+    xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git
+
+# Install pyenv
+RUN curl https://pyenv.run | bash
+
+# Set environment variables for pyenv
+ENV PYENV_ROOT /root/.pyenv
+ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+
+# Install your desired Python version
+ARG PYTHON_VERSION=3.9.1
+RUN pyenv install $PYTHON_VERSION && \
+    pyenv global $PYTHON_VERSION && \
+    pyenv rehash
+
+# Upgrade pip and install your desired packages
+ARG PIP_VERSION=22.3.1
+RUN pip install --no-cache-dir --upgrade pip==${PIP_VERSION} setuptools wheel && \
+    pip install --no-cache-dir torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
+
+WORKDIR /app
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Uncomment if you want to load the model once before starting the asgi app
 # COPY ./prestart.sh /app/
+COPY ./gunicorn_conf.py /gunicorn_conf.py
 
 # Most DL models are quite large in terms of memory, using workers is a HUGE
 # slowdown because of the fork and GIL with python.
@@ -33,3 +58,5 @@ ENV HF_HOME=/data
 # kill workers all the time before they finish.
 RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
 COPY ./app /app/app
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
