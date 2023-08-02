@@ -9,21 +9,21 @@ from tests.test_api import TESTABLE_MODELS
 
 
 @skipIf(
-    "audio-diarization" not in ALLOWED_TASKS,
-    "audio-diarization not implemented",
+    "voice-activity-detection" not in ALLOWED_TASKS,
+    "voice-activity-detection not implemented",
 )
 
 @parameterized_class(
-    [{"model_id": model_id} for model_id in TESTABLE_MODELS["audio-diarization"]]
+    [{"model_id": model_id} for model_id in TESTABLE_MODELS["voice-activity-detection"]]
 )
 
 
-class AudioDiarizationTestCase(TestCase):
+class VoiceActivityDetectionTestCase(TestCase):
     def setUp(self):
         self.old_model_id = os.getenv("MODEL_ID")
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.model_id
-        os.environ["TASK"] = "audio-diarization"
+        os.environ["TASK"] = "voice-activity-detection"
         from app.main import app
 
         self.app = app

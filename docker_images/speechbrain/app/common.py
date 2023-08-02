@@ -20,7 +20,7 @@ class ModelType(Enum):
     FASTSPEECH2 = "FASTSPEECH2"
     # text2text-generation
     GRAPHEMETOPHONEME = "GRAPHEMETOPHONEME"
-    # audio-diarization
+    # voice-activity-detection
     SPEECHEMOTIONDIARIZATION = "SPEECHEMOTIONDIARIZATION"
 
 

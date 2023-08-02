@@ -6,12 +6,12 @@ from typing import Dict, Type
 from api_inference_community.routes import pipeline_route, status_ok
 from app.pipelines import (
     AudioClassificationPipeline,
-    AudioDiarizationPipeline,
     AudioToAudioPipeline,
     AutomaticSpeechRecognitionPipeline,
     Pipeline,
     TextToSpeechPipeline,
     TextToTextPipeline,
+    VoiceActivityDetectionPipeline
 )
 from starlette.applications import Starlette
 from starlette.routing import Route
@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # - translation
 # - summarization
 # - automatic-speech-recognition
+# - voice-activity-detection
 # - ...
 # For instance
 # from app.pipelines import AutomaticSpeechRecognitionPipeline
@@ -40,11 +41,11 @@ logger = logging.getLogger(__name__)
 # directories. Implement directly within the directories.
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "audio-classification": AudioClassificationPipeline,
-    "audio-diarization": AudioDiarizationPipeline,
     "audio-to-audio": AudioToAudioPipeline,
     "automatic-speech-recognition": AutomaticSpeechRecognitionPipeline,
     "text-to-speech": TextToSpeechPipeline,
     "text2text-generation": TextToTextPipeline,
+    "voice-activity-detection": VoiceActivityDetectionPipeline
 }
 
 
