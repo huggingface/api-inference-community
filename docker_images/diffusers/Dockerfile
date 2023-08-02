@@ -35,7 +35,7 @@ COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Uncomment if you want to load the model once before starting the asgi app
-#COPY ./prestart.sh /app/
+# COPY ./prestart.sh /app/
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 
 # Most DL models are quite large in terms of memory, using workers is a HUGE
