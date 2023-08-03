@@ -55,9 +55,9 @@ ENV HF_HOME=/data
 # than 30s (the default) to load in memory.
 # If UVICORN_TIMEOUT is too low, uvicorn will simply never loads as it will
 # kill workers all the time before they finish.
-COPY --from=tiangolo/uvicorn-gunicorn-starlette:python3.10 /app/ /app
-COPY --from=tiangolo/uvicorn-gunicorn-starlette:python3.10 /start.sh /
-COPY --from=tiangolo/uvicorn-gunicorn-starlette:python3.10 /gunicorn_conf.py /
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /app/ /app
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /start.sh /
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /gunicorn_conf.py /
 COPY app/ /app/app
 
 RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
