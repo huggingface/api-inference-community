@@ -36,7 +36,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Uncomment if you want to load the model once before starting the asgi app
 # COPY ./prestart.sh /app/
-COPY ./gunicorn_conf.py /gunicorn_conf.py
 
 # Most DL models are quite large in terms of memory, using workers is a HUGE
 # slowdown because of the fork and GIL with python.
@@ -56,7 +55,11 @@ ENV HF_HOME=/data
 # than 30s (the default) to load in memory.
 # If UVICORN_TIMEOUT is too low, uvicorn will simply never loads as it will
 # kill workers all the time before they finish.
-RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
-COPY ./app /app/app
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /app/ /app
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /start.sh /
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /gunicorn_conf.py /
+COPY app/ /app/app
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
+
+CMD ["/start.sh"]
