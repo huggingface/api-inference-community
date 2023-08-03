@@ -10,7 +10,7 @@ from diffusers import (
     AutoPipelineForText2Image,
     DiffusionPipeline,
     AutoencoderKL,
-    DPMSolverMultistepScheduler,
+    EulerAncestralDiscreteScheduler,
 )
 from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
 from huggingface_hub import hf_hub_download, model_info
@@ -99,7 +99,7 @@ class TextToImagePipeline(Pipeline):
             == KarrasDiffusionSchedulers
         )
         if self.is_karras_compatible:
-            self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
+            self.ldm.scheduler = EulerAncestralDiscreteScheduler.from_config(
                 self.ldm.scheduler.config
             )
 
@@ -132,7 +132,7 @@ class TextToImagePipeline(Pipeline):
         kwargs["num_images_per_prompt"] = 1
 
         if self.is_karras_compatible and "num_inference_steps" not in kwargs:
-            kwargs["num_inference_steps"] = 25
+            kwargs["num_inference_steps"] = 20
 
         images = self.ldm(inputs, **kwargs)["images"]
         return images[0]
