@@ -9,6 +9,7 @@ from app.pipelines import Pipeline
 from diffusers import (
     AutoPipelineForText2Image,
     DiffusionPipeline,
+    AutoencoderKL,
     DPMSolverMultistepScheduler,
 )
 from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
@@ -73,6 +74,13 @@ class TextToImagePipeline(Pipeline):
                 raise ValueError(
                     "No `base_model` found. Please include a `base_model` on your README.md tags"
                 )
+            if model_to_load == "stabilityai/stable-diffusion-xl-base-1.0":
+                vae = AutoencoderKL.from_pretrained(
+                    "madebyollin/sdxl-vae-fp16-fix",
+                    torch_dtype=torch.float16,  # load fp16 fix VAE
+                )
+                kwargs["vae"] = vae
+                kwargs["variant"] = "fp16"
 
             self.ldm = DiffusionPipeline.from_pretrained(
                 model_to_load, use_auth_token=use_auth_token, **kwargs
