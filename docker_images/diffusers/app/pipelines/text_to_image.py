@@ -7,9 +7,9 @@ import torch
 from app import idle, timing
 from app.pipelines import Pipeline
 from diffusers import (
+    AutoencoderKL,
     AutoPipelineForText2Image,
     DiffusionPipeline,
-    AutoencoderKL,
     EulerAncestralDiscreteScheduler,
 )
 from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
