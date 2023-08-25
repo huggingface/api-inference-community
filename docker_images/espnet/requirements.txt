@@ -1,4 +1,4 @@
-api-inference-community==0.0.35
+api-inference-community==0.0.32
 huggingface_hub==0.5.1
 espnet==0.10.2
 pyopenjtalk==0.1.3
