@@ -392,6 +392,20 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("open_clip")
 
+    def test_openvino(self):
+        self.framework_docker_test(
+            "openvino",
+            "text-classification",
+            "echarlaix/distilbert-base-uncased-finetuned-sst-2-english-openvino",
+        )
+
+        self.framework_docker_test(
+            "openvino",
+            "question-answering",
+            "distilbert-base-cased-distilled-squad",
+        )
+        self.framework_invalid_test("openvino")
+
     def framework_invalid_test(self, framework: str):
         task = "invalid"
         model_id = "invalid"
