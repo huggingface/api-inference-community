@@ -75,7 +75,7 @@ class TabularClassificationTestCase(TestCase):
 
         assert response.status_code == 200
         content = json.loads(response.content)
-        assert type(content) is list
+        assert isinstance(content, list)
         assert len(content) == expected_output_len
 
     def test_wrong_sklearn_version_warning(self):

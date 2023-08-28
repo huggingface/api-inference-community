@@ -1,12 +1,36 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
 LABEL maintainer="Nicolas Patry <nicolas@huggingface.co>"
 
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install libgl1 -y
-RUN pip install --no-cache-dir torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
+
+# Install prerequisites
+RUN apt-get update && \
+    apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+    xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git
+
+# Install pyenv
+RUN curl https://pyenv.run | bash
+
+# Set environment variables for pyenv
+ENV PYENV_ROOT /root/.pyenv
+ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+
+# Install your desired Python version
+ARG PYTHON_VERSION=3.9.1
+RUN pyenv install $PYTHON_VERSION && \
+    pyenv global $PYTHON_VERSION && \
+    pyenv rehash
+
+# Upgrade pip and install your desired packages
+ARG PIP_VERSION=22.3.1
+RUN pip install --no-cache-dir --upgrade pip==${PIP_VERSION} setuptools wheel && \
+    pip install --no-cache-dir torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
+
+WORKDIR /app
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -31,5 +55,11 @@ ENV HF_HOME=/data
 # than 30s (the default) to load in memory.
 # If UVICORN_TIMEOUT is too low, uvicorn will simply never loads as it will
 # kill workers all the time before they finish.
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /app/ /app
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /start.sh /
+COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /gunicorn_conf.py /
+COPY app/ /app/app
+
 RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
-COPY ./app /app/app
+
+CMD ["/start.sh"]

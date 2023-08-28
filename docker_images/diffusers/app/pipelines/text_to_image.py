@@ -7,9 +7,10 @@ import torch
 from app import idle, timing
 from app.pipelines import Pipeline
 from diffusers import (
+    AutoencoderKL,
     AutoPipelineForText2Image,
     DiffusionPipeline,
-    DPMSolverMultistepScheduler,
+    EulerAncestralDiscreteScheduler,
 )
 from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
 from huggingface_hub import hf_hub_download, model_info
@@ -35,15 +36,28 @@ class TextToImagePipeline(Pipeline):
             kwargs["torch_dtype"] = torch.float16
 
         model_type = None
-        is_lora = any(
-            file.rfilename == "pytorch_lora_weights.bin" for file in model_data.siblings
+        is_diffusers_lora = any(
+            file.rfilename
+            in ("pytorch_lora_weights.bin", "pytorch_lora_weights.safetensors")
+            for file in model_data.siblings
         )
         has_model_index = any(
             file.rfilename == "model_index.json" for file in model_data.siblings
         )
 
-        if is_lora:
+        file_to_load = next(
+            (
+                file.rfilename
+                for file in model_data.siblings
+                if file.rfilename.endswith(".safetensors")
+            ),
+            None,
+        )
+
+        if is_diffusers_lora or "lora" in model_data.cardData.get("tags", []):
             model_type = "LoraModel"
+            if not file_to_load and not is_diffusers_lora:
+                raise ValueError("No *.safetensors file found for your LoRA")
         elif has_model_index:
             config_file = hf_hub_download(
                 model_id, "model_index.json", token=use_auth_token
@@ -56,11 +70,25 @@ class TextToImagePipeline(Pipeline):
 
         if model_type == "LoraModel":
             model_to_load = model_data.cardData["base_model"]
+            if not model_to_load:
+                raise ValueError(
+                    "No `base_model` found. Please include a `base_model` on your README.md tags"
+                )
+            if model_to_load == "stabilityai/stable-diffusion-xl-base-1.0":
+                vae = AutoencoderKL.from_pretrained(
+                    "madebyollin/sdxl-vae-fp16-fix",
+                    torch_dtype=torch.float16,  # load fp16 fix VAE
+                )
+                kwargs["vae"] = vae
+                kwargs["variant"] = "fp16"
 
             self.ldm = DiffusionPipeline.from_pretrained(
                 model_to_load, use_auth_token=use_auth_token, **kwargs
             )
-            self.ldm.load_lora_weights(model_id, use_auth_token=use_auth_token)
+            weight_name = file_to_load if not is_diffusers_lora else None
+            self.ldm.load_lora_weights(
+                model_id, weight_name=weight_name, use_auth_token=use_auth_token
+            )
         else:
             self.ldm = AutoPipelineForText2Image.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
@@ -71,7 +99,7 @@ class TextToImagePipeline(Pipeline):
             == KarrasDiffusionSchedulers
         )
         if self.is_karras_compatible:
-            self.ldm.scheduler = DPMSolverMultistepScheduler.from_config(
+            self.ldm.scheduler = EulerAncestralDiscreteScheduler.from_config(
                 self.ldm.scheduler.config
             )
 
@@ -104,7 +132,7 @@ class TextToImagePipeline(Pipeline):
         kwargs["num_images_per_prompt"] = 1
 
         if self.is_karras_compatible and "num_inference_steps" not in kwargs:
-            kwargs["num_inference_steps"] = 25
+            kwargs["num_inference_steps"] = 20
 
         images = self.ldm(inputs, **kwargs)["images"]
         return images[0]
