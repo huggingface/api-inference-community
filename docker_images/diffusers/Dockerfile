@@ -34,9 +34,6 @@ WORKDIR /app
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Uncomment if you want to load the model once before starting the asgi app
-# COPY ./prestart.sh /app/
-
 # Most DL models are quite large in terms of memory, using workers is a HUGE
 # slowdown because of the fork and GIL with python.
 # Using multiple pods seems like a better default strategy.
@@ -59,6 +56,8 @@ COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /app/ /app
 COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /start.sh /
 COPY --from=tiangolo/uvicorn-gunicorn:python3.8 /gunicorn_conf.py /
 COPY app/ /app/app
+
+COPY ./prestart.sh /app/
 
 RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
 
