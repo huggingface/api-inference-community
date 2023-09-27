@@ -58,6 +58,9 @@ async def pipeline_route(request: Request) -> Response:
         return JSONResponse({"error": str(e)}, status_code=500)
 
     accept = request.headers.get("accept", "")
+    lora_adapter = request.headers.get("lora")
+    if lora_adapter:
+        params["lora_adapter"] = lora_adapter
     return call_pipe(pipe, inputs, params, start, accept)
 
 
