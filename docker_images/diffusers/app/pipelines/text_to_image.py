@@ -22,9 +22,6 @@ if TYPE_CHECKING:
     from PIL import Image
 
 
-SDXL_FP16_FIX = os.getenv("SDXL_FP16_FIX", "").lower() in ("1", "true")
-
-
 class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
     def __init__(self, model_id: str):
         self.current_lora_adapter = None
@@ -69,10 +66,10 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
             self.ldm.load_lora_weights(
                 model_id, weight_name=weight_name, use_auth_token=self.use_auth_token
             )
+            self.ldm.fuse_lora()
             self.current_lora_adapter = model_id
         else:
-            # TODO/TBD: is there any specific reason not to always apply it ?
-            if SDXL_FP16_FIX and model_id == "stabilityai/stable-diffusion-xl-base-1.0":
+            if model_id == "stabilityai/stable-diffusion-xl-base-1.0":
                 self._load_sd_with_sdxl_fix(model_id, **kwargs)
             else:
                 self.ldm = AutoPipelineForText2Image.from_pretrained(
