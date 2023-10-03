@@ -58,6 +58,9 @@ async def pipeline_route(request: Request) -> Response:
         return JSONResponse({"error": str(e)}, status_code=500)
 
     accept = request.headers.get("accept", "")
+    lora_adapter = request.headers.get("lora")
+    if lora_adapter:
+        params["lora_adapter"] = lora_adapter
     return call_pipe(pipe, inputs, params, start, accept)
 
 
@@ -95,6 +98,7 @@ def call_pipe(pipe: Any, inputs, params: Dict, start: float, accept: str) -> Res
         outputs = {"error": "unknown error"}
         status_code = 500
         logger.error(f"There was an inference error: {e}")
+        logger.exception(e)
 
     if warnings and isinstance(outputs, dict):
         outputs["warnings"] = list(sorted(warnings))
