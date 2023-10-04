@@ -1,10 +1,12 @@
 starlette==0.27.0
-api-inference-community==0.0.30
-git+https://github.com/huggingface/diffusers.git@1b46c661320bd3c488dd697c866c45b71a7df884
+# to be replaced with api-inference-community==0.0.33 as soon as released
+git+https://github.com/huggingface/api-inference-community.git@b3ef3f3a6015ed988ce77f71935e45006be5b054
+# to be replaced with diffusers==0.21.4 as soon as released
+git+https://github.com/huggingface/diffusers.git@9cfd4ef0746076febb589788ec47df9e2db43d65
 transformers==4.31.0
 accelerate==0.21.0
 hf_transfer==0.1.3
-pydantic==1.8.2
+pydantic>=2
 ftfy==6.1.1
 sentencepiece==0.1.97
 scipy==1.10.0
