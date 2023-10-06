@@ -66,7 +66,7 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
             self.ldm.load_lora_weights(
                 model_id, weight_name=weight_name, use_auth_token=self.use_auth_token
             )
-            self.ldm.fuse_lora()
+            # self.ldm.fuse_lora()
             self.current_lora_adapter = model_id
         else:
             if model_id == "stabilityai/stable-diffusion-xl-base-1.0":

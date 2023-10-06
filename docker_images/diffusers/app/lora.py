@@ -64,7 +64,7 @@ class LoRAPipelineMixin(object):
                     self.current_lora_adapter,
                     adapter,
                 )
-                self.ldm.unfuse_lora()
+                # self.ldm.unfuse_lora()
                 self.ldm.unload_lora_weights()
                 self.current_lora_adapter = None
                 logger.info("LoRA weights unloaded, loading new weights")
@@ -72,7 +72,7 @@ class LoRAPipelineMixin(object):
                 self.ldm.load_lora_weights(
                     adapter, weight_name=weight_name, use_auth_token=self.use_auth_token
                 )
-                self.ldm.fuse_lora()
+                # self.ldm.fuse_lora()
                 self.current_lora_adapter = adapter
                 logger.info("LoRA weights loaded for adapter %s", adapter)
             else:
@@ -82,6 +82,6 @@ class LoRAPipelineMixin(object):
                 "No LoRA adapter requested, unloading weights and using base model %s",
                 self.model_id,
             )
-            self.ldm.unfuse_lora()
+            # self.ldm.unfuse_lora()
             self.ldm.unload_lora_weights()
             self.current_lora_adapter = None
