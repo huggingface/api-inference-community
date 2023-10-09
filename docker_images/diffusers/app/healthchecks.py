@@ -49,8 +49,12 @@ app = Starlette(routes=routes)
 
 
 def reset_logging():
+    if os.environ.get("METRICS_DEBUG", "false").lower() in ["1", "true"]:
+        level = logging.DEBUG
+    else:
+        level = logging.INFO
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=level,
         format="healthchecks - %(asctime)s - %(levelname)s - %(message)s",
         force=True,
     )
@@ -113,7 +117,7 @@ def count_current_conns(app_port: int) -> str:
         if c.laddr.port == app_port:
             estab.append(c)
     current_conns = len(estab)
-    logger.debug("Established connections %d", current_conns)
+    logger.info("Current count of established connections  to app: %d", current_conns)
 
     curr_conns_str = """# HELP inference_app_established_conns Established connection count for a given app.
 # TYPE inference_app_established_conns gauge
