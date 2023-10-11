@@ -44,6 +44,16 @@ class LoRAPipelineMixin(object):
         )
         return is_diffusers_lora
 
+    def _fuse_or_raise(self):
+        try:
+            self.ldm.fuse_lora(safe_fusing=True)
+        except ValueError as e:
+            logger.exception(e)
+            logger.warning("Unable to fuse LoRA adapter")
+            self.ldm.unload_lora_weights()
+            self.current_lora_adapter = None
+            raise
+
     def _load_lora_adapter(self, kwargs):
         adapter = kwargs.pop("lora_adapter", None)
         if adapter is not None:
@@ -64,17 +74,19 @@ class LoRAPipelineMixin(object):
                     self.current_lora_adapter,
                     adapter,
                 )
-                # self.ldm.unfuse_lora()
+                self.ldm.unfuse_lora()
                 self.ldm.unload_lora_weights()
                 self.current_lora_adapter = None
                 logger.info("LoRA weights unloaded, loading new weights")
                 weight_name = self._get_lora_weight_name(model_data=model_data)
+
                 self.ldm.load_lora_weights(
                     adapter, weight_name=weight_name, use_auth_token=self.use_auth_token
                 )
-                # self.ldm.fuse_lora()
                 self.current_lora_adapter = adapter
+                self._fuse_or_raise()
                 logger.info("LoRA weights loaded for adapter %s", adapter)
+
             else:
                 logger.info("LoRA adapter %s already loaded", adapter)
         elif self.current_lora_adapter is not None:
@@ -82,6 +94,6 @@ class LoRAPipelineMixin(object):
                 "No LoRA adapter requested, unloading weights and using base model %s",
                 self.model_id,
             )
-            # self.ldm.unfuse_lora()
+            self.ldm.unfuse_lora()
             self.ldm.unload_lora_weights()
             self.current_lora_adapter = None
