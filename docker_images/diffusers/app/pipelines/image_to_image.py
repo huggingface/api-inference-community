@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import torch
@@ -7,6 +8,7 @@ from app.pipelines import Pipeline
 from diffusers import (
     AltDiffusionImg2ImgPipeline,
     AltDiffusionPipeline,
+    AutoPipelineForImage2Image,
     ControlNetModel,
     DiffusionPipeline,
     DPMSolverMultistepScheduler,
@@ -20,11 +22,15 @@ from diffusers import (
     StableDiffusionLatentUpscalePipeline,
     StableDiffusionPipeline,
     StableDiffusionUpscalePipeline,
+    StableDiffusionXLImg2ImgPipeline,
     StableUnCLIPImg2ImgPipeline,
     StableUnCLIPPipeline,
 )
 from huggingface_hub import hf_hub_download, model_info
 from PIL import Image
+
+
+logger = logging.getLogger(__name__)
 
 
 class ImageToImagePipeline(Pipeline):
@@ -39,6 +45,8 @@ class ImageToImagePipeline(Pipeline):
         )
         if torch.cuda.is_available():
             kwargs["torch_dtype"] = torch.float16
+            if model_id == "stabilityai/stable-diffusion-xl-refiner-1.0":
+                kwargs["variant"] = "fp16"
 
         # check if is controlnet or SD/AD
         config_file_name = None
@@ -108,7 +116,11 @@ class ImageToImagePipeline(Pipeline):
                 model_to_load, use_auth_token=use_auth_token, **kwargs
             )
         else:
-            raise ValueError("Model type not found or pipeline not implemented")
+            # Not sure if there is still any reason to distinguish all cases above and not to use the auto pipeline
+            logger.debug("Falling back to generic auto pipeline loader")
+            self.ldm = AutoPipelineForImage2Image.from_pretrained(
+                model_id, use_auth_token=use_auth_token, **kwargs
+            )
 
         if isinstance(
             self.ldm,
@@ -179,6 +191,12 @@ class ImageToImagePipeline(Pipeline):
             if "num_inference_steps" not in kwargs:
                 kwargs["num_inference_steps"] = 25
             images = self.ldm(prompt, image, **kwargs)["images"]
+            return images[0]
+        elif isinstance(self.ldm, StableDiffusionXLImg2ImgPipeline):
+            if "num_inference_steps" not in kwargs:
+                kwargs["num_inference_steps"] = 50
+            image = image.convert("RGB")
+            images = self.ldm(prompt, image=image, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, (StableUnCLIPImg2ImgPipeline, StableUnCLIPPipeline)):
             if "num_inference_steps" not in kwargs:
