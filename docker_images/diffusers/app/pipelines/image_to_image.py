@@ -116,7 +116,6 @@ class ImageToImagePipeline(Pipeline):
                 model_to_load, use_auth_token=use_auth_token, **kwargs
             )
         else:
-            # Not sure if there is still any reason to distinguish all cases above and not to use the auto pipeline
             logger.debug("Falling back to generic auto pipeline loader")
             self.ldm = AutoPipelineForImage2Image.from_pretrained(
                 model_id, use_auth_token=use_auth_token, **kwargs
