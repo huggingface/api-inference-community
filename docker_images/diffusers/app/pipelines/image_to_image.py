@@ -194,7 +194,7 @@ class ImageToImagePipeline(Pipeline):
             return images[0]
         elif isinstance(self.ldm, StableDiffusionXLImg2ImgPipeline):
             if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 50
+                kwargs["num_inference_steps"] = 25
             image = image.convert("RGB")
             images = self.ldm(prompt, image=image, **kwargs)["images"]
             return images[0]
