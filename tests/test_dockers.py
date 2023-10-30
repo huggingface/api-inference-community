@@ -84,7 +84,7 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "espnet",
             "automatic-speech-recognition",
-            "espnet/Shinji_Watanabe_spgispeech_asr_train_asr_conformer6_n_fft512_hop_lengt-truncated-f1ac86",
+            "pyf98/librispeech_100h_transformer",
         )
 
     def test_fairseq(self):
