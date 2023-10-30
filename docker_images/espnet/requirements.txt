@@ -1,6 +1,6 @@
 api-inference-community==0.0.32
 huggingface_hub==0.18.0
-espnet==202308
+espnet==202310
 torch<2.0.1
 torchaudio
 torch_optimizer
