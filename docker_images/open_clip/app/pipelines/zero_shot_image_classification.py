@@ -23,6 +23,7 @@ class ZeroShotImageClassificationPipeline(Pipeline):
             self.config = json.load(f)
         self.tokenizer = open_clip.get_tokenizer(f"hf-hub:{model_id}")
         self.model.eval()
+        self.use_sigmoid = getattr(self.model, "logit_bias", None) is not None
 
     def __call__(
         self,
@@ -67,8 +68,12 @@ class ZeroShotImageClassificationPipeline(Pipeline):
         with torch.no_grad():
             image_features = self.model.encode_image(image_inputs)
             image_features = F.normalize(image_features, dim=-1)
-            logits = 100.0 * image_features @ classifier
-            scores = logits.squeeze(0).softmax(0)
+            logits = image_features @ classifier * self.model.logit_scale
+            if self.use_sigmoid:
+                logits += self.model.logit_bias
+                scores = torch.sigmoid(logits.squeeze(0))
+            else:
+                scores = logits.squeeze(0).softmax(0)
 
         output = [
             {
