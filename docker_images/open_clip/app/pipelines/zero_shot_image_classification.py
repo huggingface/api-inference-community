@@ -68,7 +68,7 @@ class ZeroShotImageClassificationPipeline(Pipeline):
         with torch.no_grad():
             image_features = self.model.encode_image(image_inputs)
             image_features = F.normalize(image_features, dim=-1)
-            logits = image_features @ classifier * self.model.logit_scale
+            logits = image_features @ classifier * self.model.logit_scale.exp()
             if self.use_sigmoid:
                 logits += self.model.logit_bias
                 scores = torch.sigmoid(logits.squeeze(0))
