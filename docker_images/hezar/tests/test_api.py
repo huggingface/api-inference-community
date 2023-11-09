@@ -9,7 +9,7 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
     "automatic-speech-recognition": "hezarai/whisper-small-fa",
-    "fill-mask": "hezarai/bert-fa-mlm",
+    "fill-mask": "hezarai/roberta-fa-mlm",
     "image-to-text": "hezarai/vit-roberta-fa-image-captioning-flickr30k",
     "text-classification": "hezarai/distilbert-fa-sentiment-digikala-snappfood",
     "text2text-generation": "hezarai/gpt2-base-fa",
