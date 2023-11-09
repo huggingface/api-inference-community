@@ -11,7 +11,7 @@ from tests.test_api import TESTABLE_MODELS
     "image-to-text" not in ALLOWED_TASKS,
     "image-to-text not implemented",
 )
-class ImageClassificationTestCase(TestCase):
+class ImageToTextTestCase(TestCase):
     def setUp(self):
         model_id = TESTABLE_MODELS["image-to-text"]
         self.old_model_id = os.getenv("MODEL_ID")
@@ -46,7 +46,7 @@ class ImageClassificationTestCase(TestCase):
         return bpayload
 
     def test_simple(self):
-        bpayload = self.read("plane.jpg")
+        bpayload = self.read("image_captioning_1.jpg")
 
         with TestClient(self.app) as client:
             response = client.post("/", data=bpayload)
@@ -59,7 +59,7 @@ class ImageClassificationTestCase(TestCase):
         self.assertEqual(type(content), list)
 
     def test_different_resolution(self):
-        bpayload = self.read("plane2.jpg")
+        bpayload = self.read("image_captioning_2.jpg")
 
         with TestClient(self.app) as client:
             response = client.post("/", data=bpayload)

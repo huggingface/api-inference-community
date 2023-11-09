@@ -11,7 +11,7 @@ from tests.test_api import TESTABLE_MODELS
     "text2text-generation" not in ALLOWED_TASKS,
     "text2text-generation not implemented",
 )
-class TextToSpeechTestCase(TestCase):
+class TextToTextTestCase(TestCase):
     def setUp(self):
         model_id = TESTABLE_MODELS["text2text-generation"]
         self.old_model_id = os.getenv("MODEL_ID")

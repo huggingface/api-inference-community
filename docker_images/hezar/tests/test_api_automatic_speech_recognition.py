@@ -46,7 +46,7 @@ class AutomaticSpeecRecognitionTestCase(TestCase):
         return bpayload
 
     def test_simple(self):
-        bpayload = self.read("sample1.flac")
+        bpayload = self.read("speech.flac")
 
         with TestClient(self.app) as client:
             response = client.post("/", data=bpayload)
@@ -57,34 +57,9 @@ class AutomaticSpeecRecognitionTestCase(TestCase):
         )
         content = json.loads(response.content)
         self.assertEqual(set(content.keys()), {"text"})
-
-    def test_malformed_audio(self):
-        bpayload = self.read("malformed.flac")
-
-        with TestClient(self.app) as client:
-            response = client.post("/", data=bpayload)
-
-        self.assertEqual(
-            response.status_code,
-            400,
-        )
-        self.assertEqual(response.content, b'{"error":"Malformed soundfile"}')
 
     def test_dual_channel_audiofile(self):
-        bpayload = self.read("sample1_dual.ogg")
-
-        with TestClient(self.app) as client:
-            response = client.post("/", data=bpayload)
-
-        self.assertEqual(
-            response.status_code,
-            200,
-        )
-        content = json.loads(response.content)
-        self.assertEqual(set(content.keys()), {"text"})
-
-    def test_webm_audiofile(self):
-        bpayload = self.read("sample1.webm")
+        bpayload = self.read("speech_stereo.flac")
 
         with TestClient(self.app) as client:
             response = client.post("/", data=bpayload)

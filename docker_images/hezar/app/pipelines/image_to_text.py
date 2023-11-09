@@ -23,4 +23,5 @@ class ImageToTextPipeline(Pipeline):
             A :obj:`list`:. The list contains a single item that is a dict {"text": the model output}
         """
         model_outputs = self.model.predict(inputs)
-        return model_outputs
+        outputs = [o.dict() for o in model_outputs]
+        return outputs

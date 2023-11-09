@@ -12,7 +12,7 @@ TESTABLE_MODELS: Dict[str, str] = {
     "fill-mask": "hezarai/bert-fa-mlm",
     "image-to-text": "hezarai/vit-roberta-fa-image-captioning-flickr30k",
     "text-classification": "hezarai/distilbert-fa-sentiment-digikala-snappfood",
-    "text-generation": "hezarai/gpt2-base-fa",
+    "text2text-generation": "hezarai/gpt2-base-fa",
     "token-classification": "hezarai/bert-fa-pos-lscp-500k",
 }
 
@@ -21,7 +21,7 @@ ALL_TASKS = {
     "fill-mask",
     "image-to-text",
     "text-classification",
-    "text-generation",
+    "text2text-generation",
     "token-classification",
 }
 

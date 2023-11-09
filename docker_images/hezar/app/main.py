@@ -4,7 +4,7 @@ import os
 from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
-from app.pipelines import (
+from .pipelines import (
     Pipeline,
     AutomaticSpeechRecognitionPipeline,
     FillMaskPipeline,
@@ -29,7 +29,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "fill-mask": FillMaskPipeline,
     "image-to-text": ImageToTextPipeline,
     "text-classification": TextClassificationPipeline,
-    "text-generation": TextToTextPipeline,
+    "text2text-generation": TextToTextPipeline,
     "token-classification": TokenClassificationPipeline,
 }
 

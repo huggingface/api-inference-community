@@ -1,6 +1,7 @@
 import json
 import os
 from unittest import TestCase, skipIf
+import logging
 
 from app.main import ALLOWED_TASKS
 from starlette.testclient import TestClient
@@ -58,6 +59,7 @@ class TextClassificationTestCase(TestCase):
 
         with TestClient(self.app) as client:
             response = client.post("/", json=inputs)
+            logging.warning(response.content)
 
         self.assertEqual(
             response.status_code,

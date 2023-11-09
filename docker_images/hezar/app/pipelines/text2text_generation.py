@@ -17,5 +17,6 @@ class TextToTextPipeline(Pipeline):
         Return:
             A :obj:`list`:. The list contains a single item that is a dict {"text": the model output}
         """
-        model_outputs = self.model.predict(inputs, top_k=len(self.model.config.id2label))
-        return model_outputs
+        model_outputs = self.model.predict(inputs)
+        outputs = [o.dict() for o in model_outputs]
+        return outputs
