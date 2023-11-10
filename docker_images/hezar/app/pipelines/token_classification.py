@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from hezar import Model
+from hezar.models import Model
 
 from app.pipelines import Pipeline
 

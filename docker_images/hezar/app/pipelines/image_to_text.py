@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List
 
-from hezar import Model
+from hezar.models import Model
 
 from app.pipelines import Pipeline
 
@@ -22,6 +22,6 @@ class ImageToTextPipeline(Pipeline):
         Return:
             A :obj:`list`:. The list contains a single item that is a dict {"text": the model output}
         """
-        model_outputs = self.model.predict(inputs)
+        model_outputs = self.model.predict([inputs])
         outputs = [o.dict() for o in model_outputs]
         return outputs

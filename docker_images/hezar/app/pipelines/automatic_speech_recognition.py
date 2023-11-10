@@ -1,7 +1,7 @@
 from typing import Dict
 
 import numpy as np
-from hezar import Model
+from hezar.models import Model
 from app.pipelines import Pipeline
 
 
