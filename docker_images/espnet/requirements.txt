@@ -1,8 +1,7 @@
 api-inference-community==0.0.32
-huggingface_hub==0.5.1
-espnet==0.10.2
-pyopenjtalk==0.1.3
-torch==1.13.1
-torchaudio==0.8.1
-torch_optimizer==0.1.0
-espnet_model_zoo==0.1.0
+huggingface_hub==0.18.0
+espnet==202310
+torch<2.0.1
+torchaudio
+torch_optimizer
+espnet_model_zoo==0.1.7
