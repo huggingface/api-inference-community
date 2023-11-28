@@ -37,4 +37,7 @@ jobs:
           token: ${{ secrets.REPO_DISPATCH_TOKEN }}
           repository: huggingface/huggingface.js
           event-type: export-tasks
-          client-payload: ${{ steps.export_tasks.outputs.payload }}
+          client-payload: |
+            {
+              "tasks": ${{ steps.export_tasks.outputs.payload }} 
+            }
