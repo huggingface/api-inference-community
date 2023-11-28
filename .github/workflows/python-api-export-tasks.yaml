@@ -1,8 +1,8 @@
 name: Export tasks
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,9 +29,6 @@ jobs:
             python scripts/export_tasks.py
             echo 'XXX_MULTI_LINE_MARKER_XXX'
           } >> $GITHUB_OUTPUT
-
-      - name: Debug
-        run: echo "${{ steps.export_tasks.outputs.payload }}"
 
       # Dispatch to huggingface/huggingface.js repo
       - name: Dispatch to huggingface/huggingface.js
