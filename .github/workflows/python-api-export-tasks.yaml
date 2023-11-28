@@ -1,8 +1,8 @@
 name: Export tasks
 on:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,4 +21,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: python scripts/export_tasks.py
+      # run export_tasks.py and store output
+      - id: export_tasks
+        run: echo "payload='$(python export_tasks.py)'" >> $GITHUB_ENV
+
+      - name: Debug
+        run: echo "${{ steps.export_tasks.outputs.payload }}"
+
+      # Dispatch to huggingface/huggingface.js repo
+      - name: Dispatch to huggingface/huggingface.js
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: huggingface/huggingface.js
+          event-type: export-tasks
+          client-payload: ${{ steps.export_tasks.outputs.payload }}
