@@ -23,7 +23,7 @@ jobs:
 
       # run export_tasks.py and store output
       - id: export_tasks
-        run: echo "payload='$(python export_tasks.py)'" >> $GITHUB_ENV
+        run: echo "payload='$(python scripts/export_tasks.py)'" >> $GITHUB_ENV
 
       - name: Debug
         run: echo "${{ steps.export_tasks.outputs.payload }}"
