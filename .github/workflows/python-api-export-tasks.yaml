@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - transmit-payload-to-hfjs
 jobs:
   build:
     runs-on: ubuntu-latest
