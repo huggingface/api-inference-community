@@ -43,12 +43,17 @@ class LoRAPipelineMixin(object):
             for file in model_data.siblings
         )
         return is_diffusers_lora
-    
+        
     @staticmethod
     def _is_pivotal_tuning_lora(model_data):
+        return LoRAPipelineMixin._is_safetensors_pivotal(
+            model_data
+        ) or any(sibling.rfilename == 'embeddings.pti' for sibling in model_data.siblings)
+
+    @staticmethod
+    def _is_safetensors_pivotal(model_data):
         embeddings_safetensors_exists = any(sibling.rfilename == 'embeddings.safetensors' for sibling in model_data.siblings)
-        embeddings_pti_exists = any(sibling.rfilename == 'embeddings.pti' for sibling in model_data.siblings)
-        return embeddings_safetensors_exists or embeddings_pti_exists
+        return embeddings_safetensors_exists
         
     def _fuse_or_raise(self):
         try:
