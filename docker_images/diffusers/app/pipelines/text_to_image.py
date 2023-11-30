@@ -4,7 +4,7 @@ import os
 from typing import TYPE_CHECKING
 
 import torch
-from app import idle, lora, timing
+from app import idle, lora, timing, validation
 from app.pipelines import Pipeline
 from diffusers import (
     AutoencoderKL,
@@ -13,7 +13,7 @@ from diffusers import (
     EulerAncestralDiscreteScheduler,
 )
 from diffusers.schedulers.scheduling_utils import KarrasDiffusionSchedulers
-from huggingface_hub import hf_hub_download, model_info
+from huggingface_hub import file_download, hf_api, hf_hub_download, model_info, utils
 
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,35 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
         self.current_lora_adapter = None
         self.model_id = None
         self.use_auth_token = os.getenv("HF_API_TOKEN")
-        model_data = model_info(model_id, token=self.use_auth_token)
+        # This should allow us to make the image work with private models when no token is provided, if the said model
+        # is already in local cache
+        self.offline_preferred = validation.str_to_bool(os.getenv("OFFLINE_PREFERRED"))
+        fetched = False
+        if self.offline_preferred:
+            cache_root = os.getenv(
+                "DIFFUSERS_CACHE", os.getenv("HUGGINGFACE_HUB_CACHE", "")
+            )
+            folder_name = file_download.repo_folder_name(
+                repo_id=model_id, repo_type="model"
+            )
+            folder_path = os.path.join(cache_root, folder_name)
+            logger.debug("Cache folder path %s", folder_path)
+            filename = os.path.join(folder_path, "hub_model_info.json")
+            try:
+                with open(filename, "r") as f:
+                    model_data = json.load(f)
+            except OSError:
+                logger.info(
+                    "No cached model info found in file %s found for model %s. Fetching on the hub",
+                    filename,
+                    model_id,
+                )
+            else:
+                model_data = hf_api.ModelInfo(**model_data)
+                fetched = True
+
+        if not fetched:
+            model_data = model_info(model_id, token=self.use_auth_token)
 
         kwargs = (
             {"safety_checker": None}
@@ -44,9 +72,26 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
         if self._is_lora(model_data):
             model_type = "LoraModel"
         elif has_model_index:
-            config_file = hf_hub_download(
-                model_id, "model_index.json", token=self.use_auth_token
-            )
+            fetched = False
+            if self.offline_preferred:
+                try:
+                    config_file = hf_hub_download(
+                        model_id,
+                        "model_index.json",
+                        token=self.use_auth_token,
+                        local_files_only=True,
+                    )
+                except utils.LocalEntryNotFoundError:
+                    logger.info("Unable to fetch model index in local cache")
+                else:
+                    fetched = True
+
+            if not fetched:
+                config_file = hf_hub_download(
+                    model_id,
+                    "model_index.json",
+                    token=self.use_auth_token,
+                )
             with open(config_file, "r") as f:
                 config_dict = json.load(f)
             model_type = config_dict.get("_class_name", None)
