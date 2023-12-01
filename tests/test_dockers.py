@@ -313,12 +313,14 @@ class DockerImageTests(unittest.TestCase):
             "diffusers",
             "text-to-image",
             "hf-internal-testing/tiny-stable-diffusion-pipe",
+            custom_environment={"UVICORN_TIMEOUT": "1200"},
         )
         self.framework_docker_test(
             "diffusers",
             "image-to-image",
             "hf-internal-testing/tiny-controlnet",
             timeout=600,
+            custom_environment={"UVICORN_TIMEOUT": "1200"},
         )
         self.framework_invalid_test("diffusers")
 
@@ -479,6 +481,7 @@ class DockerImageTests(unittest.TestCase):
             Any
         ] = None,  # if given, check inference with this specific input
         timeout=60,
+        custom_environment: Optional[dict] = None,
     ):
         tag = self.create_docker(framework)
         run_docker_command = [
@@ -490,6 +493,12 @@ class DockerImageTests(unittest.TestCase):
             f"TASK={task}",
             "-e",
             f"MODEL_ID={model_id}",
+        ]
+
+        if custom_environment:
+            for k, v in custom_environment.items():
+                run_docker_command += ["-e", f"{k}={v}"]
+        run_docker_command += [
             "-v",
             "/tmp:/data",
             "-t",
