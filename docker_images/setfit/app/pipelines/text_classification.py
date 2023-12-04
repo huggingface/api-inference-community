@@ -23,7 +23,7 @@ class TextClassificationPipeline(Pipeline):
         """
         probs = self.model.predict_proba([inputs], as_numpy=True)
         if probs.ndim == 2:
-            getattr(self.model, "id2label", {})
+            id2label = getattr(self.model, "id2label", {})
             return [
                 [
                     {"label": id2label.get(idx, idx), "score": prob}
