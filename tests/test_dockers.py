@@ -251,6 +251,13 @@ class DockerImageTests(unittest.TestCase):
             "tomaarsen/span-marker-bert-tiny-fewnerd-coarse-super",
         )
 
+    def test_setfit(self):
+        self.framework_docker_test(
+            "setfit",
+            "text-classification",
+            "tomaarsen/setfit-all-MiniLM-L6-v2-sst2-32-shot",
+        )
+
     def test_speechbrain(self):
         self.framework_docker_test(
             "speechbrain",

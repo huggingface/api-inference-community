@@ -1,0 +1,4 @@
+starlette==0.27.0
+api-inference-community==0.0.32
+huggingface_hub==0.11.0
+setfit==0.7.0
