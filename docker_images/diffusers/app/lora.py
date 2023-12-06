@@ -139,13 +139,14 @@ class LoRAPipelineMixin(object):
                     tokenizer=self.ldm.tokenizer_2,
                 )
             self.current_tokens_loaded = tokens_to_add
+            logger.info("Text embeddings loaded for adapter %s", adapter)
 
     def _load_lora_adapter(self, kwargs):
         adapter = kwargs.pop("lora_adapter", None)
+        model_data = model_info(adapter, token=self.use_auth_token)
         if adapter is not None:
             logger.info("LoRA adapter %s requested", adapter)
             if adapter != self.current_lora_adapter:
-                model_data = model_info(adapter, token=self.use_auth_token)
                 if not self._is_lora(model_data):
                     msg = f"Requested adapter {adapter:s} is not a LoRA adapter"
                     logger.error(msg)
@@ -174,11 +175,13 @@ class LoRAPipelineMixin(object):
                 self._fuse_or_raise()
                 logger.info("LoRA weights loaded for adapter %s", adapter)
                 self._load_textual_embeddings(adapter, model_data)
-                logger.info(
-                    "Textual Inversion embeddings loaded for adapter %s", adapter
-                )
             else:
                 logger.info("LoRA adapter %s already loaded", adapter)
+                if (
+                    self._is_pivotal_tuning_lora(model_data)
+                    and self.current_tokens_loaded == 0
+                ):
+                    self._load_textual_embeddings(adapter, model_data)
         elif self.current_lora_adapter is not None:
             logger.info(
                 "No LoRA adapter requested, unloading weights and using base model %s",
