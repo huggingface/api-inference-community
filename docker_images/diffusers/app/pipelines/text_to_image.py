@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from typing import TYPE_CHECKING
+import importlib
 
 import torch
 from app import idle, lora, timing, validation
@@ -65,6 +66,11 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
         if torch.cuda.is_available():
             kwargs["torch_dtype"] = torch.float16
 
+        custom_scheduler = None
+        if "scheduler" in kwargs:
+            custom_scheduler = kwargs["scheduler"]
+            kwargs.pop("scheduler")
+        
         has_model_index = any(
             file.rfilename == "model_index.json" for file in model_data.siblings
         )
@@ -127,7 +133,14 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
             self.ldm.__class__.__init__.__annotations__.get("scheduler", None)
             == KarrasDiffusionSchedulers
         )
-        if self.is_karras_compatible:
+        if custom_scheduler:
+            compatibles = self.ldm.compatibles
+            is_compatible_scheduler = [cls for cls in compatibles if cls.__name__ == custom_scheduler]
+            if(is_compatible_scheduler):
+                SchedulerClass = getattr(importlib.import_module("diffusers.schedulers"), custom_scheduler)
+                self.ldm.scheduler = SchedulerClass.from_config(self.ldm.scheduler.config)
+            
+        if self.is_karras_compatible and ((not custom_scheduler) or (custom_scheduler and not is_compatible_scheduler)):
             self.ldm.scheduler = EulerAncestralDiscreteScheduler.from_config(
                 self.ldm.scheduler.config
             )
