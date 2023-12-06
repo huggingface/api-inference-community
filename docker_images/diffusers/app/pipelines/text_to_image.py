@@ -171,7 +171,7 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
             kwargs.pop("scheduler")
 
         if custom_scheduler:
-            compatibles = self.ldm.compatibles
+            compatibles = self.ldm.scheduler.compatibles
             # Check if the scheduler is compatible
             is_compatible_scheduler = [
                 cls for cls in compatibles if cls.__name__ == custom_scheduler
