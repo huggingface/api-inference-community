@@ -114,8 +114,8 @@ class LoRAPipelineMixin(object):
                 else embeddings.get("clip_l", None)
             )
             state_dict_clip_g = (
-                embeddings.get("text_encoders_0")
-                if "text_encoders_0" in embeddings
+                embeddings.get("text_encoders_1")
+                if "text_encoders_1" in embeddings
                 else embeddings.get("clip_g", None)
             )
 
@@ -189,5 +189,6 @@ class LoRAPipelineMixin(object):
             )
             self.ldm.unfuse_lora()
             self.ldm.unload_lora_weights()
+            self._unload_textual_embeddings()
             self.current_lora_adapter = None
             self.current_tokens_loaded = 0
