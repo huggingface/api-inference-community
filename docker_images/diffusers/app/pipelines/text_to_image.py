@@ -66,11 +66,6 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
         if torch.cuda.is_available():
             kwargs["torch_dtype"] = torch.float16
 
-        custom_scheduler = None
-        if "scheduler" in kwargs:
-            custom_scheduler = kwargs["scheduler"]
-            kwargs.pop("scheduler")
-        
         has_model_index = any(
             file.rfilename == "model_index.json" for file in model_data.siblings
         )
@@ -133,14 +128,7 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
             self.ldm.__class__.__init__.__annotations__.get("scheduler", None)
             == KarrasDiffusionSchedulers
         )
-        if custom_scheduler:
-            compatibles = self.ldm.compatibles
-            is_compatible_scheduler = [cls for cls in compatibles if cls.__name__ == custom_scheduler]
-            if(is_compatible_scheduler):
-                SchedulerClass = getattr(importlib.import_module("diffusers.schedulers"), custom_scheduler)
-                self.ldm.scheduler = SchedulerClass.from_config(self.ldm.scheduler.config)
-            
-        if self.is_karras_compatible and ((not custom_scheduler) or (custom_scheduler and not is_compatible_scheduler)):
+        if self.is_karras_compatible:
             self.ldm.scheduler = EulerAncestralDiscreteScheduler.from_config(
                 self.ldm.scheduler.config
             )
@@ -174,6 +162,23 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
         Return:
             A :obj:`PIL.Image.Image` with the raw image representation as PIL.
         """
+
+        #Check if users set a custom scheduler and pop if from the kwargs if so
+        custom_scheduler = None
+        if "scheduler" in kwargs:
+            custom_scheduler = kwargs["scheduler"]
+            kwargs.pop("scheduler")
+        
+        if custom_scheduler:
+            compatibles = self.ldm.compatibles
+            #Check if the scheduler is compatible
+            is_compatible_scheduler = [cls for cls in compatibles if cls.__name__ == custom_scheduler]
+            #In case of a compatible scheduler, swap to that for inference
+            if(is_compatible_scheduler):
+                #Import the scheduler dynamically
+                SchedulerClass = getattr(importlib.import_module("diffusers.schedulers"), custom_scheduler)
+                self.ldm.scheduler = SchedulerClass.from_config(self.ldm.scheduler.config)
+                
         self._load_lora_adapter(kwargs)
 
         if idle.UNLOAD_IDLE:
