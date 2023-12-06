@@ -119,22 +119,22 @@ class LoRAPipelineMixin(object):
                 else embeddings.get("clip_g", None)
             )
 
-            if state_dict_clip_l and len(state_dict_clip_l) > 0:
+            if state_dict_clip_l is not None and len(state_dict_clip_l) > 0:
                 tokens_to_add = len(state_dict_clip_l)
                 token_list = [f"<s{i}>" for i in range(tokens_to_add)]
                 self.ldm.load_textual_inversion(
                     state_dict_clip_l,
-                    token=[token_list],
+                    token=token_list,
                     text_encoder=self.ldm.text_encoder,
                     tokenizer=self.ldm.tokenizer,
                 )
 
-            if state_dict_clip_g and len(state_dict_clip_g) > 0:
+            if state_dict_clip_g is not None and len(state_dict_clip_g) > 0:
                 tokens_to_add = len(state_dict_clip_g)
                 token_list = [f"<s{i}>" for i in range(tokens_to_add)]
                 self.ldm.load_textual_inversion(
                     state_dict_clip_g,
-                    token=[token_list],
+                    token=token_list,
                     text_encoder=self.ldm.text_encoder_2,
                     tokenizer=self.ldm.tokenizer_2,
                 )
