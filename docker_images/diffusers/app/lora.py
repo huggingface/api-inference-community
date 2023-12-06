@@ -143,10 +143,10 @@ class LoRAPipelineMixin(object):
 
     def _load_lora_adapter(self, kwargs):
         adapter = kwargs.pop("lora_adapter", None)
-        model_data = model_info(adapter, token=self.use_auth_token)
         if adapter is not None:
             logger.info("LoRA adapter %s requested", adapter)
             if adapter != self.current_lora_adapter:
+                model_data = model_info(adapter, token=self.use_auth_token)
                 if not self._is_lora(model_data):
                     msg = f"Requested adapter {adapter:s} is not a LoRA adapter"
                     logger.error(msg)
@@ -178,6 +178,7 @@ class LoRAPipelineMixin(object):
             else:
                 logger.info("LoRA adapter %s already loaded", adapter)
                 # Needed while a LoRA is loaded w/ model
+                model_data = model_info(adapter, token=self.use_auth_token)
                 if (
                     self._is_pivotal_tuning_lora(model_data)
                     and self.current_tokens_loaded == 0
