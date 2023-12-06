@@ -177,7 +177,7 @@ class LoRAPipelineMixin(object):
                 self._load_textual_embeddings(adapter, model_data)
             else:
                 logger.info("LoRA adapter %s already loaded", adapter)
-                #Needed while a LoRA is loaded w/ model
+                # Needed while a LoRA is loaded w/ model
                 if (
                     self._is_pivotal_tuning_lora(model_data)
                     and self.current_tokens_loaded == 0
