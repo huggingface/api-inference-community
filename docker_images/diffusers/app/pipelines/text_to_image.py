@@ -27,6 +27,7 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
     def __init__(self, model_id: str):
         self.current_lora_adapter = None
         self.model_id = None
+        self.current_tokens_loaded = 0
         self.use_auth_token = os.getenv("HF_API_TOKEN")
         # This should allow us to make the image work with private models when no token is provided, if the said model
         # is already in local cache
@@ -170,7 +171,7 @@ class TextToImagePipeline(Pipeline, lora.LoRAPipelineMixin):
             kwargs.pop("scheduler")
 
         if custom_scheduler:
-            compatibles = self.ldm.compatibles
+            compatibles = self.ldm.scheduler.compatibles
             # Check if the scheduler is compatible
             is_compatible_scheduler = [
                 cls for cls in compatibles if cls.__name__ == custom_scheduler
