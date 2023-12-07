@@ -98,7 +98,7 @@ class LoRAPipelineMixin(object):
                     self.ldm.tokenizer_2, self.ldm.text_encoder_2, token_to_remove
                 )
         self.current_tokens_loaded = 0
-    
+
     def _load_textual_embeddings(self, adapter, model_data):
         if self._is_pivotal_tuning_lora(model_data):
             embedding_path = hf_hub_download(
@@ -199,4 +199,3 @@ class LoRAPipelineMixin(object):
             self.ldm.unload_lora_weights()
             self._unload_textual_embeddings()
             self.current_lora_adapter = None
-            self.current_tokens_loaded = 0
