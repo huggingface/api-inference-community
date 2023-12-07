@@ -118,28 +118,33 @@ class LoRAPipelineMixin(object):
                 if "text_encoders_1" in embeddings
                 else embeddings.get("clip_g", None)
             )
+            tokens_to_add = 0 if state_dict_clip_l is None else len(state_dict_clip_l)
+            tokens_to_add_2 = 0 if state_dict_clip_g is None else len(state_dict_clip_g)
+            if tokens_to_add == tokens_to_add_2 and tokens_to_add > 0:
+                if state_dict_clip_l is not None and len(state_dict_clip_l) > 0:
+                    token_list = [f"<s{i}>" for i in range(tokens_to_add)]
+                    self.ldm.load_textual_inversion(
+                        state_dict_clip_l,
+                        token=token_list,
+                        text_encoder=self.ldm.text_encoder,
+                        tokenizer=self.ldm.tokenizer,
+                    )
 
-            if state_dict_clip_l is not None and len(state_dict_clip_l) > 0:
-                tokens_to_add = len(state_dict_clip_l)
-                token_list = [f"<s{i}>" for i in range(tokens_to_add)]
-                self.ldm.load_textual_inversion(
-                    state_dict_clip_l,
-                    token=token_list,
-                    text_encoder=self.ldm.text_encoder,
-                    tokenizer=self.ldm.tokenizer,
-                )
-
-            if state_dict_clip_g is not None and len(state_dict_clip_g) > 0:
-                tokens_to_add = len(state_dict_clip_g)
-                token_list = [f"<s{i}>" for i in range(tokens_to_add)]
-                self.ldm.load_textual_inversion(
-                    state_dict_clip_g,
-                    token=token_list,
-                    text_encoder=self.ldm.text_encoder_2,
-                    tokenizer=self.ldm.tokenizer_2,
+                if state_dict_clip_g is not None and len(state_dict_clip_g) > 0:
+                    token_list = [f"<s{i}>" for i in range(tokens_to_add_2)]
+                    self.ldm.load_textual_inversion(
+                        state_dict_clip_g,
+                        token=token_list,
+                        text_encoder=self.ldm.text_encoder_2,
+                        tokenizer=self.ldm.tokenizer_2,
+                    )
+                logger.info("Text embeddings loaded for adapter %s", adapter)
+            else:
+                logger.info(
+                    "No text embeddings were loaded due to invalid embeddings or a mismatch of token sizes for adapter %s",
+                    adapter,
                 )
             self.current_tokens_loaded = tokens_to_add
-            logger.info("Text embeddings loaded for adapter %s", adapter)
 
     def _load_lora_adapter(self, kwargs):
         adapter = kwargs.pop("lora_adapter", None)
