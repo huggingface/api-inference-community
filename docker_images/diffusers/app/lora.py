@@ -1,25 +1,19 @@
 import logging
 
 import torch.nn as nn
-from huggingface_hub import hf_hub_download, model_info
+from app import offline
 from safetensors.torch import load_file
 
 
 logger = logging.getLogger(__name__)
 
 
-class LoRAPipelineMixin(object):
-    def __init__(self):
-        if not hasattr(self, "current_lora_adapter"):
-            self.current_lora_adapter = None
-        if not hasattr(self, "model_id"):
-            self.model_id = None
-        if not hasattr(self, "current_tokens_loaded"):
-            self.current_tokens_loaded = 0
-
+class LoRAPipelineMixin(offline.OfflineBestEffortMixin):
     @staticmethod
     def _get_lora_weight_name(model_data):
-        is_diffusers_lora = LoRAPipelineMixin._is_diffusers_lora(model_data)
+        weight_name_candidate = LoRAPipelineMixin._lora_weights_candidates(model_data)
+        if weight_name_candidate:
+            return weight_name_candidate
         file_to_load = next(
             (
                 file.rfilename
@@ -28,25 +22,28 @@ class LoRAPipelineMixin(object):
             ),
             None,
         )
-        if not file_to_load and not is_diffusers_lora:
+        if not file_to_load and not weight_name_candidate:
             raise ValueError("No *.safetensors file found for your LoRA")
-        weight_name = file_to_load if not is_diffusers_lora else None
-        return weight_name
+        return file_to_load
 
     @staticmethod
     def _is_lora(model_data):
-        return LoRAPipelineMixin._is_diffusers_lora(
-            model_data
-        ) or "lora" in model_data.cardData.get("tags", [])
+        return LoRAPipelineMixin._lora_weights_candidates(model_data) or (
+            model_data.cardData.get("tags")
+            and "lora" in model_data.cardData.get("tags", [])
+        )
 
     @staticmethod
-    def _is_diffusers_lora(model_data):
-        is_diffusers_lora = any(
-            file.rfilename
-            in ("pytorch_lora_weights.bin", "pytorch_lora_weights.safetensors")
-            for file in model_data.siblings
-        )
-        return is_diffusers_lora
+    def _lora_weights_candidates(model_data):
+        candidate = None
+        for file in model_data.siblings:
+            rfilename = str(file.rfilename)
+            if rfilename.endswith("pytorch_lora_weights.bin"):
+                candidate = rfilename
+            elif rfilename.endswith("pytorch_lora_weights.safetensors"):
+                candidate = rfilename
+                break
+        return candidate
 
     @staticmethod
     def _is_safetensors_pivotal(model_data):
@@ -72,7 +69,8 @@ class LoRAPipelineMixin(object):
             self.current_lora_adapter = None
             raise
 
-    def _reset_tokenizer_and_encoder(self, tokenizer, text_encoder, token_to_remove):
+    @staticmethod
+    def _reset_tokenizer_and_encoder(tokenizer, text_encoder, token_to_remove):
         token_id = tokenizer(token_to_remove)["input_ids"][1]
         del tokenizer._added_tokens_decoder[token_id]
         del tokenizer._added_tokens_encoder[token_to_remove]
@@ -101,13 +99,14 @@ class LoRAPipelineMixin(object):
 
     def _load_textual_embeddings(self, adapter, model_data):
         if self._is_pivotal_tuning_lora(model_data):
-            embedding_path = hf_hub_download(
+            embedding_path = self._hub_repo_file(
                 repo_id=adapter,
                 filename="embeddings.safetensors"
                 if self._is_safetensors_pivotal(model_data)
                 else "embeddings.pti",
                 repo_type="model",
             )
+
             embeddings = load_file(embedding_path)
             state_dict_clip_l = (
                 embeddings.get("text_encoders_0")
@@ -152,7 +151,7 @@ class LoRAPipelineMixin(object):
         if adapter is not None:
             logger.info("LoRA adapter %s requested", adapter)
             if adapter != self.current_lora_adapter:
-                model_data = model_info(adapter, token=self.use_auth_token)
+                model_data = self._hub_model_info(adapter)
                 if not self._is_lora(model_data):
                     msg = f"Requested adapter {adapter:s} is not a LoRA adapter"
                     logger.error(msg)
@@ -167,10 +166,11 @@ class LoRAPipelineMixin(object):
                     self.current_lora_adapter,
                     adapter,
                 )
-                self.ldm.unfuse_lora()
-                self.ldm.unload_lora_weights()
-                self._unload_textual_embeddings()
-                self.current_lora_adapter = None
+                if self.current_lora_adapter is not None:
+                    self.ldm.unfuse_lora()
+                    self.ldm.unload_lora_weights()
+                    self._unload_textual_embeddings()
+                    self.current_lora_adapter = None
                 logger.info("LoRA weights unloaded, loading new weights")
                 weight_name = self._get_lora_weight_name(model_data=model_data)
 
@@ -184,7 +184,7 @@ class LoRAPipelineMixin(object):
             else:
                 logger.info("LoRA adapter %s already loaded", adapter)
                 # Needed while a LoRA is loaded w/ model
-                model_data = model_info(adapter, token=self.use_auth_token)
+                model_data = self._hub_model_info(adapter)
                 if (
                     self._is_pivotal_tuning_lora(model_data)
                     and self.current_tokens_loaded == 0

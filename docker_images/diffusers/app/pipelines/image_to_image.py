@@ -3,7 +3,7 @@ import logging
 import os
 
 import torch
-from app import idle, timing, validation
+from app import idle, offline, timing, validation
 from app.pipelines import Pipeline
 from diffusers import (
     AltDiffusionImg2ImgPipeline,
@@ -26,47 +26,20 @@ from diffusers import (
     StableUnCLIPImg2ImgPipeline,
     StableUnCLIPPipeline,
 )
-from huggingface_hub import file_download, hf_api, hf_hub_download, model_info, utils
 from PIL import Image
 
 
 logger = logging.getLogger(__name__)
 
 
-class ImageToImagePipeline(Pipeline):
+class ImageToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
     def __init__(self, model_id: str):
         use_auth_token = os.getenv("HF_API_TOKEN")
         self.use_auth_token = use_auth_token
         # This should allow us to make the image work with private models when no token is provided, if the said model
         # is already in local cache
         self.offline_preferred = validation.str_to_bool(os.getenv("OFFLINE_PREFERRED"))
-        fetched = False
-        if self.offline_preferred:
-            cache_root = os.getenv(
-                "DIFFUSERS_CACHE", os.getenv("HUGGINGFACE_HUB_CACHE", "")
-            )
-            folder_name = file_download.repo_folder_name(
-                repo_id=model_id, repo_type="model"
-            )
-            folder_path = os.path.join(cache_root, folder_name)
-            logger.debug("Cache folder path %s", folder_path)
-            filename = os.path.join(folder_path, "hub_model_info.json")
-            try:
-                with open(filename, "r") as f:
-                    model_data = json.load(f)
-            except OSError:
-                logger.info(
-                    "No cached model info found in file %s found for model %s. Fetching on the hub",
-                    filename,
-                    model_id,
-                )
-            else:
-                model_data = hf_api.ModelInfo(**model_data)
-                fetched = True
-
-        if not fetched:
-            model_data = model_info(model_id, token=self.use_auth_token)
-
+        model_data = self._hub_model_info(model_id)
         kwargs = (
             {"safety_checker": None}
             if model_id.startswith("hf-internal-testing/")
@@ -84,25 +57,7 @@ class ImageToImagePipeline(Pipeline):
                 config_file_name = file_name
                 break
         if config_file_name:
-            fetched = False
-            if self.offline_preferred:
-                try:
-                    config_file = hf_hub_download(
-                        model_id,
-                        config_file_name,
-                        token=self.use_auth_token,
-                        local_files_only=True,
-                    )
-                except utils.LocalEntryNotFoundError:
-                    logger.info("Unable to fetch model index in local cache")
-                else:
-                    fetched = True
-            if not fetched:
-                config_file = hf_hub_download(
-                    model_id,
-                    config_file_name,
-                    token=self.use_auth_token,
-                )
+            config_file = self._hub_repo_file(model_id, config_file_name)
 
             with open(config_file, "r") as f:
                 config_dict = json.load(f)
