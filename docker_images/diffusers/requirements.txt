@@ -3,7 +3,7 @@ starlette==0.27.0
 git+https://github.com/huggingface/api-inference-community.git@b3ef3f3a6015ed988ce77f71935e45006be5b054
 # to be replaced with diffusers v0.25.0 as soon as released (fixes loading textual inversion)
 git+https://github.com/huggingface/diffusers.git
-transformers==4.31.0
+transformers==4.35.2
 accelerate==0.21.0
 hf_transfer==0.1.3
 pydantic>=2
