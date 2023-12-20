@@ -85,6 +85,8 @@ class TextToImagePipeline(
                 self.ldm.scheduler.config
             )
 
+        self.default_scheduler = self.ldm.scheduler
+
         if not idle.UNLOAD_IDLE:
             self._model_to_gpu()
 
@@ -136,6 +138,11 @@ class TextToImagePipeline(
                 self.ldm.scheduler = SchedulerClass.from_config(
                     self.ldm.scheduler.config
                 )
+            else:
+                logger.info("%s scheduler not loaded: incompatible", custom_scheduler)
+                self.ldm.scheduler = self.default_scheduler
+        else:
+            self.ldm.scheduler = self.default_scheduler
 
         self._load_lora_adapter(kwargs)
 
