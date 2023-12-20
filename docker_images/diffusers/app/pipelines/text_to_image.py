@@ -138,6 +138,9 @@ class TextToImagePipeline(
                 self.ldm.scheduler = SchedulerClass.from_config(
                     self.ldm.scheduler.config
                 )
+            else:
+                logger.info("%s scheduler not loaded: incompatible", custom_scheduler)
+                self.ldm.scheduler = self.default_scheduler
         else:
             self.ldm.scheduler = self.default_scheduler
 
