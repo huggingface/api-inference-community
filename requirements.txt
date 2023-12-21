@@ -5,6 +5,7 @@ parameterized>=0.8.1
 pillow>=8.2.0
 huggingface_hub>=0.5.1
 datasets>=2.2
+pyyaml >= 6.0.1
 pytest
 httpx
 uvicorn
