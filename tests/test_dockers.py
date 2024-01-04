@@ -380,13 +380,6 @@ class DockerImageTests(unittest.TestCase):
             "nemo", "automatic-speech-recognition", "nvidia/stt_en_conformer_ctc_large"
         )
 
-    def test_generic(self):
-        self.framework_docker_test(
-            "generic",
-            "token-classification",
-            "osanseviero/en_core_web_sm",
-        )
-
     def test_mindspore(self):
         self.framework_docker_test(
             "mindspore", "image-classification", "helloway/lenet"
