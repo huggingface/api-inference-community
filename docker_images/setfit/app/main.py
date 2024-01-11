@@ -1,10 +1,13 @@
 import functools
 import logging
 import os
+import pathlib
 from typing import Dict, Type
 
+from api_inference_community import hub
 from api_inference_community.routes import pipeline_route, status_ok
 from app.pipelines import Pipeline, TextClassificationPipeline
+from huggingface_hub import constants
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.gzip import GZipMiddleware
@@ -12,8 +15,21 @@ from starlette.routing import Route
 
 
 TASK = os.getenv("TASK")
-MODEL_ID = os.getenv("MODEL_ID")
 
+
+def get_model_id():
+    m_id = os.getenv("MODEL_ID")
+    # Workaround, when sentence_transformers handles properly this env variable
+    # this should not be needed anymore
+    if constants.HF_HUB_OFFLINE:
+        cache_dir = pathlib.Path(constants.HF_HUB_CACHE)
+        m_id = hub.cached_revision_path(
+            cache_dir=cache_dir, repo_id=m_id, revision=os.getenv("REVISION")
+        )
+    return m_id
+
+
+MODEL_ID = get_model_id()
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +56,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
 @functools.lru_cache()
 def get_pipeline() -> Pipeline:
     task = os.environ["TASK"]
-    model_id = os.environ["MODEL_ID"]
+    model_id = MODEL_ID
     if task not in ALLOWED_TASKS:
         raise EnvironmentError(f"{task} is not a valid pipeline for model : {model_id}")
     return ALLOWED_TASKS[task](model_id)
