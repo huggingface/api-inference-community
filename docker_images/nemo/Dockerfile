@@ -21,8 +21,8 @@ RUN pyenv install $PYTHON_VERSION && \
 
 # See PyTorch releases for pip here: https://download.pytorch.org/whl/torch_stable.html
 COPY ./requirements.txt /app
-RUN pip install torch && \
-    pip install Cython numpy
+RUN pip install torch==2.0.1 && \
+    pip install Cython numpy==1.26.3
 RUN pip install -r requirements.txt
 COPY ./prestart.sh /app/
 
