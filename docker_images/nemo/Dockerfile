@@ -1,11 +1,23 @@
 FROM tiangolo/uvicorn-gunicorn:python3.9
 LABEL maintainer="me <me@example.com>"
 
-ARG PYTHON_VERSION=3.10
-
 # Add any system dependency here
 RUN apt-get update -y && \
     apt-get install libsndfile1 ffmpeg -y
+
+# Install pyenv
+RUN curl https://pyenv.run | bash
+
+# Set environment variables for pyenv
+ENV PYENV_ROOT /root/.pyenv
+ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+
+# Install your desired Python version
+ARG PYTHON_VERSION=3.10
+RUN pyenv install $PYTHON_VERSION && \
+    pyenv global $PYTHON_VERSION && \
+    pyenv rehash
+
 
 # See PyTorch releases for pip here: https://download.pytorch.org/whl/torch_stable.html
 COPY ./requirements.txt /app
