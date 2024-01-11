@@ -1,6 +1,8 @@
 FROM tiangolo/uvicorn-gunicorn:python3.9
 LABEL maintainer="me <me@example.com>"
 
+ARG PYTHON_VERSION=3.10
+
 # Add any system dependency here
 RUN apt-get update -y && \
     apt-get install libsndfile1 ffmpeg -y
