@@ -13,7 +13,7 @@ ENV PYENV_ROOT /root/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 
 # Install your desired Python version
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.10.1
 RUN pyenv install $PYTHON_VERSION && \
     pyenv global $PYTHON_VERSION && \
     pyenv rehash
