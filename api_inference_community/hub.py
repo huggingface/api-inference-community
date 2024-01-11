@@ -5,17 +5,14 @@ import pathlib
 import re
 from typing import List, Optional
 
-import yaml
-from huggingface_hub import constants, hf_api
+from huggingface_hub import ModelCard, constants, hf_api, try_to_load_from_cache
 from huggingface_hub.file_download import repo_folder_name
 
 
 logger = logging.getLogger(__name__)
 
-YAML_DOC_SEP = re.compile(r"^---\s*$", re.MULTILINE)
 
-
-def cached_repo_root_path(cache_dir: pathlib.Path, repo_id: str) -> pathlib.Path:
+def _cached_repo_root_path(cache_dir: pathlib.Path, repo_id: str) -> pathlib.Path:
     folder = pathlib.Path(repo_folder_name(repo_id=repo_id, repo_type="model"))
     return cache_dir / folder
 
@@ -27,7 +24,7 @@ def cached_revision_path(cache_dir, repo_id, revision) -> pathlib.Path:
     if revision is None:
         revision = "main"
 
-    repo_cache = cached_repo_root_path(cache_dir, repo_id)
+    repo_cache = _cached_repo_root_path(cache_dir, repo_id)
 
     if not repo_cache.is_dir():
         msg = f"Local repo {repo_cache} does not exist"
@@ -59,26 +56,32 @@ def cached_revision_path(cache_dir, repo_id, revision) -> pathlib.Path:
     return snapshots_dir / revision
 
 
-def _build_offline_model_info(repo_id: str, repo: pathlib.Path) -> hf_api.ModelInfo:
+def _build_offline_model_info(
+    repo_id: str, cache_dir: pathlib.Path, revision: str
+) -> hf_api.ModelInfo:
 
-    logger.info("Rebuilding offline model info for repo %s", repo)
+    logger.info("Rebuilding offline model info for repo %s", repo_id)
 
     # Let's rebuild some partial model info from what we see in cache, info extracted should be enough
     # for most use cases
-    card_path = repo / "README.md"
-    logger.debug("Opening model card %s", card_path)
-    with open(card_path, "r") as f:
-        data = f.read()
+    card_path = try_to_load_from_cache(
+        repo_id=repo_id,
+        filename="README.md",
+        cache_dir=cache_dir,
+        revision=revision,
+    )
+    if not isinstance(card_path, str):
+        raise Exception(
+            "Unable to rebuild offline model info, no README could be found"
+        )
 
-    card_chunks = re.split(YAML_DOC_SEP, data)
+    card_path = pathlib.Path(card_path)
+    logger.debug("Loading model card from model readme %s", card_path)
+    model_card = ModelCard.load(card_path)
+    card_data = model_card.data.to_dict()
 
-    card_data = "{}"
-    for c in card_chunks:
-        c = c.strip()
-        if c:
-            card_data = c
-            break
-    card_data = yaml.safe_load(card_data)
+    repo = card_path.parent
+    logger.debug("Repo path %s", repo)
     siblings = _build_offline_siblings(repo)
     model_info = hf_api.ModelInfo(
         private=False,
@@ -89,9 +92,7 @@ def _build_offline_model_info(repo_id: str, repo: pathlib.Path) -> hf_api.ModelI
         siblings=siblings,
         **card_data,
     )
-
     logger.info("Offline model info for repo %s: %s", repo, model_info)
-
     return model_info
 
 
@@ -119,6 +120,13 @@ def _build_offline_siblings(repo: pathlib.Path) -> List[dict]:
 def _cached_model_info(
     repo_id: str, revision: str, cache_dir: pathlib.Path
 ) -> hf_api.ModelInfo:
+    """
+    Looks for a json file containing prefetched model info in the revision path.
+    If none found we just rebuild model info with the local directory files.
+    Note that this file is not automatically created by hub_download/snapshot_download.
+    It is just a convenience we add here, just in case the offline info we rebuild from
+    the local directories would not cover all use cases.
+    """
     revision_path = cached_revision_path(cache_dir, repo_id, revision)
     model_info_basename = "hub_model_info.json"
     model_info_path = revision_path / model_info_basename
@@ -136,7 +144,7 @@ def _cached_model_info(
         )
         # Let's rebuild some partial model info from what we see in cache, info extracted should be enough
         # for most use cases
-        r = _build_offline_model_info(repo_id, revision_path)
+        r = _build_offline_model_info(repo_id, cache_dir, revision)
 
     return r
 
@@ -148,8 +156,7 @@ def hub_model_info(
     **kwargs,
 ) -> hf_api.ModelInfo:
     """
-    Get Hub model info with offline support, provided some hub_model_info.json file has been filled in the
-    local model directory
+    Get Hub model info with offline support
     """
     if revision is None:
         revision = "main"
