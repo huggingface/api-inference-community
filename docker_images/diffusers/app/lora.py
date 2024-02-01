@@ -62,7 +62,7 @@ class LoRAPipelineMixin(offline.OfflineBestEffortMixin):
     def _fuse_or_raise(self):
         try:
             self.ldm.fuse_lora(safe_fusing=True)
-        except ValueError as e:
+        except Exception as e:
             logger.exception(e)
             logger.warning("Unable to fuse LoRA adapter")
             self.ldm.unload_lora_weights()
