@@ -1,6 +1,6 @@
 starlette==0.27.0
 api-inference-community==0.0.29
-sentence-transformers==2.2.2
+sentence-transformers==2.3.1
 protobuf==3.18.3
 huggingface_hub==0.13.4
 sacremoses==0.0.53
