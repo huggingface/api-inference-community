@@ -153,7 +153,6 @@ def start(args):
     local_path = os.path.join(
         os.path.dirname(os.path.normpath(__file__)), "docker_images", framework
     )
-    import ipdb;ipdb.set_trace()
     sys.path.append(local_path)
     os.environ["MODEL_ID"] = model_id
     os.environ["TASK"] = task
