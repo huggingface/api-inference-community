@@ -35,7 +35,7 @@ def create_docker(name: str, is_gpu: bool) -> str:
     rand = str(uuid.uuid4())[:5]
     tag = f"{name}:{rand}"
     with cd(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), "docker_images", name)
+        os.path.join(os.path.dirname(os.path.normpath(__file__)), "docker_images", name)
     ):
         subprocess.run(["docker", "build", ".", "-t", tag])
     return tag
@@ -84,12 +84,12 @@ def get_repo_name(model_id: str, dataset_name: str) -> str:
 
 def show(args):
     directory = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "docker_images"
+        os.path.dirname(os.path.normpath(__file__)), "docker_images"
     )
     for framework in sorted(os.listdir(directory)):
         print(f"{framework}")
         local_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
+            os.path.dirname(os.path.normpath(__file__)),
             "docker_images",
             framework,
             "app",
@@ -151,8 +151,9 @@ def start(args):
     model_id, task, framework = resolve_task_framework(args)
 
     local_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "docker_images", framework
+        os.path.dirname(os.path.normpath(__file__)), "docker_images", framework
     )
+    import ipdb;ipdb.set_trace()
     sys.path.append(local_path)
     os.environ["MODEL_ID"] = model_id
     os.environ["TASK"] = task
