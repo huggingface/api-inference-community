@@ -1,4 +1,4 @@
 starlette==0.27.0
 git+https://github.com/huggingface/api-inference-community.git@f06a71e72e92caeebabaeced979eacb3542bf2ca
 huggingface_hub==0.20.2
-setfit==1.0.1
+setfit==1.0.3
