@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
+FROM tiangolo/uvicorn-gunicorn:python3.9
 LABEL maintainer="me <me@example.com>"
 
 # Add any system dependency here
