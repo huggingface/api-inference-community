@@ -37,6 +37,8 @@ class TextToSpeechPipeline(Pipeline):
         Return:
             A :obj:`np.array` and a :obj:`int`: The raw waveform as a numpy array, and the sampling rate as an int.
         """
+        if not inputs.replace("\0", "").strip():
+            inputs = "Empty query"
         if self.type == "tacotron2":
             mel_output, _, _ = self.model.encode_text(inputs)
         elif self.type == "fastspeech2":
