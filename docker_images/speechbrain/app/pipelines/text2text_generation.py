@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from app.common import ModelType, get_type
 from app.pipelines import Pipeline
-from speechbrain.pretrained import GraphemeToPhoneme
+from speechbrain.inference import GraphemeToPhoneme
 
 
 POSTPROCESSING = {ModelType.GRAPHEMETOPHONEME: lambda output: "-".join(output)}

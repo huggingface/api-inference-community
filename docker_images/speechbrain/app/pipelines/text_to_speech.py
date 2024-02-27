@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from app.common import ModelType, get_type, get_vocoder_model_id
 from app.pipelines import Pipeline
-from speechbrain.pretrained import HIFIGAN, FastSpeech2, Tacotron2
+from speechbrain.inference import HIFIGAN, FastSpeech2, Tacotron2
 
 
 class TextToSpeechPipeline(Pipeline):

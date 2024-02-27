@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from app.common import ModelType, get_type
 from app.pipelines import Pipeline
-from speechbrain.pretrained import (
+from speechbrain.inference import (
     SepformerSeparation,
     SpectralMaskEnhancement,
     WaveformEnhancement,

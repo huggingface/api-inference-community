@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from app.common import ModelType, get_type
 from app.pipelines import Pipeline
-from speechbrain.pretrained import EncoderASR, EncoderDecoderASR, WhisperASR
+from speechbrain.inference import EncoderASR, EncoderDecoderASR, WhisperASR
 
 
 class AutomaticSpeechRecognitionPipeline(Pipeline):
