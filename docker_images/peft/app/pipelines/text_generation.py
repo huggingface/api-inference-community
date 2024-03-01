@@ -19,7 +19,7 @@ class TextGenerationPipeline(Pipeline):
         config_dict = model_data.config.get("peft")
 
         if config_dict:
-            base_model_id = config_dict["base_model_name"]
+            base_model_id = config_dict["base_model_name_or_path"]
             if base_model_id:
                 self.tokenizer = AutoTokenizer.from_pretrained(base_model_id)
                 model = AutoModelForCausalLM.from_pretrained(
