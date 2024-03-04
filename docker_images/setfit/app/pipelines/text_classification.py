@@ -26,7 +26,7 @@ class TextClassificationPipeline(Pipeline):
             id2label = getattr(self.model, "id2label", {}) or {}
             return [
                 [
-                    {"label": id2label.get(idx, idx), "score": prob}
+                    {"label": id2label.get(idx, idx), "score": float(prob)}
                     for idx, prob in enumerate(probs[0])
                 ]
             ]
