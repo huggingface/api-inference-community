@@ -22,7 +22,7 @@ class ModelType(Enum):
     GRAPHEMETOPHONEME = "GRAPHEMETOPHONEME"
 
 
-def get_type(model_id, interface_type="interface"):
+def get_type(model_id, interface_type="speechbrain_interface"):
     info = HfApi().model_info(repo_id=model_id)
     if info.config:
         if "speechbrain" in info.config:
