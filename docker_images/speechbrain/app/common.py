@@ -20,6 +20,8 @@ class ModelType(Enum):
     FASTSPEECH2 = "FASTSPEECH2"
     # text2text-generation
     GRAPHEMETOPHONEME = "GRAPHEMETOPHONEME"
+    # voice-activity-detection
+    SPEECHEMOTIONDIARIZATION = "SPEECHEMOTIONDIARIZATION"
 
 
 def get_type(model_id, interface_type="speechbrain_interface"):
