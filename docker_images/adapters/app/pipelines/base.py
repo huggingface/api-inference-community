@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from transformers import AutoModelWithHeads, AutoTokenizer, get_adapter_info
+from adapters import AutoAdapterModel, get_adapter_info
+from transformers import AutoTokenizer
 
 
 class Pipeline(ABC):
@@ -20,7 +21,7 @@ class Pipeline(ABC):
             raise ValueError(f"Adapter with id '{adapter_id}' not available.")
 
         tokenizer = AutoTokenizer.from_pretrained(adapter_info.model_name)
-        model = AutoModelWithHeads.from_pretrained(adapter_info.model_name)
+        model = AutoAdapterModel.from_pretrained(adapter_info.model_name)
         model.load_adapter(adapter_id, source="hf", set_active=True)
         return pipeline_class(model=model, tokenizer=tokenizer)
 

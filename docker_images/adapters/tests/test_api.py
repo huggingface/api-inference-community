@@ -9,8 +9,10 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    "question-answering": "calpt/adapter-bert-base-squad1",
+    "question-answering": "AdapterHub/roberta-base-pf-squad",
+    "summarization": "AdapterHub/facebook-bart-large_sum_xsum_pfeiffer",
     "text-classification": "AdapterHub/roberta-base-pf-sick",
+    "text-generation": "AdapterHub/gpt2_lm_poem_pfeiffer",
     "token-classification": "AdapterHub/roberta-base-pf-conll2003",
 }
 
