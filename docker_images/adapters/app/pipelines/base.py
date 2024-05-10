@@ -3,6 +3,7 @@ from typing import Any
 
 from adapters import AutoAdapterModel, get_adapter_info
 from transformers import AutoTokenizer
+from transformers.pipelines.base import logger
 
 
 class Pipeline(ABC):
@@ -23,6 +24,12 @@ class Pipeline(ABC):
         tokenizer = AutoTokenizer.from_pretrained(adapter_info.model_name)
         model = AutoAdapterModel.from_pretrained(adapter_info.model_name)
         model.load_adapter(adapter_id, source="hf", set_active=True)
+
+        # Transformers incorrectly logs an error because class name is not known. Filter this out.
+        logger.addFilter(
+            lambda record: not record.getMessage().startswith(f"The model '{model.__class__.__name__}' is not supported")
+        )
+
         return pipeline_class(model=model, tokenizer=tokenizer)
 
 

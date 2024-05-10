@@ -1,5 +1,6 @@
 starlette==0.37.2
 api-inference-community==0.0.32
 torch==2.3.0
-adapters==0.2.1
+# TODO temporary until next release of adapters
+git+https://github.com/adapter-hub/adapters.git
 huggingface_hub==0.23.0
