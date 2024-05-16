@@ -87,6 +87,14 @@ class DockerImageTests(unittest.TestCase):
             "pyf98/librispeech_100h_transformer",
         )
 
+    def test_edsnlp(self):
+        self.framework_docker_test(
+            "edsnlp",
+            "token-classification",
+            "AP-HP/dummy-ner",
+        )
+        self.framework_invalid_test("edsnlp")
+
     def test_fairseq(self):
         self.framework_docker_test(
             "fairseq",
