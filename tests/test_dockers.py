@@ -315,6 +315,18 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test("timm", "image-classification", "sgugger/resnet50d")
         self.framework_invalid_test("timm")
 
+    def test_thirdai(self):
+        self.framework_docker_test(
+            "thirdai",
+            "text-classification",
+            "thirdai/Classification",
+        )
+        self.framework_docker_test(
+            "thirdai",
+            "token-classification",
+            "thirdai/NamedEntityRecognition",
+        )
+
     def test_diffusers(self):
         self.framework_docker_test(
             "diffusers",

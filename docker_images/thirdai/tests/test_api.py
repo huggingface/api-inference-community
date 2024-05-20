@@ -9,8 +9,8 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, str] = {
-    "text-classification": "thirdai/INSERT_CLASSIFICATION_MODEL_HERE",
-    "token-classification": "thirdai/INSERT_NER_MODEL_HERE",
+    "text-classification": "thirdai/Classification",
+    "token-classification": "thirdai/NamedEntityRecognition",
 }
 
 
