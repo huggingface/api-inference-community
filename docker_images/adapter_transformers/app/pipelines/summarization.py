@@ -17,4 +17,4 @@ class SummarizationPipeline(Pipeline):
         Return:
             A :obj:`list` of :obj:`dict` in the form of {"summary_text": "The string after summarization"}
         """
-        return self.pipeline(inputs)
+        return self.pipeline(inputs, truncation=True)

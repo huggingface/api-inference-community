@@ -27,7 +27,9 @@ class Pipeline(ABC):
 
         # Transformers incorrectly logs an error because class name is not known. Filter this out.
         logger.addFilter(
-            lambda record: not record.getMessage().startswith(f"The model '{model.__class__.__name__}' is not supported")
+            lambda record: not record.getMessage().startswith(
+                f"The model '{model.__class__.__name__}' is not supported"
+            )
         )
 
         return pipeline_class(model=model, tokenizer=tokenizer)

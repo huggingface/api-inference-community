@@ -18,4 +18,4 @@ class TextGenerationPipeline(Pipeline):
         Return:
             A :obj:`list`:. The list contains a single item that is a dict {"text": the model output}
         """
-        return self.pipeline(inputs)
+        return self.pipeline(inputs, truncation=True)
