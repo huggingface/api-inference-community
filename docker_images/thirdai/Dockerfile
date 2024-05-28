@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn:python3.10
+FROM --platform=linux/x86_64 tiangolo/uvicorn-gunicorn:python3.10
 LABEL maintainer="David Torres <david@thirdai.com>"
 
 # Add any system dependency here

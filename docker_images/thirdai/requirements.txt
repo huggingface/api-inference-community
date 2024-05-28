@@ -1,5 +1,5 @@
 starlette==0.27.0
 api-inference-community==0.0.32
 huggingface_hub==0.11.0
-thirdai>=0.8.3
+thirdai==0.8.5
 numpy==1.25.2

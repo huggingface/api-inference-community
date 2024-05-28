@@ -3,13 +3,17 @@ from typing import Any, Dict, List
 from app.pipelines import Pipeline
 from thirdai import bolt
 
+from huggingface_hub import hf_hub_download
+
 
 class TokenClassificationPipeline(Pipeline):
     def __init__(
         self,
         model_id: str,
     ):
-        self.model = bolt.UniversalDeepTransformer.NER.load(model_id)
+        print("LMFAO", model_id)
+        model_path = hf_hub_download(model_id, "model.bin", library_name="thirdai")
+        self.model = bolt.UniversalDeepTransformer.NER.load(model_path)
 
     def __call__(self, inputs: str) -> List[Dict[str, Any]]:
         """
