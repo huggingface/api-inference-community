@@ -7,7 +7,9 @@ from api_inference_community.routes import pipeline_route, status_ok
 from app.pipelines import (
     Pipeline,
     QuestionAnsweringPipeline,
+    SummarizationPipeline,
     TextClassificationPipeline,
+    TextGenerationPipeline,
     TokenClassificationPipeline,
 )
 from starlette.applications import Starlette
@@ -39,7 +41,9 @@ logger = logging.getLogger(__name__)
 # directories. Implement directly within the directories.
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "question-answering": QuestionAnsweringPipeline,
+    "summarization": SummarizationPipeline,
     "text-classification": TextClassificationPipeline,
+    "text-generation": TextGenerationPipeline,
     "token-classification": TokenClassificationPipeline,
     # IMPLEMENT_THIS: Add your implemented tasks here !
 }

@@ -136,13 +136,25 @@ class DockerImageTests(unittest.TestCase):
         self.framework_docker_test(
             "adapter_transformers",
             "question-answering",
-            "calpt/adapter-bert-base-squad1",
+            "AdapterHub/roberta-base-pf-squad",
+        )
+
+        self.framework_docker_test(
+            "adapter_transformers",
+            "summarization",
+            "AdapterHub/facebook-bart-large_sum_xsum_pfeiffer",
         )
 
         self.framework_docker_test(
             "adapter_transformers",
             "text-classification",
             "AdapterHub/roberta-base-pf-sick",
+        )
+
+        self.framework_docker_test(
+            "adapter_transformers",
+            "text-generation",
+            "AdapterHub/gpt2_lm_poem_pfeiffer",
         )
 
         self.framework_docker_test(
