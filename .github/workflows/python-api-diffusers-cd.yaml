@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - fix_action
+      - fix_actions
     paths:
       - "docker_images/diffusers/**"
 jobs:
