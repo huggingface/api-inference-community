@@ -1,5 +1,5 @@
 FROM tiangolo/uvicorn-gunicorn:python3.8
-LABEL maintainer="Tom Aarsen <ta.aarsen@gmail.com>"
+LABEL maintainer="Tom Aarsen <tom.aarsen@huggingface.co>"
 
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y

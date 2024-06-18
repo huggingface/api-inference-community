@@ -124,7 +124,11 @@ class DockerImageTests(unittest.TestCase):
             "feature-extraction",
             "bert-base-uncased",
         )
-
+        self.framework_docker_test(
+            "sentence_transformers",
+            "sentence-similarity",
+            "ymelka/camembert-cosmetic-similarity-cp1200",
+        )
         self.framework_docker_test(
             "sentence_transformers",
             "sentence-similarity",

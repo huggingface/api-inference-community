@@ -1,7 +1,9 @@
 starlette==0.27.0
 api-inference-community==0.0.32
-sentence-transformers==2.5.1
+sentence-transformers==3.0.1
+transformers==4.41.1
+tokenizers==0.19.1
 protobuf==3.18.3
-huggingface_hub==0.20.3
+huggingface_hub==0.23.3
 sacremoses==0.0.53
 # dummy.
