@@ -4,6 +4,7 @@ on:
     branches:
       - fix_actions
     paths:
+      - ".github/workflows/docker-images-cd.yaml"
       - "docker_images/sentence_transformers/**"
       - "docker_images/diffusers/**"
 
@@ -32,7 +33,7 @@ jobs:
             sentence_transformers:
               - 'docker_images/sentence_transformers/**'
       - name: install jq
-        run: apt-get update && apt-get install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
       - name: build Matrix
         id: matrix
         shell: bash
