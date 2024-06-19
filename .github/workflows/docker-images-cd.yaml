@@ -46,8 +46,8 @@ jobs:
             frameworks=$(echo $frameworks | jq '. += ["sentence-transformers"]')
           fi
           matrix='{"frameworks": $frameworks, "compute": ["gpu", "cpu"], "tag": ["${{ env.GITHUB_SHA_SHORT}}"] }'
-          echo 'Computed matrix: mymatrix=$matrix' 
-          echo 'mymatrix=$matrix' >> $GITHUB_OUTPUT
+          echo "Computed matrix: mymatrix=$matrix" 
+          echo "mymatrix=$matrix" >> $GITHUB_OUTPUT
 
   build_release_docker:
     runs-on: ubuntu-latest
