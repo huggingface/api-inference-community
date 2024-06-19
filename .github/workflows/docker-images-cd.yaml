@@ -34,22 +34,25 @@ jobs:
               - 'docker_images/sentence_transformers/**'
       - name: install jq
         run: sudo apt-get update && sudo apt-get install -y jq
-      - name: build Matrix
+      - name: build matrix
         id: matrix
         shell: bash
         run: |
           frameworks="[]"
           if [[ "${{ steps.changes.outputs.diffusers }}" == "true" ]];then
-            frameworks=$(echo $frameworks | jq '. += ["diffusers"]')
+            frameworks=$(echo $frameworks | jq -c '. += ["diffusers"]')
           fi
           if [[ "${{ steps.changes.outputs.sentence_transformers }}" == "true" ]];then
-            frameworks=$(echo $frameworks | jq '. += ["sentence-transformers"]')
+            frameworks=$(echo $frameworks | jq -c '. += ["sentence-transformers"]')
           fi
-          frameworks=$(echo $frameworks | tr -d '\n')
           matrix='{"frameworks": '$frameworks', "compute": ["gpu", "cpu"], "tag": ["${{ env.GITHUB_SHA_SHORT}}"] }'
           echo "Computed matrix: mymatrix=$matrix" 
           echo "mymatrix=$matrix" >> $GITHUB_OUTPUT
-
+      - name: check matrix format
+        shell: bash
+        run: |
+          echo "MATRIX ${{ steps.matrix.outputs.mymatrix }}"
+          echo "RESULT ${{ fromJson(needs.delivery_matrix.outputs.mymatrix) }}"
   build_release_docker:
     runs-on: ubuntu-latest
     needs: delivery_matrix
