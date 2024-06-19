@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           echo "MATRIX ${{ steps.matrix.outputs.mymatrix }}"
-          echo "RESULT ${{ fromJson(needs.delivery_matrix.outputs.mymatrix) }}"
+
   build_release_docker:
     runs-on: ubuntu-latest
     needs: delivery_matrix
