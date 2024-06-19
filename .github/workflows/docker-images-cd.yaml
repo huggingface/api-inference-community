@@ -45,7 +45,7 @@ jobs:
           if [[ "${{ steps.changes.outputs.sentence_transformers }}" == "true" ]];then
             frameworks=$(echo $frameworks | jq -c '. += ["sentence-transformers"]')
           fi
-          matrix='{"frameworks": '$frameworks', "compute": ["gpu", "cpu"], "tag": ["${{ env.GITHUB_SHA_SHORT}}"] }'
+          matrix=$(jq -cn --argjson frameworks "$frameworks" '{"frameworks": $frameworks, "compute": ["gpu", "cpu"], "tag": ["${{ env.GITHUB_SHA_SHORT}}"] }')
           echo "Computed matrix: mymatrix=$matrix" 
           echo "mymatrix=$matrix" >> $GITHUB_OUTPUT
       - name: check matrix format
