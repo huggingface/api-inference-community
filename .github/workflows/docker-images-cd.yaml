@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           echo "MATRIX ${{ steps.matrix.outputs.mymatrix }}"
-          echo "RESULT ${{ fromJson('{"frameworks": ["diffusers","sentence-transformers"], "compute": ["gpu", "cpu"], "tag": ["c255ad0"] }') }}"
+          echo "RESULT ${{ fromJson("'"${{ steps.matrix.outputs.mymatrix }}"'") }}"
   build_release_docker:
     runs-on: ubuntu-latest
     needs: delivery_matrix
