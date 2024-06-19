@@ -40,10 +40,10 @@ jobs:
         run: |
           frameworks="[]"
           if [[ "${{ steps.changes.outputs.diffusers }}" == "true" ]];then
-            frameworks=$(echo $frameworks | jq '. += "diffusers"')
+            frameworks=$(echo $frameworks | jq '. += ["diffusers"]')
           fi
           if [[ "${{ steps.changes.outputs.sentence_transformers }}" == "true" ]];then
-            frameworks=$(echo $frameworks | jq '. += "sentence-transformers"')
+            frameworks=$(echo $frameworks | jq '. += ["sentence-transformers"]')
           fi
           matrix='{"frameworks": $frameworks, "compute": ["gpu", "cpu"], "tag": ["${{ env.GITHUB_SHA_SHORT}}"] }'
           echo 'Computed matrix: mymatrix=$matrix' 
