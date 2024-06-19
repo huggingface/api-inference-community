@@ -1,0 +1,60 @@
+name: Docker images continuous delvivery
+on:
+  push:
+    branches:
+      - fix_actions
+    paths:
+      - "docker_images/sentence_transformers/**"
+      - "docker_images/diffusers/**"
+
+# Inpired from https://www.kenmuse.com/blog/dynamic-build-matrices-in-github-actions/
+jobs:
+  # Compute docker build matrix dynamically, based on changes
+  delivery_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      mymatrix: steps.matrix.outputs.mymatrix
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4.x
+      - name: Set GITHUB_SHA_SHORT from PR
+        if: env.GITHUB_EVENT_PULL_REQUEST_HEAD_SHA_SHORT != null
+        run: echo "GITHUB_SHA_SHORT=${{ env.GITHUB_EVENT_PULL_REQUEST_HEAD_SHA_SHORT }}" >> $GITHUB_ENV
+      - name: Changes inventory
+        uses: dorny/paths-filter@v3.0.0
+        id: changes
+        with:
+          filters: |
+            diffusers:
+              - 'docker_images/diffusers/**'
+            sentence_transformers:
+              - 'docker_images/sentence_transformers/**'
+      - name: install jq
+        run: apt-get update && apt-get install jq
+      - name: build Matrix
+        id: matrix
+        shell: bash
+        run: |
+          frameworks="[]"
+          if [[ "${{ steps.changes.outputs.diffusers }}" == "true" ]];then
+            frameworks=$(echo $frameworks | jq '. += "diffusers"')
+          fi
+          if [[ "${{ steps.changes.outputs.sentence_transformers }}" == "true" ]];then
+            frameworks=$(echo $frameworks | jq '. += "sentence-transformers"')
+          fi
+          matrix='{"frameworks": $frameworks, "compute": ["gpu", "cpu"], "tag": ["${{ env.GITHUB_SHA_SHORT}}"] }'
+          echo 'Computed matrix: mymatrix=$matrix' 
+          echo 'mymatrix=$matrix' >> $GITHUB_OUTPUT
+
+  build_release_docker:
+    needs: delivery_matrix
+    strategy:
+      matrix: ${{ fromJson(needs.delivery_matrix.outputs.mymatrix) }}
+    steps:
+      - name: "Delivery matrix item"
+        run: |
+          echo "FRAMEWORK ${{ matrix.framework }}"
+          echo "COMPUTE ${{ matrix.compute }}"
+          echo "TAG ${{ matrix.tag }}"
