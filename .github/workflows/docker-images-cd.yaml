@@ -49,6 +49,7 @@ jobs:
           echo 'mymatrix=$matrix' >> $GITHUB_OUTPUT
 
   build_release_docker:
+    runs-on: ubuntu-latest
     needs: delivery_matrix
     strategy:
       matrix: ${{ fromJson(needs.delivery_matrix.outputs.mymatrix) }}
