@@ -22,3 +22,4 @@ aiohttp>=3.8.5
 # https://github.com/huggingface/diffusers/issues/6809
 # peft==0.7.1
 git+https://github.com/huggingface/peft.git@a30e006bb2f82824ab24435b9f07932738b44966
+protobuf==5.27.1
