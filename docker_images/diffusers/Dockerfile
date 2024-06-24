@@ -27,7 +27,11 @@ RUN pyenv install $PYTHON_VERSION && \
 
 # Upgrade pip and install your desired packages
 ARG PIP_VERSION=22.3.1
-RUN pip install --no-cache-dir --upgrade pip==${PIP_VERSION} setuptools wheel && \
+
+# FIXME: We temporarily need to specify the setuptools version <70 due to the following issue
+# https://stackoverflow.com/questions/78604018/importerror-cannot-import-name-packaging-from-pkg-resources-when-trying-to
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues/15863#issuecomment-2125026282
+RUN pip install --no-cache-dir --upgrade pip==${PIP_VERSION} setuptools'<70' wheel && \
     pip install --no-cache-dir torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
 
 WORKDIR /app
