@@ -17,10 +17,5 @@ uvicorn>=0.23.2
 gunicorn>=21.2.0
 psutil>=5.9.5
 aiohttp>=3.8.5
-# Tmp: replace with version once there is a tag above 0.8.1
-# This commit includes a fix that concerns
-# https://github.com/huggingface/diffusers/issues/6809
-# peft==0.7.1
-git+https://github.com/huggingface/peft.git@a30e006bb2f82824ab24435b9f07932738b44966
-# peft==0.11.1
+peft==0.11.1
 protobuf==5.27.1
