@@ -23,7 +23,6 @@ ALL_TASKS = {
     "feature-extraction",
     "image-classification",
     "question-answering",
-    "sentence-similarity",
     "structured-data-classification",
     "speech-segmentation",
     "text-to-speech",

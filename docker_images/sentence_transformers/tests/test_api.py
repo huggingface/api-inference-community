@@ -9,8 +9,8 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
 TESTABLE_MODELS: Dict[str, List[str]] = {
-    "feature-extraction": ["bert-base-uncased"],
-    "sentence-similarity": [
+    "feature-extraction": [
+        "bert-base-uncased",
         "sentence-transformers/paraphrase-distilroberta-base-v1",
         "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     ],
@@ -23,7 +23,6 @@ ALL_TASKS = {
     "feature-extraction",
     "image-classification",
     "question-answering",
-    "sentence-similarity",
     "text-generation",
     "text-to-speech",
 }

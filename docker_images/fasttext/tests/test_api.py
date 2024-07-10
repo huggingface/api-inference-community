@@ -25,7 +25,6 @@ ALL_TASKS = {
     "image-classification",
     "language-identification",
     "question-answering",
-    "sentence-similarity",
     "speech-segmentation",
     "structured-data-classification",
     "text-to-speech",

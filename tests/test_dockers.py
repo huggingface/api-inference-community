@@ -126,12 +126,12 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_docker_test(
             "sentence_transformers",
-            "sentence-similarity",
+            "feature-extraction",
             "ymelka/camembert-cosmetic-similarity-cp1200",
         )
         self.framework_docker_test(
             "sentence_transformers",
-            "sentence-similarity",
+            "feature-extraction",
             "sentence-transformers/paraphrase-distilroberta-base-v1",
         )
         self.framework_invalid_test("sentence_transformers")
@@ -252,11 +252,6 @@ class DockerImageTests(unittest.TestCase):
             "spacy",
             "text-classification",
             "cverluise/xx_cat_pateexx_md",
-        )
-        self.framework_docker_test(
-            "spacy",
-            "sentence-similarity",
-            "spacy/en_core_web_sm",
         )
         self.framework_invalid_test("spacy")
 

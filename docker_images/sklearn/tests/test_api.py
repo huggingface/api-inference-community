@@ -343,7 +343,6 @@ ALL_TASKS = {
     "feature-extraction",
     "image-classification",
     "question-answering",
-    "sentence-similarity",
     "tabular-classification",
     "text-generation",
     "text-to-speech",
