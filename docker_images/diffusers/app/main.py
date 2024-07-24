@@ -74,11 +74,7 @@ async def startup_event():
     if idle.UNLOAD_IDLE:
         asyncio.create_task(idle.live_check_loop(), name="live_check_loop")
     app.get_pipeline = get_pipeline
-    try:
-        get_pipeline()
-    except Exception:
-        # We can fail so we can show exception later.
-        pass
+    get_pipeline()
 
 
 def reset_logging():
@@ -91,8 +87,4 @@ def reset_logging():
 
 if __name__ == "__main__":
     reset_logging()
-    try:
-        get_pipeline()
-    except Exception:
-        # We can fail so we can show exception later.
-        pass
+    get_pipeline()
