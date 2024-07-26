@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
 from app.pipelines import Pipeline
-from flair.data import Label, Sentence, Span
+from flair.data import Sentence, Span, Token
 from flair.models import SequenceTagger
 
 
@@ -31,8 +31,8 @@ class TokenClassificationPipeline(Pipeline):
 
         entities = []
         for label in sentence.get_labels():
-            if isinstance(label, Label):
-                current_data_point = label.data_point
+            current_data_point = label.data_point
+            if isinstance(current_data_point, Token):
                 current_entity = {
                     "entity_group": current_data_point.tag,
                     "word": current_data_point.text,
@@ -41,15 +41,15 @@ class TokenClassificationPipeline(Pipeline):
                     "score": current_data_point.score,
                 }
                 entities.append(current_entity)
-            elif isinstance(label, Span):
-                if len(label.tokens) == 0:
+            elif isinstance(current_data_point, Span):
+                if not current_data_point.tokens:
                     continue
                 current_entity = {
-                    "entity_group": label.tag,
-                    "word": label.text,
-                    "start": label.tokens[0].start_position,
-                    "end": label.tokens[-1].end_position,
-                    "score": label.score,
+                    "entity_group": current_data_point.tag,
+                    "word": current_data_point.text,
+                    "start": current_data_point.tokens[0].start_position,
+                    "end": current_data_point.tokens[-1].end_position,
+                    "score": current_data_point.score,
                 }
                 entities.append(current_entity)
 
