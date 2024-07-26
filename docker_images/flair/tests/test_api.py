@@ -8,9 +8,9 @@ from app.main import ALLOWED_TASKS, get_pipeline
 # Must contain at least one example of each implemented pipeline
 # Tests do not check the actual values of the model output, so small dummy
 # models are recommended for faster tests.
-TESTABLE_MODELS: Dict[str, List[str]] = {"token-classification": [
-                                        "flair/chunk-english-fast",
-                                        "flair/upos-english-fast"]}
+TESTABLE_MODELS: Dict[str, List[str]] = {
+    "token-classification": ["flair/chunk-english-fast", "flair/upos-english-fast"]
+}
 
 
 ALL_TASKS = {
@@ -37,7 +37,7 @@ class PipelineTestCase(TestCase):
         unsupported_tasks = ALL_TASKS - ALLOWED_TASKS.keys()
         for unsupported_task in unsupported_tasks:
             with self.subTest(msg=unsupported_task, task=unsupported_task):
-                os.environ["TASK"] = unsupported_task#
+                os.environ["TASK"] = unsupported_task
                 os.environ["MODEL_ID"] = "XX"
                 with self.assertRaises(EnvironmentError):
                     get_pipeline()
