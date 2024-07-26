@@ -27,21 +27,30 @@ class TokenClassificationPipeline(Pipeline):
         """
         sentence: Sentence = Sentence(inputs)
 
-        # Also show scores for recognized NEs
-        self.tagger.predict(sentence, label_name="predicted")
+        self.tagger.predict(sentence)
 
         entities = []
-        for span in sentence.get_spans("predicted"):
-            if len(span.tokens) == 0:
-                continue
-            current_entity = {
-                "entity_group": span.tag,
-                "word": span.text,
-                "start": span.tokens[0].start_position,
-                "end": span.tokens[-1].end_position,
-                "score": span.score,
-            }
-
-            entities.append(current_entity)
+        for label in labels:
+            if isinstance(label, Label):
+                current_data_point = label.data_point
+                current_entity = {
+                    "entity_group": current_data_point.tag,
+                    "word": current_data_point.text,
+                    "start": current_data_point.start_position,
+                    "end": current_data_point.end_position,
+                    "score": current_data_point.score,
+                }
+                entities.append(current_entity)
+            elif isinstance(label, Span):
+                if len(label.tokens) == 0:
+                    continue
+                current_entity = {
+                    "entity_group": label.tag,
+                    "word": label.text,
+                    "start": label.tokens[0].start_position,
+                    "end": label.tokens[-1].end_position,
+                    "score": label.score,
+                }
+                entities.append(current_entity)
 
         return entities
