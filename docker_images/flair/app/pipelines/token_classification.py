@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
 from app.pipelines import Pipeline
-from flair.data import Sentence
+from flair.data import Label, Sentence, Span
 from flair.models import SequenceTagger
 
 
@@ -30,7 +30,7 @@ class TokenClassificationPipeline(Pipeline):
         self.tagger.predict(sentence)
 
         entities = []
-        for label in labels:
+        for label in sentence.get_labels():
             if isinstance(label, Label):
                 current_data_point = label.data_point
                 current_entity = {
