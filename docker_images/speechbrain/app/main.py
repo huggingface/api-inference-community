@@ -11,6 +11,7 @@ from app.pipelines import (
     Pipeline,
     TextToSpeechPipeline,
     TextToTextPipeline,
+    VoiceActivityDetectionPipeline
 )
 from starlette.applications import Starlette
 from starlette.routing import Route
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 # - translation
 # - summarization
 # - automatic-speech-recognition
+# - voice-activity-detection
 # - ...
 # For instance
 # from app.pipelines import AutomaticSpeechRecognitionPipeline
@@ -43,6 +45,7 @@ ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "automatic-speech-recognition": AutomaticSpeechRecognitionPipeline,
     "text-to-speech": TextToSpeechPipeline,
     "text2text-generation": TextToTextPipeline,
+    "voice-activity-detection": VoiceActivityDetectionPipeline
 }
 
 
