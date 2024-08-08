@@ -45,7 +45,10 @@ class ImageToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
             if model_id.startswith("hf-internal-testing/")
             else {}
         )
-        if torch.cuda.is_available():
+        env_dtype = os.getenv("TORCH_DTYPE")
+        if env_dtype:
+            kwargs["torch_dtype"] = getattr(torch, env_dtype)
+        elif torch.cuda.is_available():
             kwargs["torch_dtype"] = torch.float16
             if model_id == "stabilityai/stable-diffusion-xl-refiner-1.0":
                 kwargs["variant"] = "fp16"
@@ -189,30 +192,40 @@ class ImageToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
             ),
         ):
             if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 25
+                kwargs["num_inference_steps"] = int(
+                    os.getenv("DEFAULT_NUM_INFERENCE_STEPS", "25")
+                )
             images = self.ldm(prompt, image, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, StableDiffusionXLImg2ImgPipeline):
             if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 25
+                kwargs["num_inference_steps"] = int(
+                    os.getenv("DEFAULT_NUM_INFERENCE_STEPS", "25")
+                )
             image = image.convert("RGB")
             images = self.ldm(prompt, image=image, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, (StableUnCLIPImg2ImgPipeline, StableUnCLIPPipeline)):
             if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 25
+                kwargs["num_inference_steps"] = int(
+                    os.getenv("DEFAULT_NUM_INFERENCE_STEPS", "25")
+                )
             # image comes first
             images = self.ldm(image, prompt, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, StableDiffusionImageVariationPipeline):
             if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 25
+                kwargs["num_inference_steps"] = int(
+                    os.getenv("DEFAULT_NUM_INFERENCE_STEPS", "25")
+                )
             # only image is needed
             images = self.ldm(image, **kwargs)["images"]
             return images[0]
         elif isinstance(self.ldm, (KandinskyImg2ImgPipeline)):
             if "num_inference_steps" not in kwargs:
-                kwargs["num_inference_steps"] = 100
+                kwargs["num_inference_steps"] = int(
+                    os.getenv("DEFAULT_NUM_INFERENCE_STEPS", "100")
+                )
             # not all args are supported by the prior
             prior_args = {
                 "num_inference_steps": kwargs["num_inference_steps"],
