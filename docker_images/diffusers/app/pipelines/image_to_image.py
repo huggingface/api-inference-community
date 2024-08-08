@@ -45,7 +45,10 @@ class ImageToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
             if model_id.startswith("hf-internal-testing/")
             else {}
         )
-        if torch.cuda.is_available():
+        env_dtype = os.getenv("TORCH_DTYPE")
+        if env_dtype:
+            kwargs["torch_dtype"] = getattr(torch, env_dtype)
+        elif torch.cuda.is_available():
             kwargs["torch_dtype"] = torch.float16
             if model_id == "stabilityai/stable-diffusion-xl-refiner-1.0":
                 kwargs["variant"] = "fp16"
