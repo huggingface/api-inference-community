@@ -161,8 +161,13 @@ class TextToImagePipeline(
         # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
 
-        if self.is_karras_compatible and "num_inference_steps" not in kwargs:
-            kwargs["num_inference_steps"] = 20
+        if "num_inference_steps" not in kwargs:
+            default_num_steps = os.getenv("DEFAULT_NUM_INFERENCE_STEPS")
+            if default_num_steps:
+                kwargs["num_inference_steps"] = int(default_num_steps)
+            elif self.is_karras_compatible:
+                kwargs["num_inference_steps"] = 20
+            # Else, don't specify anything, leave the default behaviour
 
         images = self.ldm(inputs, **kwargs)["images"]
         return images[0]
