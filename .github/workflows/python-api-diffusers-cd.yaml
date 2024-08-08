@@ -4,45 +4,45 @@ on:
     branches:
       - main
     paths:
+      - ".github/workflows/python-api-diffusers-cd.yaml"
       - "docker_images/diffusers/**"
+concurrency:
+  group: diffusers-cd-${{ github.head_ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: actions/checkout@v4.1.7
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4.5.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Install dependencies
+        uses: docker/setup-buildx-action@v3.6.1
+      - name: downcase REPO
         run: |
-          pip install --upgrade pip
-          pip install awscli
-      - uses: tailscale/github-action@v1
+          echo "CONTAINER_REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5.5.1
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-      - name: Update upstream
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          DEFAULT_HOSTNAME: ${{ secrets.DEFAULT_HOSTNAME }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-        run: |
-          python build_docker.py diffusers --out out.txt
-      - name: Deploy on API (CPU + GPU)
-        run: |
-          # Load the tags into the env
-          cat out.txt >> $GITHUB_ENV
-          export $(xargs < out.txt)
-          echo ${DIFFUSERS_CPU_TAG}
-          # Weird single quote escape mechanism because string interpolation does
-          # not work on single quote in bash
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"DIFFUSERS","tag": "'"${DIFFUSERS_CPU_TAG}"'"}}'
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"compute": "GPU", "framework":"DIFFUSERS","tag": "'"${DIFFUSERS_CPU_TAG}"'"}}'
+          images: ghcr.io/${{ env.CONTAINER_REPO }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v6.5.0
+        with:
+          context: docker_images/diffusers
+          push: true
+          platforms: 'linux/amd64'
+          tags: ghcr.io/${{ env.CONTAINER_REPO }}/diffusers:${{ env.GITHUB_SHA_SHORT || steps.meta-pr.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels || steps.meta-pr.outputs.labels }}
+          # TODO: cache-from/cache-to
