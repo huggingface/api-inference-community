@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
 from app.pipelines import Pipeline
-from flair.data import Sentence
+from flair.data import Sentence, Span, Token
 from flair.models import SequenceTagger
 
 
@@ -27,21 +27,30 @@ class TokenClassificationPipeline(Pipeline):
         """
         sentence: Sentence = Sentence(inputs)
 
-        # Also show scores for recognized NEs
-        self.tagger.predict(sentence, label_name="predicted")
+        self.tagger.predict(sentence)
 
         entities = []
-        for span in sentence.get_spans("predicted"):
-            if len(span.tokens) == 0:
-                continue
-            current_entity = {
-                "entity_group": span.tag,
-                "word": span.text,
-                "start": span.tokens[0].start_position,
-                "end": span.tokens[-1].end_position,
-                "score": span.score,
-            }
-
-            entities.append(current_entity)
+        for label in sentence.get_labels():
+            current_data_point = label.data_point
+            if isinstance(current_data_point, Token):
+                current_entity = {
+                    "entity_group": current_data_point.tag,
+                    "word": current_data_point.text,
+                    "start": current_data_point.start_position,
+                    "end": current_data_point.end_position,
+                    "score": current_data_point.score,
+                }
+                entities.append(current_entity)
+            elif isinstance(current_data_point, Span):
+                if not current_data_point.tokens:
+                    continue
+                current_entity = {
+                    "entity_group": current_data_point.tag,
+                    "word": current_data_point.text,
+                    "start": current_data_point.tokens[0].start_position,
+                    "end": current_data_point.tokens[-1].end_position,
+                    "score": current_data_point.score,
+                }
+                entities.append(current_entity)
 
         return entities
