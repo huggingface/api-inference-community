@@ -4,7 +4,7 @@ import os
 from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
-from app.pipelines import (
+from hf_api_sentence_transformers.pipelines import (
     FeatureExtractionPipeline,
     Pipeline,
     SentenceSimilarityPipeline,
