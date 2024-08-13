@@ -2,7 +2,7 @@ import json
 import os
 from unittest import TestCase, skipIf
 
-from app.main import ALLOWED_TASKS
+from hf_api_sentence_transformers.main import ALLOWED_TASKS
 from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
 
@@ -18,7 +18,7 @@ class FeatureExtractionTestCase(TestCase):
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = model_id
         os.environ["TASK"] = "feature-extraction"
-        from app.main import app
+        from hf_api_sentence_transformers.main import app
 
         self.app = app
 

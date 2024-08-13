@@ -12,8 +12,6 @@ def parse_requirements(filename):
 # Specify the path to the requirements.txt file
 requirements_path = os.path.join(os.path.dirname(__file__), 'requirements.txt')
 
-print("Discovered packages:", find_packages())
-
 
 setup(
     name='hf_api_sentence_transformers',
