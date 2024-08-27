@@ -88,7 +88,11 @@ def already_left(request: Request) -> bool:
 async def pipeline_route(request: Request) -> Response:
     start = time.time()
 
-    if already_left(request):
+    if os.getenv("DISCARD_LEFT", "0").lower() in [
+        "1",
+        "true",
+        "yes",
+    ] and already_left(request):
         logger.info("Discarding request as the caller already left")
         return Response(status_code=204)
 
