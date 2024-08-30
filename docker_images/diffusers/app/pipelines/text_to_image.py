@@ -171,7 +171,7 @@ class TextToImagePipeline(
 
         if "seed" in kwargs:
             seed = int(kwargs["seed"])
-            generator = torch.Generator().manual_seed(kwargs["seed"])
+            generator = torch.Generator().manual_seed(seed)
             kwargs["generator"] = generator
             kwargs.pop("seed")
 
