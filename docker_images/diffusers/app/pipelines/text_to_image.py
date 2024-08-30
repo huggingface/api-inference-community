@@ -160,7 +160,7 @@ class TextToImagePipeline(
     def _process_req(self, inputs, **kwargs):
         # only one image per prompt is supported
         kwargs["num_images_per_prompt"] = 1
-    
+
         if "num_inference_steps" not in kwargs:
             default_num_steps = os.getenv("DEFAULT_NUM_INFERENCE_STEPS")
             if default_num_steps:
@@ -168,12 +168,12 @@ class TextToImagePipeline(
             elif self.is_karras_compatible:
                 kwargs["num_inference_steps"] = 20
             # Else, don't specify anything, leave the default behaviour
-        
+
         if "seed" in kwargs:
             seed = int(kwargs["seed"])
             generator = torch.Generator().manual_seed(kwargs["seed"])
             kwargs["generator"] = generator
             kwargs.pop("seed")
-            
+
         images = self.ldm(inputs, **kwargs)["images"]
         return images[0]
