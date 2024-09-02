@@ -169,5 +169,11 @@ class TextToImagePipeline(
                 kwargs["num_inference_steps"] = 20
             # Else, don't specify anything, leave the default behaviour
 
+        if "seed" in kwargs:
+            seed = int(kwargs["seed"])
+            generator = torch.Generator().manual_seed(seed)
+            kwargs["generator"] = generator
+            kwargs.pop("seed")
+
         images = self.ldm(inputs, **kwargs)["images"]
         return images[0]
