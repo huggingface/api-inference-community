@@ -1,10 +1,12 @@
 import base64
 import io
+import ipaddress
 import logging
 import os
 import time
 from typing import Any, Dict
 
+import psutil
 from api_inference_community.validation import (
     AUDIO,
     AUDIO_INPUTS,
@@ -27,8 +29,73 @@ COMPUTE_TYPE = os.getenv("COMPUTE_TYPE", "cpu")
 logger = logging.getLogger(__name__)
 
 
+def already_left(request: Request) -> bool:
+    """
+    Check if the caller has already left without waiting for the answer to come. This can help during burst to relieve
+    the pressure on the worker by cancelling jobs whose results don't matter as they won't be fetched anyway
+    :param request:
+    :return: bool
+    """
+    # NOTE: Starlette method request.is_disconnected is totally broken, consumes the payload, does not return
+    # the correct status. So we use the good old way to identify if the caller is still there.
+    # In any case, if we are not sure, we return False
+    logger.info("Checking if request caller already left")
+    try:
+        client = request.client
+        host = client.host
+        if not host:
+            return False
+
+        port = int(client.port)
+        host = ipaddress.ip_address(host)
+
+        if port <= 0 or port > 65535:
+            logger.warning("Unexpected source port format for caller %s", port)
+            return False
+        counter = 0
+        for connection in psutil.net_connections(kind="tcp"):
+            counter += 1
+            if connection.status != "ESTABLISHED":
+                continue
+            if not connection.raddr:
+                continue
+            if int(connection.raddr.port) != port:
+                continue
+            if (
+                not connection.raddr.ip
+                or ipaddress.ip_address(connection.raddr.ip) != host
+            ):
+                continue
+            logger.info(
+                "Found caller connection still established, caller is most likely still there, %s",
+                connection,
+            )
+            return False
+    except Exception as e:
+        logger.warning(
+            "Unexpected error while checking if caller already left, assuming still there"
+        )
+        logger.exception(e)
+        return False
+
+    logger.info(
+        "%d connections checked. No connection found matching to the caller, probably left",
+        counter,
+    )
+    return True
+
+
 async def pipeline_route(request: Request) -> Response:
     start = time.time()
+
+    if os.getenv("DISCARD_LEFT", "0").lower() in [
+        "1",
+        "true",
+        "yes",
+    ] and already_left(request):
+        logger.info("Discarding request as the caller already left")
+        return Response(status_code=204)
+
     payload = await request.body()
     task = os.environ["TASK"]
     if os.getenv("DEBUG", "0") in {"1", "true"}:

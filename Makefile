@@ -16,5 +16,5 @@ style:
 
 
 test:
-	pytest -sv tests/
+	pytest -sv --log-level=DEBUG tests/
 
