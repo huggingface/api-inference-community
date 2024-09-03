@@ -1,4 +1,4 @@
-starlette==0.27.0
+starlette==0.36.2
 # to be replaced with api-inference-community==0.0.33 as soon as released
 git+https://github.com/huggingface/api-inference-community.git@35ad9135cb3cde7993c85694236a6572a0f63796
 # to be replaced with diffusers 0.31.0 as soon as released
