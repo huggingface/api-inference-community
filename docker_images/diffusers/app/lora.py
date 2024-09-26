@@ -158,9 +158,10 @@ class LoRAPipelineMixin(offline.OfflineBestEffortMixin):
                     logger.error(msg)
                     raise ValueError(msg)
                 base_model = model_data.cardData["base_model"]
-                if (
-                    isinstance(base_model, list) and (self.model_id not in base_model)
-                ) or (self.model_id != base_model):
+                is_list = isinstance(base_model, list)
+                if (is_list and (self.model_id not in base_model)) or (
+                    not is_list and self.model_id != base_model
+                ):
                     msg = f"Requested adapter {adapter:s} is not a LoRA adapter for base model {self.model_id:s}"
                     logger.error(msg)
                     raise ValueError(msg)
