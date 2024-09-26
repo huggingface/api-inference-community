@@ -141,7 +141,8 @@ class LoRAPipelineMixin(offline.OfflineBestEffortMixin):
                 logger.info("Text embeddings loaded for adapter %s", adapter)
             else:
                 logger.info(
-                    "No text embeddings were loaded due to invalid embeddings or a mismatch of token sizes for adapter %s",
+                    "No text embeddings were loaded due to invalid embeddings or a mismatch of token sizes "
+                    "for adapter %s",
                     adapter,
                 )
             self.current_tokens_loaded = tokens_to_add
@@ -157,7 +158,9 @@ class LoRAPipelineMixin(offline.OfflineBestEffortMixin):
                     logger.error(msg)
                     raise ValueError(msg)
                 base_model = model_data.cardData["base_model"]
-                if self.model_id != base_model:
+                if (
+                    isinstance(base_model, list) and (self.model_id not in base_model)
+                ) or (self.model_id != base_model):
                     msg = f"Requested adapter {adapter:s} is not a LoRA adapter for base model {self.model_id:s}"
                     logger.error(msg)
                     raise ValueError(msg)
