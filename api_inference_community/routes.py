@@ -119,8 +119,6 @@ async def pipeline_route(request: Request) -> Response:
                     f'{error["msg"]}: received `{error["input"]}` in `parameters`'
                 )
         return JSONResponse({"error": errors}, status_code=400)
-    except (EnvironmentError, ValueError) as e:
-        return JSONResponse({"error": str(e)}, status_code=400)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
