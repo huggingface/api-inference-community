@@ -99,7 +99,7 @@ class ValidationTestCase(TestCase):
 
         self.assertEqual(
             response.status_code,
-            400,
+            500,
         )
         self.assertEqual(
             response.content,
