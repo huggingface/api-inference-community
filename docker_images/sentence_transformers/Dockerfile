@@ -31,4 +31,4 @@ ENV TRANSFORMERS_CACHE=/data
 # If UVICORN_TIMEOUT is too low, uvicorn will simply never loads as it will
 # kill workers all the time before they finish.
 RUN sed -i 's/TIMEOUT/UVICORN_TIMEOUT/g' /gunicorn_conf.py
-COPY ./app /app/app
+COPY ./hf_api_sentence_transformers /app/hf_api_sentence_transformers
