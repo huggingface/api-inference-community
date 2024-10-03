@@ -1,5 +1,5 @@
 starlette==0.27.0
-api-inference-community==0.0.33
+api-inference-community==0.0.36
 # to be replaced with diffusers 0.31.0 as soon as released
 git+https://github.com/huggingface/diffusers.git@2a3fbc2cc269aa0c0d5cfdfaa3564d769d92b882
 transformers==4.41.2
