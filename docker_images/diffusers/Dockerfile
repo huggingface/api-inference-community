@@ -16,8 +16,8 @@ RUN apt-get update && \
 RUN curl https://pyenv.run | bash
 
 # Set environment variables for pyenv
-ENV PYENV_ROOT /root/.pyenv
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+ENV PYENV_ROOT=/root/.pyenv
+ENV PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 
 # Install your desired Python version
 ARG PYTHON_VERSION=3.9.1
