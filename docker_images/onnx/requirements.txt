@@ -1,0 +1,6 @@
+starlette==0.25.0
+api-inference-community==0.0.30
+huggingface_hub==0.13.3
+diffusers==0.20.0
+transformers==4.27.4
+optimum[onnxruntime]==1.12.0
