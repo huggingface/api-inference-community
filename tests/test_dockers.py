@@ -400,6 +400,20 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("open_clip")
 
+    def test_neural_compressor(self):
+        self.framework_docker_test(
+            "neural_compressor",
+            "text-classification",
+            "Intel/distilbert-base-uncased-finetuned-sst-2-english-int8-dynamic",
+        )
+
+        self.framework_docker_test(
+            "neural_compressor",
+            "question-answering",
+            "Intel/distilbert-base-uncased-distilled-squad-int8-static",
+        )
+        self.framework_invalid_test("neural_compressor")
+
     def framework_invalid_test(self, framework: str):
         task = "invalid"
         model_id = "invalid"
