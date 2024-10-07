@@ -218,6 +218,7 @@ TEXT_INPUTS = {
     "zero-shot-classification",
 }
 
+KNOWN_TASKS = AUDIO_INPUTS.union(IMAGE_INPUTS).union(TEXT_INPUTS)
 
 AUDIO = [
     "flac",

@@ -62,7 +62,7 @@ class ValidationTestCase(TestCase):
         self.assertEqual(response.headers["x-compute-characters"], "4")
         self.assertEqual(response.content, b'{"some":"json serializable"}')
 
-    def test_invalid_pipeline(self):
+    def test_invalid_task(self):
         os.environ["TASK"] = "invalid"
 
         class Pipeline:
@@ -99,15 +99,15 @@ class ValidationTestCase(TestCase):
 
         self.assertEqual(
             response.status_code,
-            500,
+            400,
         )
         self.assertEqual(
             response.content,
             b'{"error":"The task `invalid` is not recognized by api-inference-community"}',
         )
 
-    def test_invalid_task(self):
-        os.environ["TASK"] = "invalid"
+    def test_invalid_pipeline(self):
+        os.environ["TASK"] = "text-generation"
 
         def get_pipeline():
             raise Exception("We cannot load the pipeline")
