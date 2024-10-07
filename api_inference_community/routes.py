@@ -129,11 +129,6 @@ async def pipeline_route(request: Request) -> Response:
 
     try:
         inputs, params = normalize_payload(payload, task, sampling_rate=sampling_rate)
-    except EnvironmentError as e:
-        # Since we catch the environment edge cases earlier above, this should not happen here anymore
-        # harmless to keep it, just in case
-        logger.error("Error while parsing input %s", e)
-        return JSONResponse({"error": str(e)}, status_code=500)
     except ValidationError as e:
         errors = []
         for error in e.errors():
