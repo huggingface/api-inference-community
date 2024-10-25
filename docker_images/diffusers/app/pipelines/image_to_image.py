@@ -233,6 +233,12 @@ class ImageToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
                 "negative_prompt": kwargs.get("negative_prompt", None),
                 "guidance_scale": kwargs.get("guidance_scale", 7),
             }
+            if "guidance_scale" not in kwargs:
+                default_guidance_scale = os.getenv("DEFAULT_GUIDANCE_SCALE")
+                if default_guidance_scale is not None:
+                    kwargs["guidance_scale"] = float(default_guidance_scale)
+                    prior_args["guidance_scale"] = float(default_guidance_scale)
+                # Else, don't specify anything, leave the default behaviour
             image_emb, zero_image_emb = self.prior(prompt, **prior_args).to_tuple()
             images = self.ldm(
                 prompt,

@@ -169,6 +169,11 @@ class TextToImagePipeline(
                 kwargs["num_inference_steps"] = 20
             # Else, don't specify anything, leave the default behaviour
 
+        if "guidance_scale" not in kwargs:
+            default_guidance_scale = os.getenv("DEFAULT_GUIDANCE_SCALE")
+            if default_guidance_scale is not None:
+                kwargs["guidance_scale"] = float(default_guidance_scale)
+            # Else, don't specify anything, leave the default behaviour
         if "seed" in kwargs:
             seed = int(kwargs["seed"])
             generator = torch.Generator().manual_seed(seed)
