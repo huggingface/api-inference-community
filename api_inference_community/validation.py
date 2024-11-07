@@ -78,11 +78,6 @@ class QuestionInputsCheck(BaseModel):
     context: str
 
 
-class SentenceSimilarityInputsCheck(BaseModel):
-    source_sentence: str
-    sentences: List[str]
-
-
 class TableQuestionAnsweringInputsCheck(BaseModel):
     table: Dict[str, List[str]]
     query: str
@@ -139,7 +134,6 @@ INPUTS_MAPPING = {
     "conversational": ConversationalInputsCheck,
     "question-answering": QuestionInputsCheck,
     "feature-extraction": StringOrStringBatchInputCheck,
-    "sentence-similarity": SentenceSimilarityInputsCheck,
     "table-question-answering": TableQuestionAnsweringInputsCheck,
     "tabular-classification": TabularDataInputsCheck,
     "tabular-regression": TabularDataInputsCheck,
@@ -203,7 +197,6 @@ TEXT_INPUTS = {
     "conversational",
     "feature-extraction",
     "question-answering",
-    "sentence-similarity",
     "fill-mask",
     "table-question-answering",
     "tabular-classification",
