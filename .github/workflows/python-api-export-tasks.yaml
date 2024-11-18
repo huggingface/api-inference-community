@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - transmit-payload-to-hfjs
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,4 +22,23 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: python scripts/export_tasks.py
+      # run export_tasks.py and store output
+      - id: export_tasks
+        run: |
+          {
+            echo 'payload<<XXX_MULTI_LINE_MARKER_XXX'
+            python scripts/export_tasks.py
+            echo 'XXX_MULTI_LINE_MARKER_XXX'
+          } >> $GITHUB_OUTPUT
+
+      # Dispatch to huggingface/huggingface.js repo
+      - name: Dispatch to huggingface/huggingface.js
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: huggingface/huggingface.js
+          event-type: export-tasks
+          client-payload: |
+            {
+              "tasks": ${{ steps.export_tasks.outputs.payload }} 
+            }
