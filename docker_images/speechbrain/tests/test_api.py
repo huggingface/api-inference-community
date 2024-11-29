@@ -39,6 +39,10 @@ TESTABLE_MODELS: Dict[str, List[str]] = {
         # SoundChoice G2P
         "speechbrain/soundchoice-g2p"
     ],
+    "voice-activity-detection": [
+        # Emotion Diarization
+        "speechbrain/emotion-diarization-wavlm-large",
+    ],
 }
 
 
@@ -51,6 +55,7 @@ ALL_TASKS = {
     "question-answering",
     "text-generation",
     "text-to-speech",
+    "voice-activity-detection",
 }
 
 

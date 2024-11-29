@@ -7,3 +7,4 @@ from app.pipelines.automatic_speech_recognition import (
 )
 from app.pipelines.text2text_generation import TextToTextPipeline
 from app.pipelines.text_to_speech import TextToSpeechPipeline
+from app.pipelines.voice_activity_detection import VoiceActivityDetectionPipeline
