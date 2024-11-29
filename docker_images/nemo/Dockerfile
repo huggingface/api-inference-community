@@ -5,10 +5,24 @@ LABEL maintainer="me <me@example.com>"
 RUN apt-get update -y && \
     apt-get install libsndfile1 ffmpeg -y
 
+# Install pyenv
+RUN curl https://pyenv.run | bash
+
+# Set environment variables for pyenv
+ENV PYENV_ROOT /root/.pyenv
+ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+
+# Install your desired Python version
+ARG PYTHON_VERSION=3.10.1
+RUN pyenv install $PYTHON_VERSION && \
+    pyenv global $PYTHON_VERSION && \
+    pyenv rehash
+
+
 # See PyTorch releases for pip here: https://download.pytorch.org/whl/torch_stable.html
 COPY ./requirements.txt /app
-RUN pip install https://download.pytorch.org/whl/cpu/torch-1.13.1%2Bcpu-cp39-cp39-linux_x86_64.whl && \
-    pip install Cython numpy==1.21.6
+RUN pip install torch==2.0.1 && \
+    pip install Cython numpy==1.26.3
 RUN pip install -r requirements.txt
 COPY ./prestart.sh /app/
 

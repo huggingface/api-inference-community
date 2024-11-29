@@ -7,6 +7,7 @@ import librosa
 import nemo.collections.asr as nemo_asr
 import numpy as np
 import soundfile
+import torch
 from app.pipelines import Pipeline
 from huggingface_hub import hf_hub_download
 from huggingface_hub.hf_api import HfFolder
@@ -27,9 +28,10 @@ class AutomaticSpeechRecognitionPipeline(Pipeline):
         path = hf_hub_download(
             repo_id=model_id, filename=filename, use_auth_token=is_token_available
         )
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # Load model
-        self.model = nemo_asr.models.ASRModel.restore_from(path)
+        self.model = nemo_asr.models.ASRModel.restore_from(path, map_location=device)
         self.model.freeze()
 
         # Pre-Initialize RNNT decoding strategy
