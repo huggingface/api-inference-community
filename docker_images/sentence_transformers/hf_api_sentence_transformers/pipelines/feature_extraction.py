@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from app.pipelines import Pipeline
+from hf_api_sentence_transformers.pipelines import Pipeline
 from sentence_transformers import SentenceTransformer
 
 

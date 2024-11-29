@@ -1,0 +1,4 @@
+from hf_api_sentence_transformers.pipelines.base import Pipeline, PipelineException  # isort:skip
+
+from hf_api_sentence_transformers.pipelines.feature_extraction import FeatureExtractionPipeline
+from hf_api_sentence_transformers.pipelines.sentence_similarity import SentenceSimilarityPipeline
