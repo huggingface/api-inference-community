@@ -400,6 +400,20 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("open_clip")
 
+    def test_onnx(self):
+        self.framework_docker_test(
+            "onnx",
+            "text-classification",
+            "optimum/distilbert-base-uncased-finetuned-sst-2-english",
+        )
+
+        self.framework_docker_test(
+            "onnx",
+            "question-answering",
+            "optimum/roberta-base-squad2",
+        )
+        self.framework_invalid_test("onnx")
+
     def framework_invalid_test(self, framework: str):
         task = "invalid"
         model_id = "invalid"
