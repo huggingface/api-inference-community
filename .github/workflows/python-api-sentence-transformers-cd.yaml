@@ -38,9 +38,9 @@ jobs:
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@v4
-        working-directory: docker_images/sentence_transformers
         with:
-          context: .
+          context: docker_images/sentence_transformers
+          dockerfile: docker_images/sentence_transformers/Dockerfile
           push: true
           platforms: 'linux/amd64'
           build-args: |
