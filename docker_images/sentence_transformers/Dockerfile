@@ -1,10 +1,10 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
-LABEL maintainer="Omar <omar@huggingface.co>"
+FROM tiangolo/uvicorn-gunicorn:python3.10
+LABEL maintainer="Tom Aarsen <tom.aarsen@huggingface.co>"
 
 # Add any system dependency here
 # RUN apt-get update -y && apt-get install libXXX -y
 
-RUN pip3 install --no-cache-dir torch==1.13.0
+RUN pip3 install --no-cache-dir torch==2.4.1
 
 
 COPY ./requirements.txt /app
