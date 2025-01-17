@@ -1,6 +1,6 @@
 name: sentence_transformers-docker-cd
 on:
-  pull-request:
+  pull_request:
   push:
     branches:
       - main
