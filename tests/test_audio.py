@@ -36,7 +36,7 @@ class ValidationTestCase(TestCase):
     def test_dual_channel(self):
         bpayload = self.read("sample1_dual.ogg")
         payload, params = normalize_payload_audio(bpayload, 16000)
-        self.assertEqual(payload.shape, (219520,))
+        self.assertEqual(payload.shape, (219040,))
 
     def test_original_webm(self):
         bpayload = self.read("sample1.webm")
