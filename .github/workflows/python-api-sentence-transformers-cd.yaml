@@ -37,7 +37,7 @@ jobs:
           images: |
             registry.internal.huggingface.tech/api-inference/community
           tags: |
-            type=raw,value=sha-${{ env.GITHUB_SHA_SHORT }}
+            type=raw,value=sentence-transformers-sha-${{ env.GITHUB_SHA_SHORT }}
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@v4
