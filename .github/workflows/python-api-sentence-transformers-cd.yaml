@@ -35,7 +35,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            registry.internal.huggingface.tech/api-inference/community/sentence-transformers
+            registry.internal.huggingface.tech/api-inference/community
           tags: |
             type=raw,value=sha-${{ env.GITHUB_SHA_SHORT }}
       - name: Build and push Docker image
@@ -48,7 +48,7 @@ jobs:
           platforms: 'linux/amd64'
           build-args: |
             GIT_SHA=${{ env.GITHUB_SHA }}
-            DOCKER_LABEL=sha-${{ env.GITHUB_SHA_SHORT }}
+            DOCKER_LABEL=sentence-transformers-sha-${{ env.GITHUB_SHA_SHORT }}
             PLATFORM=${{ env.PLATFORM }}
           tags: ${{ steps.meta.outputs.tags || steps.meta-pr.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels || steps.meta-pr.outputs.labels }}
@@ -60,5 +60,5 @@ jobs:
           echo sha-${{ env.GITHUB_SHA_SHORT }}
           # Weird single quote escape mechanism because string interpolation does
           # not work on single quote in bash
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"SENTENCE_TRANSFORMERS","tag": "'"sha-${{ env.GITHUB_SHA_SHORT }}"'"}}'
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"SENTENCE_TRANSFORMERS","tag": "sentence-transformers-sha-${{ env.GITHUB_SHA_SHORT }}"}}'
 
