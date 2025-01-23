@@ -8,7 +8,8 @@ on:
       - "docker_images/sentence_transformers/**"
 jobs:
   build:
-    runs-on: aws-general-8-plus-use1-public-80
+    runs-on:
+      group: aws-general-8-plus-priv
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
