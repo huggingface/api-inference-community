@@ -55,8 +55,8 @@ jobs:
       - name: Deploy on API
         run: |
           # Load the tags into the env
-          echo sha-${env.GITHUB_SHA_SHORT}
+          echo sha-${{ env.GITHUB_SHA_SHORT }}
           # Weird single quote escape mechanism because string interpolation does
           # not work on single quote in bash
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"SENTENCE_TRANSFORMERS","tag": "'"sha-${env.GITHUB_SHA_SHORT}"'"}}'
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"SENTENCE_TRANSFORMERS","tag": "'"sha-${{ env.GITHUB_SHA_SHORT }}"'"}}'
 
