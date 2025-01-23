@@ -55,8 +55,6 @@ jobs:
       - name: Deploy on API
         run: |
           # Load the tags into the env
-          cat out.txt >> $GITHUB_ENV
-          export $(xargs < out.txt)
           echo sha-${env.GITHUB_SHA_SHORT}
           # Weird single quote escape mechanism because string interpolation does
           # not work on single quote in bash
