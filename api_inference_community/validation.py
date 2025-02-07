@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 from base64 import b64decode
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -8,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import annotated_types
 import numpy as np
 from pydantic import BaseModel, RootModel, Strict, field_validator
+from starlette.datastructures import Headers
 from typing_extensions import Annotated
 
 
@@ -196,8 +198,12 @@ IMAGE_INPUTS = {
 IMAGE_OUTPUTS = {
     "image-to-image",
     "text-to-image",
+    "latent-to-image",
 }
 
+TENSOR_INPUTS = {
+    "latent-to-image",
+}
 
 TEXT_INPUTS = {
     "conversational",
@@ -218,7 +224,7 @@ TEXT_INPUTS = {
     "zero-shot-classification",
 }
 
-KNOWN_TASKS = AUDIO_INPUTS.union(IMAGE_INPUTS).union(TEXT_INPUTS)
+KNOWN_TASKS = AUDIO_INPUTS.union(IMAGE_INPUTS).union(TEXT_INPUTS).union(TENSOR_INPUTS)
 
 AUDIO = [
     "flac",
@@ -254,7 +260,7 @@ def parse_accept(accept: str, accepted: List[str]) -> str:
 
 
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int]
+    bpayload: bytes, task: str, sampling_rate: Optional[int], headers: Headers
 ) -> Tuple[Any, Dict]:
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
@@ -266,6 +272,8 @@ def normalize_payload(
         return normalize_payload_image(bpayload)
     elif task in TEXT_INPUTS:
         return normalize_payload_nlp(bpayload, task)
+    elif task in TENSOR_INPUTS:
+        return normalize_payload_tensor(bpayload, headers)
     else:
         raise EnvironmentError(
             f"The task `{task}` is not recognized by api-inference-community"
@@ -407,3 +415,23 @@ def normalize_payload_nlp(bpayload: bytes, task: str) -> Tuple[Any, Dict]:
     check_params(parameters, task)
     check_inputs(inputs, task)
     return inputs, parameters
+
+
+def normalize_payload_tensor(bpayload: bytes, headers: Headers) -> Tuple[Any, Dict]:
+    import torch
+
+    DTYPE_MAP = {
+        "float16": torch.float16,
+        "float32": torch.float32,
+        "bfloat16": torch.bfloat16,
+    }
+
+    shape = json.loads(headers.get("shape"))
+    dtype = DTYPE_MAP.get(headers.get("dtype"))
+    arr = torch.frombuffer(bytearray(bpayload), dtype=dtype).reshape(shape)
+    if sys.byteorder == "big":
+        arr = torch.from_numpy(arr.numpy().byteswap(inplace=False))
+
+    tensor = arr
+
+    return tensor, {}
