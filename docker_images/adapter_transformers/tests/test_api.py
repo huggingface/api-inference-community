@@ -22,7 +22,6 @@ ALL_TASKS = {
     "feature-extraction",
     "image-classification",
     "question-answering",
-    "sentence-similarity",
     "structured-data-classification",
     "text-generation",
     "text-to-speech",

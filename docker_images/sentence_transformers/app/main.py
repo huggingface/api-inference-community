@@ -4,11 +4,7 @@ import os
 from typing import Dict, Type
 
 from api_inference_community.routes import pipeline_route, status_ok
-from app.pipelines import (
-    FeatureExtractionPipeline,
-    Pipeline,
-    SentenceSimilarityPipeline,
-)
+from app.pipelines import FeatureExtractionPipeline, Pipeline
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.gzip import GZipMiddleware
@@ -38,7 +34,6 @@ logger = logging.getLogger(__name__)
 # directories. Implement directly within the directories.
 ALLOWED_TASKS: Dict[str, Type[Pipeline]] = {
     "feature-extraction": FeatureExtractionPipeline,
-    "sentence-similarity": SentenceSimilarityPipeline,
 }
 
 
