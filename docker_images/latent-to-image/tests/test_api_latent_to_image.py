@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 from io import BytesIO
@@ -47,13 +48,14 @@ class TextToImageTestCase(TestCase):
 
     def test_simple(self):
         inputs = torch.randn([1, 4, 64, 64], generator=torch.Generator().manual_seed(0))
-        shape = json.dumps(list(inputs.shape))
+        shape = list(inputs.shape)
         dtype = str(inputs.dtype).split(".")[-1]
-        tensor_data = _tobytes(inputs, "inputs")
-        headers = {"shape": shape, "dtype": dtype}
+        tensor_data = base64.b64encode(_tobytes(inputs, "inputs")).decode("utf-8")
+        parameters = {"shape": shape, "dtype": dtype}
+        data = {"inputs": tensor_data, "parameters": parameters}
 
         with TestClient(self.app) as client:
-            response = client.post("/", data=tensor_data, headers=headers)
+            response = client.post("/", json=data)
 
         self.assertEqual(
             response.status_code,
@@ -64,9 +66,13 @@ class TextToImageTestCase(TestCase):
         self.assertTrue(isinstance(image, PIL.Image.Image))
 
     def test_malformed_input(self):
-        headers = {"shape": json.dumps([1, 4, 64, 64]), "dtype": "float32"}
+        parameters = {"shape": [1, 4, 64, 64], "dtype": "float32"}
+        data = {
+            "inputs": base64.b64encode(b"\xc3\x28").decode("utf-8"),
+            "parameters": parameters,
+        }
         with TestClient(self.app) as client:
-            response = client.post("/", data=b"\xc3\x28", headers=headers)
+            response = client.post("/", json=data)
 
         self.assertEqual(
             response.status_code,

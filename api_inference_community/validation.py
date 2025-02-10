@@ -260,7 +260,7 @@ def parse_accept(accept: str, accepted: List[str]) -> str:
 
 
 def normalize_payload(
-    bpayload: bytes, task: str, sampling_rate: Optional[int], headers: Headers
+    bpayload: bytes, task: str, sampling_rate: Optional[int]
 ) -> Tuple[Any, Dict]:
     if task in AUDIO_INPUTS:
         if sampling_rate is None:
@@ -273,7 +273,7 @@ def normalize_payload(
     elif task in TEXT_INPUTS:
         return normalize_payload_nlp(bpayload, task)
     elif task in TENSOR_INPUTS:
-        return normalize_payload_tensor(bpayload, headers)
+        return normalize_payload_tensor(bpayload)
     else:
         raise EnvironmentError(
             f"The task `{task}` is not recognized by api-inference-community"
@@ -417,8 +417,17 @@ def normalize_payload_nlp(bpayload: bytes, task: str) -> Tuple[Any, Dict]:
     return inputs, parameters
 
 
-def normalize_payload_tensor(bpayload: bytes, headers: Headers) -> Tuple[Any, Dict]:
+def normalize_payload_tensor(bpayload: bytes) -> Tuple[Any, Dict]:
     import torch
+
+    data = json.loads(bpayload)
+    tensor = data["inputs"]
+    tensor = b64decode(tensor.encode("utf-8"))
+    parameters = data.get("parameters", {})
+    if "shape" not in parameters:
+        raise ValueError("Expected `shape` in parameters.")
+    if "dtype" not in parameters:
+        raise ValueError("Expected `dtype` in parameters.")
 
     DTYPE_MAP = {
         "float16": torch.float16,
@@ -426,12 +435,8 @@ def normalize_payload_tensor(bpayload: bytes, headers: Headers) -> Tuple[Any, Di
         "bfloat16": torch.bfloat16,
     }
 
-    shape = json.loads(headers.get("shape"))
-    dtype = DTYPE_MAP.get(headers.get("dtype"))
-    arr = torch.frombuffer(bytearray(bpayload), dtype=dtype).reshape(shape)
-    if sys.byteorder == "big":
-        arr = torch.from_numpy(arr.numpy().byteswap(inplace=False))
+    shape = parameters.pop("shape")
+    dtype = DTYPE_MAP.get(parameters.pop("dtype"))
+    tensor = torch.frombuffer(bytearray(tensor), dtype=dtype).reshape(shape)
 
-    tensor = arr
-
-    return tensor, {}
+    return tensor, parameters
