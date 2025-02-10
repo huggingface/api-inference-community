@@ -1,7 +1,6 @@
 import json
 import os
 import subprocess
-import sys
 from base64 import b64decode
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -9,7 +8,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import annotated_types
 import numpy as np
 from pydantic import BaseModel, RootModel, Strict, field_validator
-from starlette.datastructures import Headers
 from typing_extensions import Annotated
 
 
