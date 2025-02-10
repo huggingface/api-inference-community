@@ -77,9 +77,9 @@ class LatentToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
         )
         if needs_upcasting:
             self.vae = self.vae.to(torch.float32)
-            latents = latents.to(self.device, torch.float32)
+            inputs = inputs.to(self.device, torch.float32)
         else:
-            latents = inputs.to(self.device, self.dtype)
+            inputs = inputs.to(self.device, self.dtype)
 
         # unscale/denormalize the latents
         # denormalize with the mean and std if available and not None
@@ -95,21 +95,21 @@ class LatentToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
             latents_mean = (
                 torch.tensor(self.vae.config.latents_mean)
                 .view(1, 4, 1, 1)
-                .to(latents.device, latents.dtype)
+                .to(inputs.device, inputs.dtype)
             )
             latents_std = (
                 torch.tensor(self.vae.config.latents_std)
                 .view(1, 4, 1, 1)
-                .to(latents.device, latents.dtype)
+                .to(inputs.device, inputs.dtype)
             )
-            latents = (
-                latents * latents_std / self.vae.config.scaling_factor + latents_mean
+            inputs = (
+                inputs * latents_std / self.vae.config.scaling_factor + latents_mean
             )
         else:
-            latents = latents / self.vae.config.scaling_factor
+            inputs = inputs / self.vae.config.scaling_factor
 
         with torch.no_grad():
-            image = self.vae.decode(latents, return_dict=False)[0]
+            image = self.vae.decode(inputs, return_dict=False)[0]
 
         if needs_upcasting:
             self.vae.to(dtype=torch.float16)
