@@ -72,11 +72,47 @@ class LatentToImagePipeline(Pipeline, offline.OfflineBestEffortMixin):
         return resp
 
     def _process_req(self, inputs, **kwargs):
+        needs_upcasting = (
+            self.vae.dtype == torch.float16 and self.vae.config.force_upcast
+        )
+        if needs_upcasting:
+            self.vae = self.vae.to(torch.float32)
+            latents = latents.to(self.device, torch.float32)
+        else:
+            latents = inputs.to(self.device, self.dtype)
 
-        latents = inputs.to(self.device, self.dtype)
+        # unscale/denormalize the latents
+        # denormalize with the mean and std if available and not None
+        has_latents_mean = (
+            hasattr(self.vae.config, "latents_mean")
+            and self.vae.config.latents_mean is not None
+        )
+        has_latents_std = (
+            hasattr(self.vae.config, "latents_std")
+            and self.vae.config.latents_std is not None
+        )
+        if has_latents_mean and has_latents_std:
+            latents_mean = (
+                torch.tensor(self.vae.config.latents_mean)
+                .view(1, 4, 1, 1)
+                .to(latents.device, latents.dtype)
+            )
+            latents_std = (
+                torch.tensor(self.vae.config.latents_std)
+                .view(1, 4, 1, 1)
+                .to(latents.device, latents.dtype)
+            )
+            latents = (
+                latents * latents_std / self.vae.config.scaling_factor + latents_mean
+            )
+        else:
+            latents = latents / self.vae.config.scaling_factor
 
         with torch.no_grad():
             image = self.vae.decode(latents, return_dict=False)[0]
+
+        if needs_upcasting:
+            self.vae.to(dtype=torch.float16)
 
         image = self.image_processor.postprocess(image, output_type="pil")
 
