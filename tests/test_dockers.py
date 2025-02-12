@@ -136,7 +136,7 @@ class DockerImageTests(unittest.TestCase):
         )
         self.framework_invalid_test("sentence_transformers")
 
-    def test_image_to_latent(self):
+    def test_latent_to_image(self):
         # TODO add working examples.
         self.framework_invalid_test("image-to-latent")
 
