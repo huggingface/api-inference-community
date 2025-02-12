@@ -196,8 +196,12 @@ IMAGE_INPUTS = {
 IMAGE_OUTPUTS = {
     "image-to-image",
     "text-to-image",
+    "latent-to-image",
 }
 
+TENSOR_INPUTS = {
+    "latent-to-image",
+}
 
 TEXT_INPUTS = {
     "conversational",
@@ -218,7 +222,7 @@ TEXT_INPUTS = {
     "zero-shot-classification",
 }
 
-KNOWN_TASKS = AUDIO_INPUTS.union(IMAGE_INPUTS).union(TEXT_INPUTS)
+KNOWN_TASKS = AUDIO_INPUTS.union(IMAGE_INPUTS).union(TEXT_INPUTS).union(TENSOR_INPUTS)
 
 AUDIO = [
     "flac",
@@ -266,6 +270,8 @@ def normalize_payload(
         return normalize_payload_image(bpayload)
     elif task in TEXT_INPUTS:
         return normalize_payload_nlp(bpayload, task)
+    elif task in TENSOR_INPUTS:
+        return normalize_payload_tensor(bpayload)
     else:
         raise EnvironmentError(
             f"The task `{task}` is not recognized by api-inference-community"
@@ -407,3 +413,28 @@ def normalize_payload_nlp(bpayload: bytes, task: str) -> Tuple[Any, Dict]:
     check_params(parameters, task)
     check_inputs(inputs, task)
     return inputs, parameters
+
+
+def normalize_payload_tensor(bpayload: bytes) -> Tuple[Any, Dict]:
+    import torch
+
+    data = json.loads(bpayload)
+    tensor = data["inputs"]
+    tensor = b64decode(tensor.encode("utf-8"))
+    parameters = data.get("parameters", {})
+    if "shape" not in parameters:
+        raise ValueError("Expected `shape` in parameters.")
+    if "dtype" not in parameters:
+        raise ValueError("Expected `dtype` in parameters.")
+
+    DTYPE_MAP = {
+        "float16": torch.float16,
+        "float32": torch.float32,
+        "bfloat16": torch.bfloat16,
+    }
+
+    shape = parameters.pop("shape")
+    dtype = DTYPE_MAP.get(parameters.pop("dtype"))
+    tensor = torch.frombuffer(bytearray(tensor), dtype=dtype).reshape(shape)
+
+    return tensor, parameters
