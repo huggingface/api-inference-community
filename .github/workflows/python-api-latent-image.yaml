@@ -1,5 +1,5 @@
 # TODO: Merge this with allenNLP to have a single workflow for all docker images.
-name: sentence-transformers-docker
+name: latent-to-image-docker
 
 on:
   pull_request:
