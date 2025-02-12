@@ -1,5 +1,5 @@
 starlette
-api-inference-community
+api-inference-community>=0.37
 diffusers
 transformers
 accelerate
