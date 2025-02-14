@@ -1,48 +1,74 @@
 name: latent-to-image-docker-cd
 on:
+  pull_request:
   push:
     branches:
       - main
     paths:
       - "docker_images/latent-to-image/**"
+permissions:
+  packages: write
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: aws-general-8-plus-priv
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: "3.10"
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install awscli
-      - uses: huggingface/tailscale-action@v1
+        uses: actions/checkout@v4
+      - name: Initialize Docker Buildx
+        uses: docker/setup-buildx-action@v3
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-      - name: Update upstream
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          DEFAULT_HOSTNAME: ${{ secrets.DEFAULT_HOSTNAME }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-        run: |
-          python build_docker.py latent-to-image --out out.txt
+          install: true
+          buildkitd-config: /tmp/buildkitd.toml
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4.4.1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to internal Container Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry: registry.internal.huggingface.tech
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta-pr
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            registry.internal.huggingface.tech/api-inference/community
+            ghcr.io/huggingface/api-inference-community
+          tags: |
+            type=raw,value=latent-to-image-sha-${{ env.GITHUB_SHA_SHORT }}
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v4
+        with:
+          context: docker_images/latent-to-image
+          dockerfile: docker_images/latent-to-image/Dockerfile
+          push: true
+          platforms: 'linux/amd64'
+          build-args: |
+            GIT_SHA=${{ env.GITHUB_SHA }}
+            DOCKER_LABEL=latent-to-image-sha-${{ env.GITHUB_SHA_SHORT }}
+            PLATFORM=${{ env.PLATFORM }}
+          tags: ${{ steps.meta.outputs.tags || steps.meta-pr.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels || steps.meta-pr.outputs.labels }}
+          cache-from: type=s3,region=us-east-1,bucket=ci-docker-buildx-cache,name=latent-to-image-cache${{ env.LABEL }},mode=min,access_key_id=${{ secrets.S3_CI_DOCKER_BUILDX_CACHE_ACCESS_KEY_ID }},secret_access_key=${{ secrets.S3_CI_DOCKER_BUILDX_CACHE_SECRET_ACCESS_KEY }},mode=min
+          cache-to: type=s3,region=us-east-1,bucket=ci-docker-buildx-cache,name=latent-to-image-cache${{ env.LABEL }},mode=min,access_key_id=${{ secrets.S3_CI_DOCKER_BUILDX_CACHE_ACCESS_KEY_ID }},secret_access_key=${{ secrets.S3_CI_DOCKER_BUILDX_CACHE_SECRET_ACCESS_KEY }},mode=min
       - name: Deploy on API
         run: |
           # Load the tags into the env
-          cat out.txt >> $GITHUB_ENV
-          export $(xargs < out.txt)
-          echo ${LATENT_TO_IMAGE_CPU_TAG}
+          echo sha-${{ env.GITHUB_SHA_SHORT }}
           # Weird single quote escape mechanism because string interpolation does
           # not work on single quote in bash
-          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"LATENT_TO_IMAGE","tag": "'"${LATENT_TO_IMAGE_CPU_TAG}"'"}}'
+          curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface-internal/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"LATENT_TO_IMAGE","tag": "latent-to-image-sha-${{ env.GITHUB_SHA_SHORT }}"}}'
+
 
