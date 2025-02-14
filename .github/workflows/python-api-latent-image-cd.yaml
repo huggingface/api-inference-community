@@ -38,8 +38,7 @@ jobs:
         with:
           images: |
             registry.internal.huggingface.tech/api-inference/community
-            # TODO add the token.
-            # ghcr.io/huggingface/api-inference-community
+            ghcr.io/huggingface/api-inference-community
           tags: |
             type=raw,value=latent-to-image-sha-${{ env.GITHUB_SHA_SHORT }}
       - name: Build and push Docker image
