@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "docker_images/latent-to-image/**"
+permissions:
+  packages: write
 jobs:
   build:
     runs-on:
