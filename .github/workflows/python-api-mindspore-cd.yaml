@@ -38,10 +38,24 @@ jobs:
           python build_docker.py mindspore --out out.txt
       - name: Deploy on API
         run: |
-          # Load the tags into the env
-          cat out.txt >> $GITHUB_ENV
-          export $(xargs < out.txt)
+          # Load and validate the tag
+          if [ -f out.txt ]; then
+            MINDSPORE_CPU_TAG=$(grep '^MINDSPORE_CPU_TAG=' out.txt | cut -d'=' -f2 | head -n1)
+            if [ -z "$MINDSPORE_CPU_TAG" ]; then
+              echo "Error: MINDSPORE_CPU_TAG not found in out.txt"
+              exit 1
+            fi
+            # Validate tag format (alphanumeric, dots, hyphens, underscores only)
+            if ! echo "$MINDSPORE_CPU_TAG" | grep -qE '^[a-zA-Z0-9._-]+$'; then
+              echo "Error: Invalid MINDSPORE_CPU_TAG format"
+              exit 1
+            fi
+            echo "MINDSPORE_CPU_TAG=${MINDSPORE_CPU_TAG}" >> $GITHUB_ENV
+          else
+            echo "Error: out.txt not found"
+            exit 1
+          fi
+      - name: Call API
+        run: |
           echo ${MINDSPORE_CPU_TAG}
-          # Weird single quote escape mechanism because string interpolation does
-          # not work on single quote in bash
           curl  -H "Authorization: Bearer  ${{ secrets.API_GITHUB_TOKEN }}"   https://api.github.com/repos/huggingface/api-inference/actions/workflows/update_community.yaml/dispatches   -d '{"ref":"main","inputs":{"framework":"MINDSPORE","tag": "'"${MINDSPORE_CPU_TAG}"'"}}'
