@@ -2,7 +2,7 @@ import json
 import os
 from unittest import TestCase, skipIf
 
-from app.main import ALLOWED_TASKS
+from hf_api_sentence_transformers.main import ALLOWED_TASKS
 from parameterized import parameterized_class
 from starlette.testclient import TestClient
 from tests.test_api import TESTABLE_MODELS
@@ -21,7 +21,7 @@ class SentenceSimilarityTestCase(TestCase):
         self.old_task = os.getenv("TASK")
         os.environ["MODEL_ID"] = self.model_id
         os.environ["TASK"] = "sentence-similarity"
-        from app.main import app
+        from hf_api_sentence_transformers.main import app
 
         self.app = app
 
